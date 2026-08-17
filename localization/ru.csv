@@ -154,3 +154,6 @@ ACT_BUILD_FORT,Построить форт
 MSG_FORT_FAIL,Нельзя построить форт здесь
 ACT_COLONIZE,Колонизировать
 MSG_COLONIZE_FAIL,Нельзя колонизировать эту провинцию
+ACT_RECRUIT_COMMANDER,Нанять командира
+MSG_COMMANDER_RECRUITED,Командир нанят
+MSG_COMMANDER_FAIL,Нельзя нанять командира

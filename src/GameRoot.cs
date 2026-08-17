@@ -63,6 +63,12 @@ public partial class GameRoot : Node
         _camera.MapClicked += OnMapClicked;
         _debug.ExternalCommand = HandleDebugCommand;
 
+        // Панель режимов карты (снизу).
+        var modeBar = new MapModeBar();
+        modeBar.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _uiRoot.AddChild(modeBar);
+        modeBar.Initialize(_modeController);
+
         // 6. Стартовая камера (вся карта в кадре).
         _camera.Center = _mapRenderer.WorldSize / 2f;
         Vector2 vp = GetViewport().GetVisibleRect().Size;
@@ -126,11 +132,36 @@ public partial class GameRoot : Node
 
     public override void _UnhandledInput(InputEvent ev)
     {
-        // ESC — возврат в главное меню.
-        if (ev is InputEventKey key && key.Pressed && !key.Echo && key.Keycode == Key.Escape)
+        if (ev is not InputEventKey key || !key.Pressed || key.Echo)
+            return;
+
+        switch (key.Keycode)
         {
-            GetTree().ChangeSceneToFile("res://scenes/MainMenu.tscn");
-            GetViewport().SetInputAsHandled();
+            case Key.Escape:
+                GetTree().ChangeSceneToFile("res://scenes/MainMenu.tscn");
+                GetViewport().SetInputAsHandled();
+                break;
+
+            case Key.Space:
+                // Пробел — пауза/снятие с паузы.
+                if (GameManager.Instance.State == GameState.Playing)
+                    GameManager.Instance.Pause();
+                else if (GameManager.Instance.State == GameState.Paused)
+                    GameManager.Instance.Resume();
+                GetViewport().SetInputAsHandled();
+                break;
+
+            case Key.Key1:
+            case Key.Key2:
+            case Key.Key3:
+            case Key.Key4:
+            case Key.Key5:
+                // 1..5 — скорость времени.
+                TimeManager.Instance.SetSpeed((int)(key.Keycode - Key.Key1) + 1);
+                TimeManager.Instance.Resume();
+                GameManager.Instance.Resume();
+                GetViewport().SetInputAsHandled();
+                break;
         }
     }
 

@@ -392,6 +392,22 @@ public partial class UIManager : Node
             GovernanceSystem.ChangeIdeology(world, playerId);
             RebuildPlayerPanel();
         });
+        AddButton(_playerBox, L("ACT_RECRUIT_COMMANDER"), () =>
+        {
+            int cap = c.CapitalProvinceId;
+            if (MilitaryManager.Instance.RecruitCommander(playerId, cap))
+                EventBus.Instance.EmitUINotification(L("MSG_COMMANDER_RECRUITED"));
+            else
+                EventBus.Instance.EmitUINotification(L("MSG_COMMANDER_FAIL"));
+            RebuildPlayerPanel();
+        });
+
+        // Список командиров.
+        foreach (CommanderData cmd in MilitaryManager.Instance.Commanders)
+        {
+            if (cmd.OwnerId == playerId)
+                _playerBox.AddChild(new Label { Text = $"  ◆ {cmd.Name} (skill {cmd.Skill:0})" });
+        }
     }
 
     // --- Панель целевой страны ------------------------------------------------

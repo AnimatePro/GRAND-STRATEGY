@@ -27,7 +27,16 @@ public partial class MilitaryManager : Node
     };
 
     public List<ArmyData> Armies { get; private set; } = new();
+    public List<CommanderData> Commanders { get; private set; } = new();
+
+    private static readonly string[] CommanderNames =
+    {
+        "Alexander", "Caesar", "Napoleon", "Zhukov", "Rommel", "Patton",
+        "Sun Tzu", "Hannibal", "Saladin", "Moltke", "Guderian", "Wellington",
+    };
+
     private int _nextArmyId = 1;
+    private int _nextCommanderId = 1;
     private long _seed;
 
     public override void _Ready()
@@ -39,7 +48,9 @@ public partial class MilitaryManager : Node
     private void OnGameStarted()
     {
         Armies.Clear();
+        Commanders.Clear();
         _nextArmyId = 1;
+        _nextCommanderId = 1;
     }
 
     public void SetSeed(long seed) => _seed = seed;
@@ -85,6 +96,60 @@ public partial class MilitaryManager : Node
     public void DisbandArmy(int armyId)
     {
         Armies.RemoveAll(a => a.Id == armyId);
+    }
+
+    // --- Командиры -----------------------------------------------------------
+
+    /// <summary>Найм командира (случайный навык 1..5), стоимость растёт с числом командиров.</summary>
+    public bool RecruitCommander(int ownerId, int provinceId)
+    {
+        WorldData world = DataManager.Instance.World;
+        CountryData c = world.GetCountry(ownerId);
+        if (c == null)
+            return false;
+        double cost = 1000 + Commanders.Count * 500;
+        if (c.Treasury < cost)
+            return false;
+
+        c.Treasury -= cost;
+        var rng = new Rng(_seed + _nextCommanderId * 7919L + TimeManager.Instance.CurrentTurn);
+        var commander = new CommanderData
+        {
+            Id = _nextCommanderId++,
+            OwnerId = ownerId,
+            Name = CommanderNames[rng.NextInt(0, CommanderNames.Length - 1)],
+            Skill = rng.NextInt(1, 5),
+        };
+        Commanders.Add(commander);
+        // Автоназначение первой армии без командира.
+        ArmyData? free = Armies.Find(a => a.OwnerId == ownerId && a.CommanderId < 0);
+        if (free != null)
+            free.CommanderId = commander.Id;
+
+        LogService.Instance.Info($"Military: commander {commander.Name} (skill {commander.Skill}) recruited by {ownerId}");
+        return true;
+    }
+
+    /// <summary>Назначение командира армии (null = снять).</summary>
+    public bool AssignCommander(int armyId, int commanderId)
+    {
+        ArmyData? army = Armies.Find(a => a.Id == armyId);
+        CommanderData? commander = Commanders.Find(c => c.Id == commanderId);
+        if (army == null)
+            return false;
+        if (commanderId >= 0 && (commander == null || commander.OwnerId != army.OwnerId))
+            return false;
+        army.CommanderId = commanderId;
+        return true;
+    }
+
+    /// <summary>Множитель командира армии (1.0 без командира).</summary>
+    public static double CommanderMult(ArmyData army)
+    {
+        if (army.CommanderId < 0)
+            return 1.0;
+        CommanderData? c = Instance.Commanders.Find(x => x.Id == army.CommanderId);
+        return c != null ? 1.0 + c.Skill * 0.08 : 1.0;
     }
 
     private static bool ConsumeManpower(WorldData world, int ownerId, int amount)
@@ -228,8 +293,14 @@ public partial class MilitaryManager : Node
         if (HasHostileArmy(world, next, army.OwnerId))
             return;
 
+        // Морской переход = цель не является сухопутным соседом (переброска по морю).
+        bool isSeaJump = System.Array.IndexOf(world.GetProvince(army.ProvinceId).NeighborIds, next) < 0;
+
         army.ProvinceId = next;
         army.MoveOrder.RemoveAt(0);
+
+        if (isSeaJump)
+            army.NavalLandingTurns = 2; // штраф десанта на 2 хода
     }
 
     private void ResolveBattles(WorldData world, Rng rng)
@@ -263,12 +334,19 @@ public partial class MilitaryManager : Node
         double terrainDef = TerrainDefenseBonus(province.Terrain);
         double fortDef = b.FortLevel * 0.05;
 
+        // Командиры и штраф морского десанта (атакующая сторона — a).
+        double aCommander = CommanderMult(a);
+        double bCommander = CommanderMult(b);
+        double aLanding = a.NavalLandingTurns > 0 ? 0.7 : 1.0;
+
         double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength
             * TechManager.Instance.MilitaryMult(a.OwnerId)
-            * DifficultyModifiers.MilitaryMult(a.OwnerId);
+            * DifficultyModifiers.MilitaryMult(a.OwnerId)
+            * aCommander * aLanding;
         double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef)
             * TechManager.Instance.MilitaryMult(b.OwnerId)
-            * DifficultyModifiers.MilitaryMult(b.OwnerId);
+            * DifficultyModifiers.MilitaryMult(b.OwnerId)
+            * bCommander;
 
         double total = attackP + defenseP;
         if (total <= 0)
@@ -443,6 +521,10 @@ public partial class MilitaryManager : Node
                 army.Supply = 0;
                 army.Strength = Mathf.Clamp(army.Strength - 0.05f, 0f, 1f); // истощение
             }
+
+            // Штраф десанта спадает со временем.
+            if (army.NavalLandingTurns > 0)
+                army.NavalLandingTurns--;
         }
     }
 

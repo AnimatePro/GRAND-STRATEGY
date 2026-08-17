@@ -29,6 +29,7 @@ public sealed class ArmyData
     public int CommanderId = -1;
     public int FortLevel;
     public List<int> MoveOrder = new(); // очередь провинций пути (следующая — первая)
+    public int NavalLandingTurns;       // >0 = армия только что высадилась с моря (штраф в бою)
 
     public int TotalUnits
     {
@@ -69,6 +70,15 @@ public sealed class ArmyData
             return s * 100; // 1 юнит = 100 человек (масштаб)
         }
     }
+}
+
+/// <summary>Командир/генерал — даёт бонус атаки/обороны назначенной армии.</summary>
+public sealed class CommanderData
+{
+    public int Id;
+    public int OwnerId;
+    public string Name = string.Empty; // отображаемое имя
+    public float Skill;                // 1..5
 }
 
 /// <summary>Война между двумя странами.</summary>

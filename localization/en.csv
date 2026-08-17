@@ -154,3 +154,6 @@ ACT_BUILD_FORT,Build Fort
 MSG_FORT_FAIL,Cannot build fort here
 ACT_COLONIZE,Colonize
 MSG_COLONIZE_FAIL,Cannot colonize this province
+ACT_RECRUIT_COMMANDER,Recruit Commander
+MSG_COMMANDER_RECRUITED,Commander recruited
+MSG_COMMANDER_FAIL,Cannot recruit commander
