@@ -108,6 +108,7 @@ public partial class AIDirector : Node
         }
 
         ConsiderConstruction(world, countryId, rng);
+        ConsiderLaws(world, countryId);
     }
 
     private void ConsiderWar(WorldData world, int countryId, Rng rng, bool aggressive)
@@ -159,13 +160,65 @@ public partial class AIDirector : Node
                 break;
             }
 
-        if (atWar && country.Treasury > 500 && ManpowerAvailable(world, countryId) > 1000)
+        // Армия в войну — крупная, в мир — базовая (милитаристы/экспансионисты/оппортунисты).
+        bool wantsStanding = country.AiProfile is AiProfile.Militarist or AiProfile.Expansionist
+            or AiProfile.Opportunist or AiProfile.Defensive;
+        int armyCount = MilitaryManager.Instance.Armies.Count(a => a.OwnerId == countryId);
+
+        if (atWar)
+        {
+            if (country.Treasury > 500 && ManpowerAvailable(world, countryId) > 1000 && armyCount < 20)
+            {
+                int capital = country.CapitalProvinceId;
+                if (capital >= 0)
+                    MilitaryManager.Instance.RecruitArmy(countryId, capital,
+                        new Dictionary<int, int> { { 0, 5 }, { 2, 2 } });
+            }
+        }
+        else if (wantsStanding && country.Treasury > 2000 && ManpowerAvailable(world, countryId) > 2000 && armyCount < 3)
         {
             int capital = country.CapitalProvinceId;
             if (capital >= 0)
                 MilitaryManager.Instance.RecruitArmy(countryId, capital,
-                    new Dictionary<int, int> { { 0, 5 }, { 2, 2 } });
+                    new Dictionary<int, int> { { 0, 4 } });
         }
+    }
+
+    private void ConsiderLaws(WorldData world, int countryId)
+    {
+        CountryData country = world.Countries[countryId];
+        CountryEconomy eco = EconomyManager.Instance.Economy.Countries[countryId];
+        if (eco == null || world.Laws.Length == 0)
+            return;
+
+        // Торговые профили предпочитают свободную торговлю, милитаристы — призыв.
+        int desiredLaw = -1;
+        switch (country.AiProfile)
+        {
+            case AiProfile.Trader:
+                desiredLaw = LawByName(world, "LAW_FREE_TRADE");
+                break;
+            case AiProfile.Militarist:
+            case AiProfile.Expansionist:
+                desiredLaw = LawByName(world, "LAW_CONSCRIPTION");
+                break;
+            case AiProfile.Isolationist:
+                desiredLaw = LawByName(world, "LAW_PROTECTIONISM");
+                break;
+        }
+        if (desiredLaw >= 0 && System.Array.IndexOf(country.Laws, desiredLaw) < 0)
+        {
+            var list = new List<int>(country.Laws) { desiredLaw };
+            country.Laws = list.ToArray();
+        }
+    }
+
+    private static int LawByName(WorldData world, string nameKey)
+    {
+        for (int i = 0; i < world.Laws.Length; i++)
+            if (world.Laws[i].NameKey == nameKey)
+                return i;
+        return -1;
     }
 
     private void ConsiderAlliance(WorldData world, int countryId, Rng rng)
@@ -215,26 +268,25 @@ public partial class AIDirector : Node
     private void ConsiderConstruction(WorldData world, int countryId, Rng rng)
     {
         CountryData country = world.Countries[countryId];
-        if (country.Treasury < 1000 || rng.Chance(0.7))
+        if (country.Treasury < 1000 || rng.Chance(0.5))
             return;
-        // Строим в провинции с наименьшей инфраструктурой.
+        // Строим здание (ферма/дорога) в провинции с наименьшим развитием.
         int worst = -1;
-        float worstInfra = float.MaxValue;
+        float worstDev = float.MaxValue;
         foreach (int pid in country.OwnedProvinceIds)
         {
             ProvinceData p = world.GetProvince(pid);
-            if (p.Infrastructure < worstInfra)
+            if (p.Development < worstDev)
             {
-                worstInfra = p.Infrastructure;
+                worstDev = p.Development;
                 worst = pid;
             }
         }
-        if (worst >= 0 && worstInfra < 0.8f)
+        if (worst >= 0)
         {
-            ProvinceData p = world.GetProvince(worst);
-            p.Infrastructure = Mathf.Clamp(p.Infrastructure + 0.05f, 0f, 1f);
-            world.SetProvince(worst, in p);
-            country.Treasury -= 500;
+            // id 1 = ферма, id 9 = дорога (см. buildings.csv).
+            int building = rng.Chance(0.5) ? 1 : 9;
+            MilitaryManager.Instance.BuildBuilding(countryId, worst, building);
         }
     }
 
