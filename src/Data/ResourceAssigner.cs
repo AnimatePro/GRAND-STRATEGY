@@ -24,7 +24,10 @@ public static class ResourceAssigner
 
     public static int[] Assign(int provinceId, Terrain terrain, Climate climate)
     {
-        var rng = new Rng((long)(provinceId * 0x9E3779B97F4A7C15L + 0x1234567));
+        // 2654435761 = 0x9E3779B9 (золотое сечение, младшие 32 бита) — влезает в long,
+        // поэтому `int * long` однозначно. Детерминированное зерно для SplitMix64.
+        long seed = provinceId * 2654435761L + 0x1234567;
+        var rng = new Rng(seed);
         var result = new List<int>(2);
 
         switch (terrain)
