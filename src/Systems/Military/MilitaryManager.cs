@@ -1,0 +1,323 @@
+using System;
+using System.Collections.Generic;
+using Godot;
+using GrandStrategy.Core;
+using GrandStrategy.Data;
+using GrandStrategy.Systems.Diplomacy;
+using GrandStrategy.Utils;
+
+namespace GrandStrategy.Systems.Military;
+
+/// <summary>
+/// Менеджер военных действий (Autoload #12). Армии-стеки, перемещение по провинциям
+/// (BFS по графу соседства), детерминированный бой (атака/оборона/террейн/форт/мораль),
+/// снабжение и истощение, оккупация провинций. Рекруты берутся из male_adults.
+/// </summary>
+public partial class MilitaryManager : Node
+{
+    public static MilitaryManager Instance { get; private set; } = null!;
+
+    public static readonly UnitTypeData[] UnitTypes =
+    {
+        new() { Id = 0, NameKey = "UNIT_INFANTRY", Attack = 1.0f, Defense = 2.0f, Mobility = 1f, Cost = 10, Upkeep = 0.2, ManpowerCost = 100 },
+        new() { Id = 1, NameKey = "UNIT_CAVALRY", Attack = 2.0f, Defense = 1.0f, Mobility = 2f, Cost = 20, Upkeep = 0.4, ManpowerCost = 100 },
+        new() { Id = 2, NameKey = "UNIT_ARTILLERY", Attack = 3.0f, Defense = 1.5f, Mobility = 1f, Cost = 40, Upkeep = 0.8, ManpowerCost = 100 },
+    };
+
+    public List<ArmyData> Armies { get; private set; } = new();
+    private int _nextArmyId = 1;
+    private long _seed;
+
+    public override void _Ready()
+    {
+        Instance = this;
+        EventBus.Instance.GameStarted += OnGameStarted;
+    }
+
+    private void OnGameStarted()
+    {
+        Armies.Clear();
+        _nextArmyId = 1;
+    }
+
+    public void SetSeed(long seed) => _seed = seed;
+
+    // --- Набор и расформирование ---------------------------------------------
+
+    public bool RecruitArmy(int ownerId, int provinceId, Dictionary<int, int> unitCounts)
+    {
+        WorldData world = DataManager.Instance.World;
+        if (!world.TryGetProvince(provinceId, out ProvinceData p))
+            return false;
+        if (p.EffectiveOwnerId != ownerId)
+            return false;
+
+        int manpower = 0;
+        foreach (KeyValuePair<int, int> kv in unitCounts)
+            manpower += kv.Value * UnitTypes[kv.Key].ManpowerCost;
+        if (!ConsumeManpower(world, ownerId, manpower))
+            return false;
+
+        var army = new ArmyData
+        {
+            Id = _nextArmyId++,
+            OwnerId = ownerId,
+            ProvinceId = provinceId,
+            UnitCounts = unitCounts,
+        };
+        Armies.Add(army);
+        LogService.Instance.Info($"Military: army {army.Id} recruited by {ownerId} in {provinceId}");
+        return true;
+    }
+
+    public void DisbandArmy(int armyId)
+    {
+        Armies.RemoveAll(a => a.Id == armyId);
+    }
+
+    private static bool ConsumeManpower(WorldData world, int ownerId, int amount)
+    {
+        int remaining = amount;
+        foreach (int pid in world.Countries[ownerId].OwnedProvinceIds)
+        {
+            int idx = world.ProvinceIdToIndex[pid];
+            ProvinceData p = world.Provinces[idx];
+            int take = Math.Min(p.MaleAdults, remaining);
+            p.MaleAdults -= take;
+            remaining -= take;
+            world.Provinces[idx] = p;
+            if (remaining <= 0)
+                return true;
+        }
+        return remaining <= 0;
+    }
+
+    // --- Перемещение ---------------------------------------------------------
+
+    public bool OrderMove(int armyId, int targetProvinceId)
+    {
+        ArmyData? army = Armies.Find(a => a.Id == armyId);
+        if (army == null)
+            return false;
+
+        WorldData world = DataManager.Instance.World;
+        List<int> path = Pathfind(world, army.ProvinceId, targetProvinceId);
+        if (path == null || path.Count <= 1)
+            return false;
+
+        // Первый элемент — текущая провинция, пропускаем; остальное — очередь пути.
+        army.MoveOrder.Clear();
+        for (int i = 1; i < path.Count; i++)
+            army.MoveOrder.Add(path[i]);
+        return true;
+    }
+
+    private static List<int>? Pathfind(WorldData world, int from, int to)
+    {
+        if (from == to)
+            return new List<int> { from };
+
+        var prev = new Dictionary<int, int>();
+        var queue = new Queue<int>();
+        var visited = new HashSet<int> { from };
+        queue.Enqueue(from);
+
+        while (queue.Count > 0)
+        {
+            int cur = queue.Dequeue();
+            if (cur == to)
+                break;
+            ProvinceData p = world.GetProvince(cur);
+            foreach (int nid in p.NeighborIds)
+            {
+                if (visited.Add(nid))
+                {
+                    prev[nid] = cur;
+                    queue.Enqueue(nid);
+                }
+            }
+        }
+
+        if (!prev.ContainsKey(to))
+            return null;
+
+        var path = new List<int> { to };
+        int step = to;
+        while (prev.TryGetValue(step, out int parent))
+        {
+            path.Add(parent);
+            step = parent;
+        }
+        path.Reverse();
+        return path;
+    }
+
+    // --- Тик (движение, бой, оккупация, снабжение) ---------------------------
+
+    public void Tick()
+    {
+        WorldData world = DataManager.Instance.World;
+        var rng = new Rng(_seed + TimeManager.Instance.CurrentTurn);
+
+        // 1. Движение: каждый стек на 1 провинцию к цели.
+        foreach (ArmyData army in Armies)
+            MoveOneStep(world, army);
+
+        // 2. Бой: враждебные армии в одной провинции.
+        ResolveBattles(world, rng);
+
+        // 3. Оккупация.
+        ApplyOccupation(world);
+
+        // 4. Снабжение и истощение.
+        ApplySupply(world);
+
+        // 5. Удаление уничтоженных армий.
+        Armies.RemoveAll(a => a.TotalUnits <= 0);
+    }
+
+    private void MoveOneStep(WorldData world, ArmyData army)
+    {
+        if (army.MoveOrder.Count == 0)
+            return;
+
+        int next = army.MoveOrder[0];
+        // Блокируем движение в провинцию с враждебной армией.
+        if (HasHostileArmy(world, next, army.OwnerId))
+            return;
+
+        army.ProvinceId = next;
+        army.MoveOrder.RemoveAt(0);
+    }
+
+    private void ResolveBattles(WorldData world, Rng rng)
+    {
+        // Группировка по провинциям.
+        var byProvince = new Dictionary<int, List<ArmyData>>();
+        foreach (ArmyData army in Armies)
+        {
+            if (!byProvince.TryGetValue(army.ProvinceId, out List<ArmyData>? list))
+                byProvince[army.ProvinceId] = list = new List<ArmyData>();
+            list.Add(army);
+        }
+
+        foreach (KeyValuePair<int, List<ArmyData>> kv in byProvince)
+        {
+            List<ArmyData> armies = kv.Value;
+            for (int i = 0; i < armies.Count; i++)
+            {
+                for (int j = i + 1; j < armies.Count; j++)
+                {
+                    if (DiplomacyManager.Instance.AreAtWar(armies[i].OwnerId, armies[j].OwnerId))
+                        ResolveCombat(world, armies[i], armies[j], rng);
+                }
+            }
+        }
+    }
+
+    private void ResolveCombat(WorldData world, ArmyData a, ArmyData b, Rng rng)
+    {
+        ProvinceData province = world.GetProvince(a.ProvinceId);
+        double terrainDef = TerrainDefenseBonus(province.Terrain);
+        double fortDef = b.FortLevel * 0.05;
+
+        double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength;
+        double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef);
+
+        double total = attackP + defenseP;
+        if (total <= 0)
+            return;
+
+        double attackerWin = attackP / total;
+        // Потери доли юнитов.
+        ApplyCasualties(a, (int)(a.TotalUnits * (1.0 - attackerWin) * 0.3));
+        ApplyCasualties(b, (int)(b.TotalUnits * attackerWin * 0.3));
+
+        a.Morale = Mathf.Clamp(a.Morale - 0.15f, 0f, 1f);
+        b.Morale = Mathf.Clamp(b.Morale - 0.15f, 0f, 1f);
+        a.Strength = Mathf.Clamp(a.Strength - 0.05f, 0f, 1f);
+        b.Strength = Mathf.Clamp(b.Strength - 0.05f, 0f, 1f);
+
+        WarData? war = DiplomacyManager.Instance.FindWar(a.OwnerId, b.OwnerId);
+        if (war != null)
+        {
+            war.Battles++;
+            war.WarScore += (attackerWin - 0.5) * 2.0; // атакующий выигрывает/проигрывает
+            war.WarScore = Mathf.Clamp((float)war.WarScore, -100f, 100f);
+        }
+    }
+
+    private static void ApplyCasualties(ArmyData army, int casualties)
+    {
+        int total = army.TotalUnits;
+        if (total <= 0 || casualties <= 0)
+            return;
+        double share = Math.Clamp((double)casualties / total, 0.0, 1.0);
+        var keys = new List<int>(army.UnitCounts.Keys);
+        foreach (int k in keys)
+        {
+            army.UnitCounts[k] = (int)(army.UnitCounts[k] * (1.0 - share));
+            if (army.UnitCounts[k] <= 0)
+                army.UnitCounts.Remove(k);
+        }
+    }
+
+    private void ApplyOccupation(WorldData world)
+    {
+        foreach (ArmyData army in Armies)
+        {
+            ProvinceData p = world.GetProvince(army.ProvinceId);
+            if (p.OwnerId < 0 || p.OwnerId == army.OwnerId)
+                continue;
+            if (!DiplomacyManager.Instance.AreAtWar(army.OwnerId, p.OwnerId))
+                continue;
+            // Враждебная армия в провинции без гарнизона -> оккупация.
+            if (!HasHostileArmy(world, army.ProvinceId, army.OwnerId))
+            {
+                p.ControllerId = army.OwnerId;
+                world.SetProvince(army.ProvinceId, in p);
+            }
+        }
+    }
+
+    private bool HasHostileArmy(WorldData world, int provinceId, int friendlyOwner)
+    {
+        foreach (ArmyData army in Armies)
+            if (army.ProvinceId == provinceId &&
+                DiplomacyManager.Instance.AreAtWar(army.OwnerId, friendlyOwner))
+                return true;
+        return false;
+    }
+
+    private void ApplySupply(WorldData world)
+    {
+        foreach (ArmyData army in Armies)
+        {
+            ProvinceData p = world.GetProvince(army.ProvinceId);
+            bool friendly = p.EffectiveOwnerId == army.OwnerId;
+            if (friendly)
+                army.Supply = Math.Min(army.Supply + 20.0, 100.0);
+            else
+                army.Supply -= army.TotalUnits * 0.5;
+
+            if (army.Supply <= 0)
+            {
+                army.Supply = 0;
+                army.Strength = Mathf.Clamp(army.Strength - 0.05f, 0f, 1f); // истощение
+            }
+        }
+    }
+
+    private static double TerrainDefenseBonus(Terrain t)
+    {
+        return t switch
+        {
+            Terrain.Mountains => 0.3,
+            Terrain.Hills => 0.15,
+            Terrain.Forest => 0.1,
+            Terrain.Jungle => 0.1,
+            Terrain.Marsh => 0.1,
+            _ => 0.0,
+        };
+    }
+}

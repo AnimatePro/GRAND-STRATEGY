@@ -41,13 +41,13 @@ public partial class CameraRig : Node
 
     public Vector2 ScreenToWorld(Vector2 screen)
     {
-        Vector2 viewportCenter = GetViewportRect().Size / 2f;
+        Vector2 viewportCenter = GetViewport().GetVisibleRect().Size / 2f;
         return (screen - viewportCenter) / Zoom + Center;
     }
 
     public Vector2 WorldToScreen(Vector2 world)
     {
-        Vector2 viewportCenter = GetViewportRect().Size / 2f;
+        Vector2 viewportCenter = GetViewport().GetVisibleRect().Size / 2f;
         return (world - Center) * Zoom + viewportCenter;
     }
 
@@ -103,7 +103,7 @@ public partial class CameraRig : Node
         if (SettingsManager.Instance.Current.Game.EdgePan)
         {
             Vector2 mouse = GetViewport().GetMousePosition();
-            Vector2 size = GetViewportRect().Size;
+            Vector2 size = GetViewport().GetVisibleRect().Size;
             if (mouse.X <= EdgeMargin) dir.X -= 1;
             if (mouse.X >= size.X - EdgeMargin) dir.X += 1;
             if (mouse.Y <= EdgeMargin) dir.Y -= 1;
@@ -119,7 +119,7 @@ public partial class CameraRig : Node
     {
         Vector2 worldUnderCursor = ScreenToWorld(screenPos);
         Zoom = Mathf.Clamp(newZoom, MinZoom, MaxZoom);
-        Vector2 viewportCenter = GetViewportRect().Size / 2f;
+        Vector2 viewportCenter = GetViewport().GetVisibleRect().Size / 2f;
         Center = worldUnderCursor - (screenPos - viewportCenter) / Zoom;
         ClampCenter();
     }
@@ -127,7 +127,7 @@ public partial class CameraRig : Node
     private void ClampCenter()
     {
         Vector2 half = _worldSize / 2f;
-        Vector2 viewportSize = GetViewportRect().Size;
+        Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
         float halfView = (viewportSize / Zoom) / 2f;
         // Разрешаем небольшой выход за края карты (океан), но ограничиваем.
         float margin = 200f;

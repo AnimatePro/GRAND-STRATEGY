@@ -57,3 +57,13 @@ LAW_COMPULSORY_EDUCATION,Compulsory Education
 LAW_UNIVERSAL_HEALTHCARE,Universal Healthcare
 LAW_CENSORSHIP,Censorship
 LAW_FREE_PRESS,Free Press
+UNIT_INFANTRY,Infantry
+UNIT_CAVALRY,Cavalry
+UNIT_ARTILLERY,Artillery
+EVT_ECONOMIC_BOOM_TITLE,Economic Boom
+EVT_ECONOMIC_BOOM_DESC,Your economy is thriving.
+EVT_RECESSION_TITLE,Recession
+EVT_RECESSION_DESC,Your economy is contracting.
+EVT_POP_GROWTH_TITLE,Population Growth
+EVT_POP_GROWTH_DESC,Your population is growing.
+EVT_OPT_OK,OK

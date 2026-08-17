@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using Godot;
 
@@ -76,7 +77,10 @@ public static class WorldDataLoader
             province.AreaKm2 = pdto.AreaKm2;
             province.Centroid = new Vector2(pdto.CentroidX, pdto.CentroidY);
             province.NeighborIds = pdto.NeighborIds.ToArray();
-            province.ResourceIds = pdto.ResourceIds.ToArray();
+            // Ресурсы: явные из данных, иначе детерминированный fallback по ландшафту.
+            province.ResourceIds = pdto.ResourceIds.Count > 0
+                ? pdto.ResourceIds.ToArray()
+                : ResourceAssigner.Assign(pdto.Id, province.Terrain, province.Climate);
             province.CoreIds = ResolveCoreCodes(pdto.CoreCodes, world);
 
             SplitPopulation(pdto.TotalPopulation, split);

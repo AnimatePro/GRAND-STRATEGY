@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using GrandStrategy.AI;
+using GrandStrategy.Systems.Diplomacy;
+using GrandStrategy.Systems.Economy;
+using GrandStrategy.Systems.Events;
+using GrandStrategy.Systems.Military;
 
 namespace GrandStrategy.Core;
 
@@ -47,6 +52,22 @@ public partial class GameManager : Node
         TimeManager.Instance.StartNewGame(options.StartYear);
         State = GameState.Playing;
 
+        // Сброс и сидирование всех симуляционных систем.
+        EconomyManager.Instance.Reset();
+        DiplomacyManager.Instance.Reset();
+        MilitaryManager.Instance.SetSeed(options.Seed);
+        EventManager.Instance.SetSeed(options.Seed);
+        AIDirector.Instance.SetSeed(options.Seed);
+        AIDirector.Instance.Reset();
+
+        // Помечаем игрока.
+        if (DataManager.Instance.IsLoaded)
+        {
+            for (int i = 0; i < DataManager.Instance.World.Countries.Length; i++)
+                if (DataManager.Instance.World.Countries[i] != null)
+                    DataManager.Instance.World.Countries[i].IsPlayer = (i == options.PlayerCountryId);
+        }
+
         LogService.Instance.Info($"GameManager: new game (seed={options.Seed}, player={options.PlayerCountryId}, difficulty={options.Difficulty})");
         EventBus.Instance.EmitGameStarted();
         EventBus.Instance.EmitTurnStarted(0);
@@ -60,7 +81,12 @@ public partial class GameManager : Node
         int turn = TimeManager.Instance.CurrentTurn;
         EventBus.Instance.EmitTurnEnded(turn);
 
-        // M5: здесь выполняется фиксированный порядок тиков экономики/населения/торговли.
+        // Фиксированный порядок симуляции хода.
+        EconomyManager.Instance.Tick();      // демография, экономика, торговля
+        DiplomacyManager.Instance.Tick();    // отношения, военное истощение
+        MilitaryManager.Instance.Tick();     // движение, бой, оккупация, снабжение
+        EventManager.Instance.Tick();        // события
+        AIDirector.Instance.Tick();          // решения ИИ
 
         int next = TimeManager.Instance.AdvanceTurn();
         EventBus.Instance.EmitTurnStarted(next);

@@ -57,3 +57,13 @@ LAW_COMPULSORY_EDUCATION,Обязательное образование
 LAW_UNIVERSAL_HEALTHCARE,Всеобщее здравоохранение
 LAW_CENSORSHIP,Цензура
 LAW_FREE_PRESS,Свободная пресса
+UNIT_INFANTRY,Пехота
+UNIT_CAVALRY,Кавалерия
+UNIT_ARTILLERY,Артиллерия
+EVT_ECONOMIC_BOOM_TITLE,Экономический подъём
+EVT_ECONOMIC_BOOM_DESC,Ваша экономика процветает.
+EVT_RECESSION_TITLE,Рецессия
+EVT_RECESSION_DESC,Ваша экономика сокращается.
+EVT_POP_GROWTH_TITLE,Рост населения
+EVT_POP_GROWTH_DESC,Ваше население растёт.
+EVT_OPT_OK,ОК

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "economic_boom",
+    "title_key": "EVT_ECONOMIC_BOOM_TITLE",
+    "desc_key": "EVT_ECONOMIC_BOOM_DESC",
+    "scope": "country",
+    "mtth": 300,
+    "weight": 1.0,
+    "once": false,
+    "cooldown": 100,
+    "conditions": ["gdp > 1000000000"],
+    "options": [
+      {
+        "text_key": "EVT_OPT_OK",
+        "effects": [
+          { "type": "add_money", "value": 50000 },
+          { "type": "add_stability", "value": 3 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "recession",
+    "title_key": "EVT_RECESSION_TITLE",
+    "desc_key": "EVT_RECESSION_DESC",
+    "scope": "country",
+    "mtth": 400,
+    "weight": 1.0,
+    "once": false,
+    "cooldown": 100,
+    "conditions": ["stability < 40"],
+    "options": [
+      {
+        "text_key": "EVT_OPT_OK",
+        "effects": [
+          { "type": "add_money", "value": -30000 },
+          { "type": "add_stability", "value": -5 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "population_growth",
+    "title_key": "EVT_POP_GROWTH_TITLE",
+    "desc_key": "EVT_POP_GROWTH_DESC",
+    "scope": "country",
+    "mtth": 200,
+    "weight": 1.0,
+    "once": false,
+    "cooldown": 50,
+    "conditions": ["stability > 50"],
+    "options": [
+      {
+        "text_key": "EVT_OPT_OK",
+        "effects": [
+          { "type": "change_population", "value": 0.02 },
+          { "type": "add_stability", "value": 2 }
+        ]
+      }
+    ]
+  }
+]

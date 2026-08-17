@@ -60,10 +60,19 @@ public partial class GameRoot : Node
 
         // 6. Стартовая камера (вся карта в кадре).
         _camera.Center = _mapRenderer.WorldSize / 2f;
-        Vector2 vp = GetViewportRect().Size;
+        Vector2 vp = GetViewport().GetVisibleRect().Size;
         _camera.SetZoom(Mathf.Min(vp.X / _mapRenderer.WorldSize.X, vp.Y / _mapRenderer.WorldSize.Y));
 
         EventBus.Instance.UINotification += OnNotification;
+
+        // 7. Старт новой партии (M4 заменит на экран новой игры с выбором страны/зерна).
+        GameManager.Instance.StartNewGame(new NewGameOptions
+        {
+            PlayerCountryId = 0,
+            Seed = 20260817,
+            Difficulty = "normal",
+        });
+
         LogService.Instance.Info("GameRoot ready");
     }
 
@@ -108,7 +117,7 @@ public partial class GameRoot : Node
             return;
 
         // Трансформ камеры -> позиция/размер TextureRect.
-        Vector2 vp = GetViewportRect().Size;
+        Vector2 vp = GetViewport().GetVisibleRect().Size;
         _mapRenderer.Position = vp / 2f - _camera.Center * _camera.Zoom;
         _mapRenderer.Size = _mapRenderer.WorldSize * _camera.Zoom;
 
@@ -170,6 +179,8 @@ public partial class GameRoot : Node
     private void OnNotification(string text) =>
         LogService.Instance.Info($"[notification] {text}");
 
+    private int PlayerCountryId() => GameManager.Instance.ActiveOptions?.PlayerCountryId ?? 0;
+
     private void HandleDebugCommand(string text)
     {
         string[] parts = text.Trim().Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
@@ -183,7 +194,21 @@ public partial class GameRoot : Node
                 if (parts.Length > 1 && double.TryParse(parts[1],
                         System.Globalization.NumberStyles.Float,
                         System.Globalization.CultureInfo.InvariantCulture, out double amt))
-                    DataManager.Instance.World.GetCountry(0).Treasury += amt;
+                    DataManager.Instance.World.GetCountry(PlayerCountryId()).Treasury += amt;
+                break;
+            case "spawn_army":
+                {
+                    var world = DataManager.Instance.World;
+                    var country = world.GetCountry(PlayerCountryId());
+                    if (country != null && country.CapitalProvinceId >= 0)
+                        MilitaryManager.Instance.RecruitArmy(PlayerCountryId(), country.CapitalProvinceId,
+                            new System.Collections.Generic.Dictionary<int, int> { { 0, 5 }, { 1, 2 }, { 2, 2 } });
+                    break;
+                }
+            case "test_save":
+                GameManager.Instance.SaveGame("debug_roundtrip");
+                bool ok = GameManager.Instance.LoadGame("debug_roundtrip");
+                GD.Print($"round-trip save test: {(ok ? "OK" : "FAILED")}");
                 break;
             default:
                 GD.Print($"Unknown command: {parts[0]}");
