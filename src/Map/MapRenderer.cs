@@ -50,6 +50,8 @@ public partial class MapRenderer : TextureRect
         _idTexture = ImageTexture.CreateFromImage(_idImage);
         Texture = _idTexture;
         TextureFilter = TextureFilterEnum.Nearest;
+        StretchMode = TextureRect.StretchModeEnum.Scale;
+        ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 
         Image borderImg = Image.LoadFromFile(ProjectSettings.GlobalizePath(BorderMaskPath));
         _borderTexture = ImageTexture.CreateFromImage(borderImg);

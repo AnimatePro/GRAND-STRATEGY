@@ -4,6 +4,7 @@ using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Systems.Diplomacy;
+using GrandStrategy.Systems.Tech;
 using GrandStrategy.Utils;
 
 namespace GrandStrategy.Systems.Military;
@@ -41,6 +42,16 @@ public partial class MilitaryManager : Node
     }
 
     public void SetSeed(long seed) => _seed = seed;
+
+    /// <summary>Восстановление армий из сохранения.</summary>
+    public void RestoreArmies(List<ArmyData> armies)
+    {
+        Armies.Clear();
+        Armies.AddRange(armies);
+        _nextArmyId = 1;
+        foreach (ArmyData a in Armies)
+            _nextArmyId = Math.Max(_nextArmyId, a.Id + 1);
+    }
 
     // --- Набор и расформирование ---------------------------------------------
 
@@ -136,6 +147,19 @@ public partial class MilitaryManager : Node
                     queue.Enqueue(nid);
                 }
             }
+
+            // Морская переброска: из прибрежной провинции — в любую другую прибрежную.
+            if (p.IsCoastal)
+            {
+                foreach (int cid in CoastalProvinces(world))
+                {
+                    if (cid != cur && visited.Add(cid))
+                    {
+                        prev[cid] = cur;
+                        queue.Enqueue(cid);
+                    }
+                }
+            }
         }
 
         if (!prev.ContainsKey(to))
@@ -150,6 +174,23 @@ public partial class MilitaryManager : Node
         }
         path.Reverse();
         return path;
+    }
+
+    private static int[]? _coastalCache;
+    private static int _coastalCacheWorld;
+
+    private static int[] CoastalProvinces(WorldData world)
+    {
+        if (_coastalCache != null && _coastalCacheWorld == world.ProvinceCount)
+            return _coastalCache;
+
+        var list = new List<int>();
+        for (int i = 0; i < world.ProvinceCount; i++)
+            if (world.Provinces[i].IsCoastal)
+                list.Add(i);
+        _coastalCache = list.ToArray();
+        _coastalCacheWorld = world.ProvinceCount;
+        return _coastalCache;
     }
 
     // --- Тик (движение, бой, оккупация, снабжение) ---------------------------
@@ -221,8 +262,10 @@ public partial class MilitaryManager : Node
         double terrainDef = TerrainDefenseBonus(province.Terrain);
         double fortDef = b.FortLevel * 0.05;
 
-        double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength;
-        double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef);
+        double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength
+            * TechManager.Instance.MilitaryMult(a.OwnerId);
+        double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef)
+            * TechManager.Instance.MilitaryMult(b.OwnerId);
 
         double total = attackP + defenseP;
         if (total <= 0)

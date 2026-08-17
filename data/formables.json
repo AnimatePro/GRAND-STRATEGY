@@ -1,0 +1,32 @@
+[
+  {
+    "id": "form_scandinavia",
+    "name_key": "FORM_SCANDINAVIA",
+    "requires_codes": ["NOR", "SWE", "DNK", "FIN"],
+    "color_hex": "#005BAA"
+  },
+  {
+    "id": "form_german_confederation",
+    "name_key": "FORM_GERMANY",
+    "requires_codes": ["DEU", "AUT", "CHE"],
+    "color_hex": "#111111"
+  },
+  {
+    "id": "form_arab_league",
+    "name_key": "FORM_ARAB_LEAGUE",
+    "requires_codes": ["SAU", "EGY", "IRQ", "SYR", "JOR"],
+    "color_hex": "#006C35"
+  },
+  {
+    "id": "form_greater_colombia",
+    "name_key": "FORM_GRAN_COLOMBIA",
+    "requires_codes": ["COL", "VEN", "ECU", "PAN"],
+    "color_hex": "#FCD116"
+  },
+  {
+    "id": "form_central_asia",
+    "name_key": "FORM_CENTRAL_ASIA",
+    "requires_codes": ["KAZ", "UZB", "TKM", "KGZ", "TJK"],
+    "color_hex": "#0099B5"
+  }
+]

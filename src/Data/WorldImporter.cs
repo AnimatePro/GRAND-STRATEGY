@@ -84,6 +84,7 @@ public static class WorldImporter
         var provinces = new List<ProvinceDto>();
         var featureIndexToProvinceId = new Dictionary<int, int>();
         var provinceAreaByCountry = new Dictionary<int, double>();
+        HashSet<int> coastalFeatures = AdjacencyGraph.FindCoastalFeatures(provinceFeatures);
 
         foreach (GeoFeature f in provinceFeatures)
         {
@@ -111,6 +112,7 @@ public static class WorldImporter
                 AreaKm2 = area,
                 CentroidX = cx,
                 CentroidY = cy,
+                IsCoastal = coastalFeatures.Contains((int)f.Index),
                 Terrain = (int)Terrain.Plains,
                 Climate = (int)ClimateFromLatitude(cy),
                 ContinentId = ContinentFromCountry(ownerCode),

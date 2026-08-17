@@ -72,6 +72,7 @@ public static class WorldDataLoader
             province.OwnerId = world.CountryByCode(pdto.OwnerCode);
             province.RegionId = pdto.RegionId;
             province.ContinentId = pdto.ContinentId;
+            province.IsCoastal = pdto.IsCoastal;
             province.Terrain = (Terrain)pdto.Terrain;
             province.Climate = (Climate)pdto.Climate;
             province.AreaKm2 = pdto.AreaKm2;
@@ -144,8 +145,9 @@ public static class WorldDataLoader
         var list = new List<GoodData>();
         foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/goods.csv"))
         {
+            // id в CSV — справочный; индекс в массиве — порядок строк (0-based).
             var good = GoodData.Create(
-                CsvTableLoader.Int(row, "id"),
+                list.Count,
                 CsvTableLoader.Str(row, "name_key"),
                 (GoodCategory)CsvTableLoader.Int(row, "category"),
                 CsvTableLoader.Double(row, "base_price"));

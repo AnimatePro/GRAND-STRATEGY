@@ -67,3 +67,17 @@ EVT_RECESSION_DESC,Your economy is contracting.
 EVT_POP_GROWTH_TITLE,Population Growth
 EVT_POP_GROWTH_DESC,Your population is growing.
 EVT_OPT_OK,OK
+unclaimed,Unclaimed
+TECH_AGRICULTURE,Agriculture
+TECH_INDUSTRIALIZATION,Industrialization
+TECH_ECONOMICS,Economics
+TECH_MILITARY_DOCTRINE,Military Doctrine
+TECH_CONSCRIPTION_DOCTRINE,Conscription Doctrine
+TECH_EDUCATION,Education
+TECH_ADVANCED_INDUSTRY,Advanced Industry
+TECH_MODERN_LOGISTICS,Modern Logistics
+FORM_SCANDINAVIA,Scandinavia
+FORM_GERMANY,German Confederation
+FORM_ARAB_LEAGUE,Arab League
+FORM_GRAN_COLOMBIA,Gran Colombia
+FORM_CENTRAL_ASIA,Central Asian Union

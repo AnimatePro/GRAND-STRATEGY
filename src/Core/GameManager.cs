@@ -2,10 +2,14 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using GrandStrategy.AI;
+using GrandStrategy.Data;
 using GrandStrategy.Systems.Diplomacy;
 using GrandStrategy.Systems.Economy;
 using GrandStrategy.Systems.Events;
+using GrandStrategy.Systems.Governance;
 using GrandStrategy.Systems.Military;
+using GrandStrategy.Systems.Tech;
+using GrandStrategy.Utils;
 
 namespace GrandStrategy.Core;
 
@@ -59,6 +63,7 @@ public partial class GameManager : Node
         EventManager.Instance.SetSeed(options.Seed);
         AIDirector.Instance.SetSeed(options.Seed);
         AIDirector.Instance.Reset();
+        TechManager.Instance.Reset();
 
         // Помечаем игрока.
         if (DataManager.Instance.IsLoaded)
@@ -85,10 +90,18 @@ public partial class GameManager : Node
         EconomyManager.Instance.Tick();      // демография, экономика, торговля
         DiplomacyManager.Instance.Tick();    // отношения, военное истощение
         MilitaryManager.Instance.Tick();     // движение, бой, оккупация, снабжение
+        TechManager.Instance.Tick();         // исследования
+        GovernanceSystem.Tick(DataManager.Instance.World,
+            new Rng((ActiveOptions?.Seed ?? 0) + turn)); // перевороты, мятежи
         EventManager.Instance.Tick();        // события
         AIDirector.Instance.Tick();          // решения ИИ
 
         int next = TimeManager.Instance.AdvanceTurn();
+
+        // Автосейв по расписанию (каждые 5 ходов).
+        if (SettingsManager.Instance.Current.Game.Autosave && next % 5 == 0)
+            AutoSave();
+
         EventBus.Instance.EmitTurnStarted(next);
     }
 
@@ -131,17 +144,22 @@ public partial class GameManager : Node
 
     private GameSnapshot BuildSnapshot()
     {
+        WorldData world = DataManager.Instance.World;
+        WorldStateSaveDto worldState = WorldSaveCodec.Encode(world, EconomyManager.Instance.Economy,
+            MilitaryManager.Instance.Armies, DiplomacyManager.Instance.Wars);
+
         return new GameSnapshot
         {
             Timestamp = DateTime.UtcNow.ToString("o"),
             CurrentDate = TimeManager.Instance.CurrentDateString,
+            CurrentYear = TimeManager.Instance.CurrentYear,
             CurrentTurn = TimeManager.Instance.CurrentTurn,
             PlayerCountryId = ActiveOptions?.PlayerCountryId ?? 0,
             Seed = ActiveOptions?.Seed ?? 0,
             Difficulty = ActiveOptions?.Difficulty ?? "normal",
             Ironman = ActiveOptions?.Ironman ?? false,
             Settings = SettingsManager.Instance.Current,
-            WorldState = new Dictionary<string, object?>(),
+            WorldState = worldState,
         };
     }
 
@@ -149,17 +167,33 @@ public partial class GameManager : Node
     {
         ActiveOptions = new NewGameOptions
         {
-            StartYear = TimeManager.Instance.CurrentYear,
+            StartYear = snapshot.CurrentYear,
             PlayerCountryId = snapshot.PlayerCountryId,
             Seed = snapshot.Seed,
             Difficulty = snapshot.Difficulty,
             Ironman = snapshot.Ironman,
         };
 
-        // Восстановление мира (province/country/economy/...) — M9.
-        TimeManager.Instance.StartNewGame(TimeManager.Instance.CurrentYear);
+        // Восстановление мира.
+        if (snapshot.WorldState != null)
+        {
+            var armies = new List<ArmyData>();
+            var wars = new List<WarData>();
+            WorldSaveCodec.Apply(DataManager.Instance.World, EconomyManager.Instance.Economy,
+                snapshot.WorldState, armies, wars);
+            MilitaryManager.Instance.RestoreArmies(armies);
+            DiplomacyManager.Instance.RestoreWars(wars);
+        }
+
+        // Время.
+        TimeManager.Instance.StartNewGame(snapshot.CurrentYear);
         while (TimeManager.Instance.CurrentTurn < snapshot.CurrentTurn)
             TimeManager.Instance.AdvanceTurn();
+
+        // Помечаем игрока.
+        for (int i = 0; i < DataManager.Instance.World.Countries.Length; i++)
+            if (DataManager.Instance.World.Countries[i] != null)
+                DataManager.Instance.World.Countries[i].IsPlayer = (i == snapshot.PlayerCountryId);
 
         State = GameState.Playing;
     }

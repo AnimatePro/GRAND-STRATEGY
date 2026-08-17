@@ -5,13 +5,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Godot;
+using GrandStrategy.Data;
 
 namespace GrandStrategy.Core;
 
 /// <summary>
-/// Снимок сохранения (верхнеуровневые ключи, см. формат M9).
-/// world_state — заглушка: в M9 станет конкретным графом объектов
-/// (provinces, countries, economy, trade, diplomacy, wars, events, ai_state).
+/// Снимок сохранения (верхнеуровневые ключи). WorldState — полный граф мира
+/// (провинции/страны/экономика/армии/войны) в сериализуемом DTO.
 /// </summary>
 public sealed class GameSnapshot
 {
@@ -19,13 +19,14 @@ public sealed class GameSnapshot
     public string GameVersion { get; init; } = GameConstants.AppVersion;
     public string Timestamp { get; init; } = string.Empty;
     public string CurrentDate { get; init; } = string.Empty;
+    public int CurrentYear { get; init; } = GameConstants.DefaultStartYear;
     public int CurrentTurn { get; init; }
     public int PlayerCountryId { get; init; }
     public long Seed { get; init; }
     public string Difficulty { get; init; } = "normal";
     public bool Ironman { get; init; }
     public Settings? Settings { get; init; }
-    public Dictionary<string, object?>? WorldState { get; init; }
+    public WorldStateSaveDto? WorldState { get; init; }
 }
 
 /// <summary>

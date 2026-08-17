@@ -3,8 +3,26 @@ using System.Collections.Generic;
 using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
+using GrandStrategy.Systems.Governance;
 
 namespace GrandStrategy.Systems.Diplomacy;
+
+/// <summary>Условия мирного договора.</summary>
+public sealed class PeaceTerms
+{
+    public bool CedeOccupied;   // передать оккупированные провинции их контролёру
+    public bool Puppet;         // проигравший становится вассалом победителя
+    public bool Annex;          // полная аннексия проигравшего
+    public double Reparations;  // разовый платёж победителю
+}
+
+/// <summary>Результат мирного договора.</summary>
+public enum PeaceType
+{
+    WhitePeace = 0,
+    Victory = 1,   // атакующий выиграл (по war score)
+    Defeat = 2,    // защищающийся выиграл
+}
 
 /// <summary>
 /// Менеджер дипломатии (Autoload #11). Отношения (-100..100) хранятся в CountryData.Relations,
@@ -27,6 +45,17 @@ public partial class DiplomacyManager : Node
         Wars.Clear();
         _status.Clear();
         _nextWarId = 1;
+    }
+
+    /// <summary>Восстановление войн из сохранения (с пересборкой матрицы статусов).</summary>
+    public void RestoreWars(List<WarData> wars)
+    {
+        Wars.Clear();
+        _status.Clear();
+        Wars.AddRange(wars);
+        foreach (WarData w in Wars)
+            SetStatus(w.AttackerId, w.DefenderId, DiplomacyStatus.War);
+        _nextWarId = Wars.Count + 1;
     }
 
     // --- Статусы -------------------------------------------------------------
@@ -94,20 +123,84 @@ public partial class DiplomacyManager : Node
 
     public bool SignPeace(int a, int b)
     {
+        return MakePeace(a, b, new PeaceTerms());
+    }
+
+    /// <summary>Мирный договор с условиями. a = инициатор (обычно победитель).</summary>
+    public bool MakePeace(int a, int b, PeaceTerms terms)
+    {
         WarData? war = FindWar(a, b);
         if (war == null)
             return false;
+
+        WorldData world = DataManager.Instance.World;
+        CountryData ca = world.Countries[a];
+        CountryData cb = world.Countries[b];
+
+        // Победитель: по war score (с точки зрения атакующего).
+        double score = war.WarScore;
+        int winner = score >= 0 ? war.AttackerId : war.DefenderId;
+        int loser = score >= 0 ? war.DefenderId : war.AttackerId;
+        CountryData cw = world.Countries[winner];
+        CountryData cl = world.Countries[loser];
+
+        // Уступка оккупированных провинций их контролёру.
+        if (terms.CedeOccupied)
+        {
+            foreach (int pid in new List<int>(war.OccupiedProvinces))
+            {
+                ProvinceData p = world.GetProvince(pid);
+                if (p.ControllerId >= 0 && p.ControllerId != p.OwnerId)
+                {
+                    GovernanceSystem.TransferProvince(world, pid, p.OwnerId, p.ControllerId);
+                }
+            }
+        }
+
+        // Вассалитет проигравшего.
+        if (terms.Puppet)
+        {
+            SetStatus(winner, loser, DiplomacyStatus.Vassal);
+            SetStatus(loser, winner, DiplomacyStatus.Vassal);
+            cl.AiProfile = AiProfile.Defensive;
+        }
+
+        // Аннексия проигравшего.
+        if (terms.Annex)
+        {
+            foreach (int pid in new List<int>(cl.OwnedProvinceIds))
+            {
+                ProvinceData p = world.GetProvince(pid);
+                p.OwnerId = winner;
+                p.ControllerId = -1;
+                world.SetProvince(pid, in p);
+                cw.OwnedProvinceIds.Add(pid);
+            }
+            cl.IsAlive = false;
+            cl.OwnedProvinceIds.Clear();
+            cl.ControlledProvinceIds.Clear();
+        }
+
+        // Репарации.
+        if (terms.Reparations > 0)
+        {
+            double pay = Math.Min(terms.Reparations, cl.Treasury);
+            cl.Treasury -= pay;
+            cw.Treasury += pay;
+        }
 
         Wars.Remove(war);
         SetStatus(a, b, DiplomacyStatus.Truce);
         SetStatus(b, a, DiplomacyStatus.Truce);
 
-        WorldData world = DataManager.Instance.World;
-        world.Countries[a].SetRelation(b, world.Countries[a].RelationWith(b) + 20f);
-        world.Countries[b].SetRelation(a, world.Countries[b].RelationWith(a) + 20f);
+        ca.SetRelation(b, ca.RelationWith(b) + 20f);
+        cb.SetRelation(a, cb.RelationWith(a) + 20f);
+        ca.WarExhaustion = 0f;
+        cb.WarExhaustion = 0f;
 
-        LogService.Instance.Info($"Diplomacy: peace between {a} and {b}");
+        LogService.Instance.Info($"Diplomacy: peace between {a} and {b} (winner {winner})");
         EventBus.Instance.EmitPeaceSigned(a, b);
+        EventBus.Instance.EmitDiplomacyUpdated();
         return true;
     }
 
@@ -130,7 +223,46 @@ public partial class DiplomacyManager : Node
         SetStatus(a, b, DiplomacyStatus.Alliance);
         ImproveRelations(a, b, 25f);
         ImproveRelations(b, a, 25f);
+        EventBus.Instance.EmitDiplomacyUpdated();
         return true;
+    }
+
+    /// <summary>Переключение эмбарго (a вводит/снимает эмбарго против b).</summary>
+    public void ToggleEmbargo(int a, int b)
+    {
+        WorldData world = DataManager.Instance.World;
+        var set = world.Countries[a].TradePolicy.Embargoed;
+        if (!set.Remove(b))
+            set.Add(b);
+        EventBus.Instance.EmitTradeUpdated();
+    }
+
+    /// <summary>Циклический сдвиг торгового соглашения a с b.</summary>
+    public void CycleTradeAgreement(int a, int b)
+    {
+        WorldData world = DataManager.Instance.World;
+        var agreements = world.Countries[a].TradePolicy.Agreements;
+        agreements.TryGetValue(b, out TradeAgreement cur);
+        TradeAgreement next = cur switch
+        {
+            TradeAgreement.None => TradeAgreement.FreeTrade,
+            TradeAgreement.FreeTrade => TradeAgreement.Preferential,
+            TradeAgreement.Preferential => TradeAgreement.CustomsUnion,
+            TradeAgreement.CustomsUnion => TradeAgreement.CommonMarket,
+            _ => TradeAgreement.None,
+        };
+        if (next == TradeAgreement.None)
+            agreements.Remove(b);
+        else
+            agreements[b] = next;
+        EventBus.Instance.EmitTradeUpdated();
+    }
+
+    public TradeAgreement GetTradeAgreement(int a, int b)
+    {
+        WorldData world = DataManager.Instance.World;
+        return world.Countries[a].TradePolicy.Agreements.TryGetValue(b, out TradeAgreement v)
+            ? v : TradeAgreement.None;
     }
 
     // --- Тик -------------------------------------------------------------

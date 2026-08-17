@@ -15,6 +15,7 @@ public struct ProvinceData
     public int ControllerId; // страна-оккупант, -1 = контролирует владелец
     public int RegionId;     // регион (субъект/штат/область)
     public int ContinentId;
+    public bool IsCoastal;   // имеет выход к морю (для морской переброски армий)
     public Terrain Terrain;
     public Climate Climate;
     public float AreaKm2;

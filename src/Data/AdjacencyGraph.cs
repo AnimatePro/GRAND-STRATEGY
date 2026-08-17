@@ -68,6 +68,48 @@ public static class AdjacencyGraph
         return result;
     }
 
+    /// <summary>
+    /// Находит «прибрежные» фичи — имеющие хотя бы одно ребро, не разделяемое с другой
+    /// фичей (граница с океаном или внешней рамкой карты). Нужно для морской переброски.
+    /// </summary>
+    public static HashSet<int> FindCoastalFeatures(List<GeoFeature> features)
+    {
+        var edgeCount = new Dictionary<EdgeKey, int>();
+        foreach (GeoFeature feature in features)
+            foreach (List<Vector2[]> polygon in feature.Polygons)
+                foreach (Vector2[] ring in polygon)
+                    for (int i = 0; i < ring.Length; i++)
+                    {
+                        var key = new EdgeKey(ring[i], ring[(i + 1) % ring.Length]);
+                        edgeCount.TryGetValue(key, out int c);
+                        edgeCount[key] = c + 1;
+                    }
+
+        var coastal = new HashSet<int>();
+        for (int f = 0; f < features.Count; f++)
+        {
+            GeoFeature feature = features[f];
+            foreach (List<Vector2[]> polygon in feature.Polygons)
+            {
+                bool found = false;
+                foreach (Vector2[] ring in polygon)
+                    for (int i = 0; i < ring.Length; i++)
+                    {
+                        var key = new EdgeKey(ring[i], ring[(i + 1) % ring.Length]);
+                        if (edgeCount[key] == 1)
+                        {
+                            coastal.Add(f);
+                            found = true;
+                            break;
+                        }
+                    }
+                if (found)
+                    break;
+            }
+        }
+        return coastal;
+    }
+
     /// <summary>Ключ ненаправленного ребра (точки упорядочены лексикографически).</summary>
     private readonly struct EdgeKey : System.IEquatable<EdgeKey>
     {

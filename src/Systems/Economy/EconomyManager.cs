@@ -3,6 +3,7 @@ using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Systems.Population;
+using GrandStrategy.Systems.Tech;
 using GrandStrategy.Systems.Trade;
 
 namespace GrandStrategy.Systems.Economy;
@@ -151,7 +152,8 @@ public partial class EconomyManager : Node
             double rural = PopulationSystem.LaborForce(p) * (1.0 - world.Countries[p.OwnerId].Urbanization);
             int foodId = FoodGoodId(world);
             if (foodId >= 0)
-                production[foodId] += rural * EconomyConstants.RuralFoodPerWorker * dev * infra;
+                production[foodId] += rural * EconomyConstants.RuralFoodPerWorker * dev * infra
+                    * TechManager.Instance.FoodMult(p.OwnerId);
 
             // Добыча ресурсов.
             foreach (int rid in p.ResourceIds)
@@ -166,7 +168,8 @@ public partial class EconomyManager : Node
         {
             CountryEconomy eco = Economy.Countries[c];
             double industrial = eco.Employment * world.Countries[c].Urbanization;
-            double output = industrial * EconomyConstants.IndustryProductivity;
+            double output = industrial * EconomyConstants.IndustryProductivity
+                * TechManager.Instance.ProductionMult(c);
 
             int manuCount = 0;
             for (int g = 0; g < world.GoodCount; g++)
@@ -277,7 +280,7 @@ public partial class EconomyManager : Node
             double vat = consumptionValue * eco.Taxes.Vat;
             double resource = outputValue * eco.Taxes.Resource * 0.3;
 
-            eco.BudgetRevenue = income + corporate + vat + resource;
+            eco.BudgetRevenue = (income + corporate + vat + resource) * TechManager.Instance.TaxMult(c);
         }
     }
 

@@ -67,3 +67,17 @@ EVT_RECESSION_DESC,Ваша экономика сокращается.
 EVT_POP_GROWTH_TITLE,Рост населения
 EVT_POP_GROWTH_DESC,Ваше население растёт.
 EVT_OPT_OK,ОК
+unclaimed,Ничья земля
+TECH_AGRICULTURE,Сельское хозяйство
+TECH_INDUSTRIALIZATION,Индустриализация
+TECH_ECONOMICS,Экономика
+TECH_MILITARY_DOCTRINE,Военная доктрина
+TECH_CONSCRIPTION_DOCTRINE,Призывная доктрина
+TECH_EDUCATION,Образование
+TECH_ADVANCED_INDUSTRY,Передовая промышленность
+TECH_MODERN_LOGISTICS,Современная логистика
+FORM_SCANDINAVIA,Скандинавия
+FORM_GERMANY,Германская конфедерация
+FORM_ARAB_LEAGUE,Арабская лига
+FORM_GRAN_COLOMBIA,Великая Колумбия
+FORM_CENTRAL_ASIA,Центральноазиатский союз

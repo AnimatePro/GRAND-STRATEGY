@@ -11,13 +11,16 @@ namespace GrandStrategy.Data;
 /// </summary>
 public static class ResourceAssigner
 {
-    public const int Timber = 2;
-    public const int Iron = 3;
-    public const int Coal = 4;
-    public const int Oil = 5;
-    public const int Gas = 6;
-    public const int Gold = 13;
-    public const int RareMetals = 14;
+    // Индексы товаров в массиве WorldData.Goods (0-based, порядок = data/goods.csv).
+    // goods.csv: 0=Food 1=Timber 2=Iron 3=Coal 4=Oil 5=Gas 6=Steel 7=Cement
+    //            8=Textiles 9=Electronics 10=Machinery 11=Vehicles 12=Gold 13=RareMetals 14=Consumer 15=Electricity
+    public const int Timber = 1;
+    public const int Iron = 2;
+    public const int Coal = 3;
+    public const int Oil = 4;
+    public const int Gas = 5;
+    public const int Gold = 12;
+    public const int RareMetals = 13;
 
     public static int[] Assign(int provinceId, Terrain terrain, Climate climate)
     {

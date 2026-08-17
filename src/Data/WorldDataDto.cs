@@ -38,6 +38,7 @@ public sealed class ProvinceDto
     public string OwnerCode = string.Empty;
     public int RegionId = -1;
     public int ContinentId = -1;
+    public bool IsCoastal;
     public int Terrain;
     public int Climate;
     public float AreaKm2;
