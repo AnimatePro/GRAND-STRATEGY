@@ -157,3 +157,6 @@ MSG_COLONIZE_FAIL,Cannot colonize this province
 ACT_RECRUIT_COMMANDER,Recruit Commander
 MSG_COMMANDER_RECRUITED,Commander recruited
 MSG_COMMANDER_FAIL,Cannot recruit commander
+PANEL_MILITARY,Military
+MIL_ARMIES,armies
+MIL_UNITS,units

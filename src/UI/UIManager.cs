@@ -34,9 +34,10 @@ public partial class UIManager : Node
     private Label _stabilityLabel = null!;
 
     private VBoxContainer _provinceBox = null!;
-    private VBoxContainer _playerBox = null!;
+    private VBoxContainer _playerBox = null!;    // вкладка «Страна»
+    private VBoxContainer _militaryBox = null!;  // вкладка «Армия»
     private VBoxContainer _targetBox = null!;
-    private VBoxContainer _techBox = null!;
+    private VBoxContainer _techBox = null!;      // вкладка «Технологии»
 
     private Label _toast = null!;
 
@@ -137,20 +138,47 @@ public partial class UIManager : Node
         AddButton(topHBox, L("HUD_SAVE"), () => GameManager.Instance.SaveGame("manual"));
         AddButton(topHBox, L("HUD_MENU"), () => GetTree().ChangeSceneToFile("res://scenes/MainMenu.tscn"));
 
-        // Панель провинции (слева сверху).
-        _provinceBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 64), new Vector2(360, 260), L("PANEL_PROVINCE"));
-        // Панель игрока (слева снизу).
-        _playerBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 340), new Vector2(360, 640), L("PANEL_COUNTRY"));
+        // Панель провинции (слева сверху, контекстная).
+        _provinceBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 64), new Vector2(360, 300), L("PANEL_PROVINCE"));
+
+        // Левая боковая панель с вкладками (Страна / Армия / Технологии).
+        var sidebar = new TabContainer();
+        sidebar.SetAnchorsPreset(Control.LayoutPreset.TopLeft);
+        sidebar.OffsetLeft = 8;
+        sidebar.OffsetTop = 310;
+        sidebar.OffsetRight = 380;
+        sidebar.OffsetBottom = -60;
+        sidebar.TabAlignment = TabBar.AlignmentMode.Left;
+        _canvas.AddChild(sidebar);
+
+        _playerBox = MakeTab(sidebar, L("PANEL_COUNTRY"));
+        _militaryBox = MakeTab(sidebar, L("PANEL_MILITARY"));
+        _techBox = MakeTab(sidebar, L("PANEL_TECHNOLOGY"));
+
         // Панель целевой страны (справа).
-        _targetBox = MakePanel(Control.LayoutPreset.TopRight, new Vector2(-380, 64), new Vector2(-8, 420), L("PANEL_TARGET"));
-        // Панель технологий (справа снизу).
-        _techBox = MakePanel(Control.LayoutPreset.TopRight, new Vector2(-380, 430), new Vector2(-8, 700), L("PANEL_TECHNOLOGY"));
+        _targetBox = MakePanel(Control.LayoutPreset.TopRight, new Vector2(-380, 64), new Vector2(-8, 520), L("PANEL_TARGET"));
 
         // Тост.
         _toast = new Label { HorizontalAlignment = HorizontalAlignment.Center, Visible = false };
         _toast.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
         _toast.OffsetTop = -40;
         _canvas.AddChild(_toast);
+    }
+
+    /// <summary>Создаёт вкладку TabContainer с прокруткой и возвращает её контент-VBox.</summary>
+    private static VBoxContainer MakeTab(TabContainer tabs, string title)
+    {
+        var scroll = new ScrollContainer
+        {
+            HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+        };
+        var vbox = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        vbox.AddThemeConstantOverride("separation", 4);
+        scroll.AddChild(vbox);
+        tabs.AddChild(scroll);
+        scroll.Name = title;
+        return vbox;
     }
 
     private static Label MakeLabel(HBoxContainer parent)
@@ -269,6 +297,7 @@ public partial class UIManager : Node
             return;
         RebuildProvincePanel();
         RebuildPlayerPanel();
+        RebuildMilitaryPanel();
         RebuildTargetPanel();
         RebuildTechPanel();
     }
@@ -392,22 +421,47 @@ public partial class UIManager : Node
             GovernanceSystem.ChangeIdeology(world, playerId);
             RebuildPlayerPanel();
         });
-        AddButton(_playerBox, L("ACT_RECRUIT_COMMANDER"), () =>
+    }
+
+    // --- Панель армии ----------------------------------------------------------
+
+    private void RebuildMilitaryPanel()
+    {
+        ClearChildren(_militaryBox);
+        if (!DataManager.Instance.IsLoaded)
+            return;
+
+        int playerId = PlayerId();
+        MilitaryManager mil = MilitaryManager.Instance;
+
+        var header = new Label
         {
-            int cap = c.CapitalProvinceId;
-            if (MilitaryManager.Instance.RecruitCommander(playerId, cap))
+            Text = $"{L("PANEL_MILITARY")}: {mil.Armies.Count(a => a.OwnerId == playerId)} {L("MIL_ARMIES")}",
+        };
+        _militaryBox.AddChild(header);
+
+        // Армии игрока.
+        foreach (ArmyData army in mil.Armies)
+        {
+            if (army.OwnerId != playerId)
+                continue;
+            CommanderData? cmd = mil.Commanders.Find(c => c.Id == army.CommanderId);
+            _militaryBox.AddChild(new Label
+            {
+                Text = $"  ⚔ {army.TotalUnits} {L("MIL_UNITS")} @ {DataManager.Instance.World.ProvinceName(army.ProvinceId, LocalizationManager.Instance.Language)}" +
+                       $"  ({(cmd != null ? cmd.Name : "-")})",
+            });
+        }
+
+        AddButton(_militaryBox, L("ACT_RECRUIT_COMMANDER"), () =>
+        {
+            int cap = DataManager.Instance.World.GetCountry(playerId).CapitalProvinceId;
+            if (mil.RecruitCommander(playerId, cap))
                 EventBus.Instance.EmitUINotification(L("MSG_COMMANDER_RECRUITED"));
             else
                 EventBus.Instance.EmitUINotification(L("MSG_COMMANDER_FAIL"));
-            RebuildPlayerPanel();
+            RebuildMilitaryPanel();
         });
-
-        // Список командиров.
-        foreach (CommanderData cmd in MilitaryManager.Instance.Commanders)
-        {
-            if (cmd.OwnerId == playerId)
-                _playerBox.AddChild(new Label { Text = $"  ◆ {cmd.Name} (skill {cmd.Skill:0})" });
-        }
     }
 
     // --- Панель целевой страны ------------------------------------------------

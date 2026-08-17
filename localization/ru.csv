@@ -157,3 +157,6 @@ MSG_COLONIZE_FAIL,Нельзя колонизировать эту провин�
 ACT_RECRUIT_COMMANDER,Нанять командира
 MSG_COMMANDER_RECRUITED,Командир нанят
 MSG_COMMANDER_FAIL,Нельзя нанять командира
+PANEL_MILITARY,Армия
+MIL_ARMIES,армий
+MIL_UNITS,отрядов

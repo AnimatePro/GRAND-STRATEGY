@@ -109,9 +109,9 @@ public partial class GameRoot : Node
         _minimap = new Minimap();
         _minimap.SetAnchorsPreset(Control.LayoutPreset.BottomRight);
         _minimap.OffsetLeft = -260;
-        _minimap.OffsetTop = -130;
+        _minimap.OffsetTop = -178;
         _minimap.OffsetRight = -8;
-        _minimap.OffsetBottom = -8;
+        _minimap.OffsetBottom = -52;
         _uiRoot.AddChild(_minimap);
         _minimap.Initialize(_mapRenderer, _camera);
 
