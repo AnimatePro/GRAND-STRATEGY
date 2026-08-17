@@ -47,14 +47,20 @@ public static class WorldDataLoader
         LoadCultures(world);
 
         // --- Страны ---
-        // Лидеры (реальные главы государств на дату сценария).
-        var leaderByCode = new Dictionary<string, string>(StringComparer.Ordinal);
+        // Лидеры по 4 эпохам (реальные главы государств).
+        var leader2024 = new Dictionary<string, string>(StringComparer.Ordinal);
+        var leader1936 = new Dictionary<string, string>(StringComparer.Ordinal);
+        var leader1914 = new Dictionary<string, string>(StringComparer.Ordinal);
+        var leader1815 = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/leaders.csv"))
         {
             string code = CsvTableLoader.Str(row, "code");
-            string leader = CsvTableLoader.Str(row, "leader");
-            if (code.Length > 0 && leader.Length > 0)
-                leaderByCode[code] = leader;
+            if (code.Length == 0)
+                continue;
+            leader2024[code] = CsvTableLoader.Str(row, "leader_2024");
+            leader1936[code] = CsvTableLoader.Str(row, "leader_1936");
+            leader1914[code] = CsvTableLoader.Str(row, "leader_1914");
+            leader1815[code] = CsvTableLoader.Str(row, "leader_1815");
         }
 
         world.Countries = new CountryData[dto.Countries.Count];
@@ -78,7 +84,10 @@ public static class WorldDataLoader
                 Treasury = cdto.Treasury,
                 StateReligionId = cdto.ReligionId,
                 PrimaryCultureId = cdto.CultureId,
-                LeaderName = leaderByCode.TryGetValue(cdto.Code, out string? l) ? l : string.Empty,
+                Leader2024 = leader2024.TryGetValue(cdto.Code, out string? l24) ? l24 : string.Empty,
+                Leader1936 = leader1936.TryGetValue(cdto.Code, out string? l36) ? l36 : string.Empty,
+                Leader1914 = leader1914.TryGetValue(cdto.Code, out string? l14) ? l14 : string.Empty,
+                Leader1815 = leader1815.TryGetValue(cdto.Code, out string? l15) ? l15 : string.Empty,
             };
             world.Countries[cdto.Id] = country;
             world.CountryCodeToId[cdto.Code] = cdto.Id;

@@ -40,7 +40,19 @@ public sealed class CountryData
 
     public int StateReligionId;   // государственная религия (индекс в WorldData.Religions)
     public int PrimaryCultureId;  // основная культура (индекс в WorldData.Cultures)
-    public string LeaderName = string.Empty; // реальный лидер/глава государства на дату сценария
+    public string Leader2024 = string.Empty; // реальный глава государства (2024)
+    public string Leader1936 = string.Empty; // межвоенный лидер (1936)
+    public string Leader1914 = string.Empty; // лидер начала ПМВ (1914)
+    public string Leader1815 = string.Empty; // лидер пост-наполеоновской эпохи (1815)
+
+    /// <summary>Лидер страны на заданный год сценария.</summary>
+    public string LeaderForYear(int year)
+    {
+        if (year >= 2000) return Leader2024;
+        if (year >= 1918) return Leader1936;
+        if (year >= 1900) return Leader1914;
+        return Leader1815;
+    }
 
     /// <summary>Отношения с другими странами: countryId -> [-100..100].</summary>
     public Dictionary<int, float> Relations = new();

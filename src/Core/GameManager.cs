@@ -60,6 +60,7 @@ public partial class GameManager : Node
         EconomyManager.Instance.Reset();
         DiplomacyManager.Instance.Reset();
         MilitaryManager.Instance.SetSeed(options.Seed);
+        MilitaryManager.Instance.LoadGenerals();
         EventManager.Instance.SetSeed(options.Seed);
         AIDirector.Instance.SetSeed(options.Seed);
         AIDirector.Instance.Reset();

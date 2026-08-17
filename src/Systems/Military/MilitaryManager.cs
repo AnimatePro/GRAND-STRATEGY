@@ -54,7 +54,39 @@ public partial class MilitaryManager : Node
     /// <summary>Множество юнитов для конкретного года (для тестов/прогноза).</summary>
     public static UnitTypeData[] UnitsForYear(int year) => year >= 1900 ? ModernUnits : ClassicUnits;
 
-    // --- Командиры по эпохам ---
+    // --- Реальные генералы по странам и эпохам (data/generals.csv) ---
+    private readonly Dictionary<string, List<string>> _generalsByCode = new(StringComparer.Ordinal);
+
+    /// <summary>Загрузка реальных генералов; вызывается при загрузке данных.</summary>
+    public void LoadGenerals()
+    {
+        _generalsByCode.Clear();
+        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/generals.csv"))
+        {
+            string code = CsvTableLoader.Str(row, "code");
+            string era = CsvTableLoader.Str(row, "era");
+            string generals = CsvTableLoader.Str(row, "generals");
+            if (code.Length == 0 || generals.Length == 0)
+                continue;
+            string key = code + ":" + era;
+            var names = new List<string>();
+            foreach (string n in generals.Split(';'))
+                if (!string.IsNullOrWhiteSpace(n))
+                    names.Add(n.Trim());
+            _generalsByCode[key] = names;
+        }
+    }
+
+    /// <summary>Эпоха для текущего года (ключ, совпадающий с generals.csv).</summary>
+    private static string EraForYear(int year)
+    {
+        if (year >= 2000) return "2024";
+        if (year >= 1918) return "1936";
+        if (year >= 1900) return "1914";
+        return "1815";
+    }
+
+    // Фолбэк-пулы (если для страны нет реального генерала в эпохе).
     private static readonly string[] ClassicCommanders =
     {
         "Napoleon", "Wellington", "Kutuzov", "Blucher", "Suworow", "Nelson", "Ney", "Bagration",
@@ -171,12 +203,25 @@ public partial class MilitaryManager : Node
 
         c.Treasury -= cost;
         var rng = new Rng(_seed + _nextCommanderId * 7919L + TimeManager.Instance.CurrentTurn);
-        string[] pool = TimeManager.Instance.CurrentYear >= 1900 ? ModernCommanders : ClassicCommanders;
+
+        // Реальный генерал страны в текущей эпохе; иначе — фолбэк-пул эпохи.
+        string name;
+        string key = c.Code + ":" + EraForYear(TimeManager.Instance.CurrentYear);
+        if (_generalsByCode.TryGetValue(key, out List<string>? countryGenerals) && countryGenerals.Count > 0)
+        {
+            name = countryGenerals[rng.NextInt(0, countryGenerals.Count - 1)];
+        }
+        else
+        {
+            string[] pool = TimeManager.Instance.CurrentYear >= 1900 ? ModernCommanders : ClassicCommanders;
+            name = pool[rng.NextInt(0, pool.Length - 1)];
+        }
+
         var commander = new CommanderData
         {
             Id = _nextCommanderId++,
             OwnerId = ownerId,
-            Name = pool[rng.NextInt(0, pool.Length - 1)],
+            Name = name,
             Skill = rng.NextInt(1, 5),
         };
         Commanders.Add(commander);
@@ -325,21 +370,111 @@ public partial class MilitaryManager : Node
         WorldData world = DataManager.Instance.World;
         var rng = new Rng(_seed + TimeManager.Instance.CurrentTurn);
 
-        // 1. Движение: каждый стек на 1 провинцию к цели.
+        // 1. Морской перехват и движение (десанты атакуются вражескими флотами).
         foreach (ArmyData army in Armies)
             MoveOneStep(world, army);
 
-        // 2. Бой: враждебные армии в одной провинции.
+        // 2. Бой: враждебные армии в одной провинции (в т.ч. флоты).
         ResolveBattles(world, rng);
 
-        // 3. Оккупация.
+        // 3. Морские сражения: вражеские флоты в соседних прибрежных провинциях.
+        ResolveNavalBattles(world, rng);
+
+        // 4. Оккупация.
         ApplyOccupation(world);
 
-        // 4. Снабжение и истощение.
+        // 5. Снабжение и истощение.
         ApplySupply(world);
 
-        // 5. Удаление уничтоженных армий.
+        // 6. Удаление уничтоженных армий.
         Armies.RemoveAll(a => a.TotalUnits <= 0);
+    }
+
+    /// <summary>Флоты противников в смежных прибрежных провинциях вступают в морской бой.</summary>
+    private void ResolveNavalBattles(WorldData world, Rng rng)
+    {
+        var fleets = new List<ArmyData>();
+        foreach (ArmyData army in Armies)
+        {
+            if (IsFleet(army))
+                fleets.Add(army);
+        }
+
+        for (int i = 0; i < fleets.Count; i++)
+        {
+            for (int j = i + 1; j < fleets.Count; j++)
+            {
+                ArmyData a = fleets[i];
+                ArmyData b = fleets[j];
+                if (a.OwnerId == b.OwnerId)
+                    continue;
+                if (!DiplomacyManager.Instance.AreAtWar(a.OwnerId, b.OwnerId))
+                    continue;
+                if (!ProvincesAdjacentOrCoastal(world, a.ProvinceId, b.ProvinceId))
+                    continue;
+                ResolveNavalCombat(world, a, b);
+            }
+        }
+    }
+
+    /// <summary>Морской бой: участвуют только флот и авиация (ПВО/пехота — слабоэффективны в море).</summary>
+    private void ResolveNavalCombat(WorldData world, ArmyData a, ArmyData b)
+    {
+        double aP = RolePower(a, UnitRole.Navy) * 1.0
+            + RolePower(a, UnitRole.AirForce) * 0.8
+            + RolePower(a, UnitRole.Drone) * 0.4;
+        double bP = RolePower(b, UnitRole.Navy) * 1.0
+            + RolePower(b, UnitRole.AirForce) * 0.8
+            + RolePower(b, UnitRole.Drone) * 0.4;
+
+        double total = aP + bP;
+        if (total <= 0)
+            return;
+
+        double aWin = aP / total;
+        // Потери преимущественно в кораблях/авиации.
+        ApplyRoleCasualties(a, aWin < 0.5 ? (1.0 - aWin) * 2.0 * 0.3 : 0.1);
+        ApplyRoleCasualties(b, aWin > 0.5 ? aWin * 2.0 * 0.3 : 0.1);
+
+        a.Morale = Mathf.Clamp(a.Morale - 0.1f, 0f, 1f);
+        b.Morale = Mathf.Clamp(b.Morale - 0.1f, 0f, 1f);
+
+        WarData? war = DiplomacyManager.Instance.FindWar(a.OwnerId, b.OwnerId);
+        if (war != null)
+            war.WarScore = Mathf.Clamp((float)(war.WarScore + (aWin - 0.5) * 1.5), -100f, 100f);
+    }
+
+    /// <summary>Потери в роли юнита (доля потерь применяется к морским/воздушным юнитам).</summary>
+    private static void ApplyRoleCasualties(ArmyData army, double lossShare)
+    {
+        lossShare = Math.Clamp(lossShare, 0.0, 0.8);
+        var keys = new List<int>(army.UnitCounts.Keys);
+        foreach (int k in keys)
+        {
+            if (k < 0 || k >= UnitTypes.Length)
+                continue;
+            UnitRole role = UnitTypes[k].Role;
+            if (role is UnitRole.Navy or UnitRole.AirForce or UnitRole.Drone)
+            {
+                army.UnitCounts[k] = (int)(army.UnitCounts[k] * (1.0 - lossShare));
+                if (army.UnitCounts[k] <= 0)
+                    army.UnitCounts.Remove(k);
+            }
+        }
+    }
+
+    /// <summary>Армия считается флотом, если большинство её силы — флот.</summary>
+    private static bool IsFleet(ArmyData army) =>
+        RolePower(army, UnitRole.Navy) > RolePower(army, UnitRole.Infantry) + RolePower(army, UnitRole.Mobile);
+
+    /// <summary>Две провинции «соседствуют по морю», если обе прибрежные (флоты могут сойтись).</summary>
+    private static bool ProvincesAdjacentOrCoastal(WorldData world, int pa, int pb)
+    {
+        ProvinceData a = world.GetProvince(pa);
+        ProvinceData b = world.GetProvince(pb);
+        if (System.Array.IndexOf(a.NeighborIds, pb) >= 0)
+            return true;
+        return a.IsCoastal && b.IsCoastal;
     }
 
     private void MoveOneStep(WorldData world, ArmyData army)
@@ -364,11 +499,47 @@ public partial class MilitaryManager : Node
         // Морской переход = цель не является сухопутным соседом (переброска по морю).
         bool isSeaJump = System.Array.IndexOf(world.GetProvince(army.ProvinceId).NeighborIds, next) < 0;
 
+        // Морской перехват: вражеские флоты атакуют десант при переправе.
+        if (isSeaJump)
+            ApplyNavalInterception(world, army);
+
         army.ProvinceId = next;
         army.MoveOrder.RemoveAt(0);
 
         if (isSeaJump)
             army.NavalLandingTurns = 2; // штраф десанта на 2 хода
+    }
+
+    /// <summary>
+    /// Вражеские флоты в прибрежных провинциях перехватывают морской десант.
+    /// Собственный эскорт (флот атакующего) снижает потери.
+    /// </summary>
+    private void ApplyNavalInterception(WorldData world, ArmyData army)
+    {
+        double enemyNaval = 0.0;
+        foreach (ArmyData other in Armies)
+        {
+            if (other.OwnerId == army.OwnerId || other.Id == army.Id)
+                continue;
+            if (!DiplomacyManager.Instance.AreAtWar(army.OwnerId, other.OwnerId))
+                continue;
+            ProvinceData op = world.GetProvince(other.ProvinceId);
+            if (!op.IsCoastal)
+                continue;
+            enemyNaval += RolePower(other, UnitRole.Navy) + RolePower(other, UnitRole.AirForce) * 0.5;
+        }
+
+        if (enemyNaval <= 0)
+            return;
+
+        double escort = RolePower(army, UnitRole.Navy) * 3.0;
+        double defense = escort + army.TotalUnits * 0.2;
+        double ratio = enemyNaval / Math.Max(defense, 1.0);
+        double lossShare = Mathf.Clamp((float)ratio, 0f, 0.5f);
+        ApplyCasualties(army, (int)(army.TotalUnits * lossShare));
+
+        if (lossShare > 0.02)
+            LogService.Instance.Info($"Naval interception: army {army.Id} lost {(lossShare * 100):0}% crossing sea");
     }
 
     /// <summary>Тиков на переход в соседнюю провинцию.</summary>
