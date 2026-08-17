@@ -83,6 +83,8 @@ public static class WorldDataLoader
             province.Terrain = (Terrain)pdto.Terrain;
             province.Climate = (Climate)pdto.Climate;
             province.AreaKm2 = pdto.AreaKm2;
+            province.Development = pdto.Development;
+            province.Infrastructure = pdto.Infrastructure;
             province.Centroid = new Vector2(pdto.CentroidX, pdto.CentroidY);
             province.NeighborIds = pdto.NeighborIds.ToArray();
             // Ресурсы: явные из данных, иначе детерминированный fallback по ландшафту.

@@ -45,6 +45,8 @@ public sealed class ProvinceDto
     public int Terrain;
     public int Climate;
     public float AreaKm2;
+    public float Development;
+    public float Infrastructure;
     public float CentroidX;
     public float CentroidY;
     public long TotalPopulation;

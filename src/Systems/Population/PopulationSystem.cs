@@ -12,7 +12,8 @@ namespace GrandStrategy.Systems.Population;
 public static class PopulationSystem
 {
     // Годовые коэффициенты (настраиваются в data, здесь fallback).
-    private const double BirthRate = 0.018;         // рождений на женщину 18-59 в год
+    // 0.056 рождений/женщина/год ≈ TFR 2.0 (замещение; при смертности ~1.6%/год население стабильно).
+    private const double BirthRate = 0.056;
     private const double ChildMortality = 0.006;
     private const double TeenMortality = 0.0015;
     private const double AdultMortality = 0.007;

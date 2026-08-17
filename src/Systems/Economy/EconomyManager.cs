@@ -314,7 +314,8 @@ public partial class EconomyManager : Node
             expenses += discretionary * eco.Spending.Security;
 
             eco.BudgetExpenses = expenses;
-            eco.Deficit = Math.Max(expenses - revenue, 0.0);
+            // Знаковый баланс: >0 = дефицит, <0 = профицит (профицит гасит долг/пополняет казну).
+            eco.Deficit = expenses - revenue;
         }
     }
 
@@ -327,7 +328,7 @@ public partial class EconomyManager : Node
             CountryEconomy eco = Economy.Countries[c];
             // Денежная эмиссия (финансирование дефицита) + перегрев спроса.
             double baseInflation = world.Countries[c].Inflation;
-            double moneyPrinting = (eco.Deficit / Math.Max(eco.Gdp, 1.0)) * EconomyConstants.MoneyPrintingInflationFactor;
+            double moneyPrinting = (Math.Max(eco.Deficit, 0.0) / Math.Max(eco.Gdp, 1.0)) * EconomyConstants.MoneyPrintingInflationFactor;
             double demandPull = 0.0;
             for (int g = 0; g < world.GoodCount; g++)
                 demandPull += Math.Max(eco.Demand[g] - eco.Supply[g], 0.0) / Math.Max(eco.Supply[g], 1.0);
@@ -348,10 +349,8 @@ public partial class EconomyManager : Node
             CountryEconomy eco = Economy.Countries[c];
             CountryData country = world.Countries[c];
 
-            if (eco.Deficit > 0)
-                eco.Debt += eco.Deficit;
-            else
-                eco.Debt = Math.Max(eco.Debt + eco.Deficit, 0.0); // профицит гасит долг
+            // Дефицит наращивает долг, профицит гасит (Deficit — знаковый).
+            eco.Debt = Math.Max(eco.Debt + eco.Deficit, 0.0);
 
             // Процентная ставка растёт с долгом.
             double debtRatio = eco.Debt / Math.Max(eco.Gdp, 1.0);

@@ -169,10 +169,16 @@ def main():
             "Gdp": gdp,
             "Literacy": 0.5,
             "Urbanization": 0.5,
-            "Treasury": 1000.0,
+            "Treasury": max(gdp * 0.02, 1000.0),
             "Continent": continent,
         })
     print(f"countries: {len(countries)}")
+
+    # ВВП на душу населения (для развития провинций).
+    gdp_pc = {}
+    for c in countries:
+        pop = c["Population"] if c["Population"] > 0 else 1
+        gdp_pc[c["Code"]] = c["Gdp"] / pop
 
     # --- Провинции (admin-1) + растеризация ---
     d1 = json.load(open(ADMIN1, encoding="utf-8"))
@@ -221,6 +227,10 @@ def main():
         name_en = p.get("name_en") or p.get("name") or ""
         name_ru = p.get("name_ru") or name_en
 
+        # Развитие и инфраструктура — из ВВП на душу населения страны.
+        dev = min(max(0.2 + gdp_pc.get(code, 5000.0) / 150000.0, 0.2), 0.95)
+        infra = min(max(0.3 + 0.5 * dev, 0.3), 0.95)
+
         # Растеризация: внешний контур — цвет провинции, дырки — океан (0).
         col = ((pid + 1) & 0xFF, ((pid + 1) >> 8) & 0xFF, ((pid + 1) >> 16) & 0xFF)
         for poly in polygons:
@@ -248,6 +258,8 @@ def main():
             "Terrain": 0,  # Plains
             "Climate": climate_from_lat(lat),
             "AreaKm2": area,
+            "Development": dev,
+            "Infrastructure": infra,
             "CentroidX": cx,
             "CentroidY": cy,
             "TotalPopulation": 0,
