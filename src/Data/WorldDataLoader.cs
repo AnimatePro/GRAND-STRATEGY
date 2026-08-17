@@ -14,7 +14,11 @@ public static class WorldDataLoader
 {
     public const string WorldCachePath = "res://data/cache/world.json";
 
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        IncludeFields = true, // DTO используют публичные поля
+    };
 
     public static WorldData Load(string cachePath = WorldCachePath)
     {
@@ -48,6 +52,7 @@ public static class WorldDataLoader
                 Id = cdto.Id,
                 Code = cdto.Code,
                 NameKey = cdto.NameKey,
+                NameRu = cdto.NameRu,
                 FlagId = cdto.FlagId,
                 Color = ParseColor(cdto.ColorHex),
                 GovernmentType = (GovernmentType)cdto.GovernmentType,
@@ -65,6 +70,8 @@ public static class WorldDataLoader
 
         // --- Провинции ---
         world.Provinces = new ProvinceData[dto.Provinces.Count];
+        world.ProvinceNamesEn = new string[dto.Provinces.Count];
+        world.ProvinceNamesRu = new string[dto.Provinces.Count];
         var split = new long[8];
         foreach (ProvinceDto pdto in dto.Provinces)
         {
@@ -96,10 +103,17 @@ public static class WorldDataLoader
 
             world.Provinces[pdto.Id] = province;
             world.ProvinceIdToIndex[pdto.Id] = pdto.Id;
+            world.ProvinceNamesEn[pdto.Id] = pdto.NameEn;
+            world.ProvinceNamesRu[pdto.Id] = pdto.NameRu;
 
             if (province.OwnerId >= 0)
                 world.Countries[province.OwnerId].OwnedProvinceIds.Add(pdto.Id);
         }
+
+        // Страны без провинций (Антарктида, спорные микротерритории) — неактивны.
+        foreach (CountryData c in world.Countries)
+            if (c != null)
+                c.IsAlive = c.OwnedProvinceIds.Count > 0;
 
         return world;
     }

@@ -55,7 +55,7 @@ public partial class LabelPool : Control
         }
 
         bool showAll = zoom >= LabelMinZoom;
-        Vector2 size = GetViewportRect().Size;
+        Vector2 size = GetViewport().GetVisibleRect().Size;
         Vector2 half = size / (2f * zoom);
         Vector2 center = _camera.Center;
         float minX = center.X - half.X - 40, maxX = center.X + half.X + 40;
@@ -97,9 +97,11 @@ public partial class LabelPool : Control
 
     private string ProvinceLabel(ProvinceData p)
     {
-        // Пока нет названий провинций (приходят из GeoJSON name), показываем id/население.
-        return p.TotalPopulation > 1_000_000
-            ? $"{p.Id} · {p.TotalPopulation / 1_000_000f:0.0}M"
-            : $"{p.Id}";
+        string name = _world!.ProvinceName(p.Id, LocalizationManager.Instance.Language);
+        if (name == p.Id.ToString())
+            name = string.Empty; // нет названия — показываем только население
+        if (p.TotalPopulation > 1_000_000)
+            return name.Length > 0 ? $"{name}" : $"{p.TotalPopulation / 1_000_000f:0.0}M";
+        return name;
     }
 }

@@ -74,7 +74,7 @@ public partial class Minimap : Control
         DrawTextureRect(_texture, new Rect2(Vector2.Zero, Size), false);
 
         // Прямоугольник обзора.
-        Vector2 half = GetViewportRect().Size / (2f * _camera.Zoom);
+        Vector2 half = GetViewport().GetVisibleRect().Size / (2f * _camera.Zoom);
         Vector2 topLeft = _camera.Center - half;
         Vector2 bottomRight = _camera.Center + half;
         var rect = new Rect2(

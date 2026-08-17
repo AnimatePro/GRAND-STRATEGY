@@ -23,7 +23,11 @@ public sealed class ImportResult
 
 public static class WorldImporter
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        IncludeFields = true, // DTO используют публичные поля
+    };
 
     public static ImportResult Import(string admin0Json, string admin1Json, string? populationCsv = null)
     {

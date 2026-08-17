@@ -20,6 +20,7 @@ public sealed class CountryDto
     public int Id;
     public string Code = string.Empty;
     public string NameKey = string.Empty;
+    public string NameRu = string.Empty;
     public string FlagId = string.Empty;
     public string ColorHex = "#888888";
     public int GovernmentType;
@@ -36,6 +37,8 @@ public sealed class ProvinceDto
 {
     public int Id;
     public string OwnerCode = string.Empty;
+    public string NameEn = string.Empty;
+    public string NameRu = string.Empty;
     public int RegionId = -1;
     public int ContinentId = -1;
     public bool IsCoastal;

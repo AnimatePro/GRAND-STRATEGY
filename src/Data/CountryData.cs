@@ -11,7 +11,8 @@ public sealed class CountryData
 {
     public int Id;
     public string Code = string.Empty;      // ISO 3166-1 alpha-3, напр. "RUS"
-    public string NameKey = string.Empty;   // ключ локализации
+    public string NameKey = string.Empty;   // английское название
+    public string NameRu = string.Empty;    // русское название
     public string FlagId = string.Empty;    // идентификатор флага (assets)
     public Color Color = Colors.Gray;
 

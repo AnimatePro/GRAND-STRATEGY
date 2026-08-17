@@ -11,3 +11,6 @@ obj/
 *.tmp
 *.log
 export_presets.cfg.bak
+
+# Исходные GeoJSON Natural Earth (скачиваются импортёром; кэш в data/cache коммитится)
+data/source/

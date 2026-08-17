@@ -56,6 +56,7 @@ public partial class SaveManager : Node
     {
         WriteIndented = true,
         PropertyNameCaseInsensitive = true,
+        IncludeFields = true, // DTO сохранения используют публичные поля
     };
 
     public override void _Ready()

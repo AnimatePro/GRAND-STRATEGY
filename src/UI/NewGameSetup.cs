@@ -91,7 +91,10 @@ public partial class NewGameSetup : Control
         foreach (CountryData c in DataManager.Instance.World.Countries)
             if (c != null && c.IsAlive)
                 list.Add(c);
-        list.Sort((a, b) => string.Compare(a.NameKey, b.NameKey, StringComparison.Ordinal));
+        string lang = LocalizationManager.Instance.Language;
+        list.Sort((a, b) => string.Compare(
+            DataManager.Instance.World.CountryName(a, lang),
+            DataManager.Instance.World.CountryName(b, lang), StringComparison.Ordinal));
         return list.ToArray();
     }
 
@@ -99,10 +102,13 @@ public partial class NewGameSetup : Control
     {
         _countryDropdown.Clear();
         filter = filter.Trim().ToLowerInvariant();
+        string lang = LocalizationManager.Instance.Language;
         foreach (CountryData c in _countries)
         {
-            string label = $"{c.NameKey} ({c.Code})";
+            string name = DataManager.Instance.World.CountryName(c, lang);
+            string label = $"{name} ({c.Code})";
             if (filter.Length == 0 ||
+                name.ToLowerInvariant().Contains(filter) ||
                 c.NameKey.ToLowerInvariant().Contains(filter) ||
                 c.Code.ToLowerInvariant().Contains(filter))
             {

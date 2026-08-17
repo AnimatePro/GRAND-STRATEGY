@@ -30,7 +30,7 @@ public sealed class GeoFeature
 /// </summary>
 public static class GeoProjection
 {
-    public const float Scale = 8f; // пикселей на градус
+    public const float Scale = 16f; // пикселей на градус (совпадает с tools/import_world.py)
 
     public static Vector2 ToMap(float lon, float lat)
     {

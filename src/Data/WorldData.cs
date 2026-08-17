@@ -17,6 +17,10 @@ public sealed class WorldData
     public GovernmentData[] Governments = System.Array.Empty<GovernmentData>();
     public LawData[] Laws = System.Array.Empty<LawData>();
 
+    /// <summary>Названия провинций (индекс = id провинции), EN и RU.</summary>
+    public string[] ProvinceNamesEn = System.Array.Empty<string>();
+    public string[] ProvinceNamesRu = System.Array.Empty<string>();
+
     /// <summary>Провинция id -> индекс в Provinces (для O(1) доступа).</summary>
     public Dictionary<int, int> ProvinceIdToIndex = new();
 
@@ -76,8 +80,33 @@ public sealed class WorldData
     public GoodData GetGood(int id) =>
         id >= 0 && id < Goods.Length ? Goods[id] : default;
 
+    /// <summary>Название провинции на текущем языке (fallback — EN, затем id).</summary>
+    public string ProvinceName(int provinceId, string language = "en")
+    {
+        if (provinceId >= 0 && provinceId < ProvinceNamesEn.Length)
+        {
+            if (language == "ru" && !string.IsNullOrEmpty(ProvinceNamesRu[provinceId]))
+                return ProvinceNamesRu[provinceId];
+            if (!string.IsNullOrEmpty(ProvinceNamesEn[provinceId]))
+                return ProvinceNamesEn[provinceId];
+        }
+        return provinceId.ToString();
+    }
+
     public int CountryByCode(string code) =>
         CountryCodeToId.TryGetValue(code, out int id) ? id : -1;
+
+    /// <summary>Название страны на указанном языке (fallback — EN, затем код).</summary>
+    public string CountryName(CountryData country, string language = "en")
+    {
+        if (country == null)
+            return string.Empty;
+        if (language == "ru" && !string.IsNullOrEmpty(country.NameRu))
+            return country.NameRu;
+        if (!string.IsNullOrEmpty(country.NameKey))
+            return country.NameKey;
+        return country.Code;
+    }
 
     public int ProvinceCount => Provinces.Length;
     public int CountryCount => Countries.Length;

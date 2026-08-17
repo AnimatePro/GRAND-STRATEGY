@@ -239,14 +239,16 @@ public partial class UIManager : Node
         WorldData world = DataManager.Instance.World;
         ProvinceData p = world.GetProvince(_selectedProvince);
         int playerId = PlayerId();
+        string lang = LocalizationManager.Instance.Language;
         string ownerName = world.TryGetCountry(p.OwnerId, out CountryData owner)
-            ? LocalizationManager.Instance.Get(owner.NameKey)
+            ? world.CountryName(owner, lang)
             : LocalizationManager.Instance.Get("unclaimed");
+        string provName = world.ProvinceName(p.Id, lang);
 
         var info = new Label
         {
             Text =
-                $"Province #{p.Id}  ({ownerName})\n" +
+                $"{provName} ({ownerName})\n" +
                 $"Pop: {p.TotalPopulation:N0}\n" +
                 $"  Adults: {p.MaleAdults + p.FemaleAdults:N0} (M {p.MaleAdults:N0} / F {p.FemaleAdults:N0})\n" +
                 $"  Children: {p.MaleChildren + p.FemaleChildren:N0}  Seniors: {p.MaleSeniors + p.FemaleSeniors:N0}\n" +
@@ -316,7 +318,7 @@ public partial class UIManager : Node
         var info = new Label
         {
             Text =
-                $"{c.NameKey} ({c.Code})\n" +
+                $"{world.CountryName(c, LocalizationManager.Instance.Language)} ({c.Code})\n" +
                 $"Gov: {c.GovernmentType}  Ideology: {c.Ideology}\n" +
                 $"GDP: {c.Gdp:N0}  Pop: {c.Population:N0}\n" +
                 $"Debt: {c.Debt:N0}  Inflation: {eco.Inflation * 100:0.0}%\n" +
@@ -362,7 +364,7 @@ public partial class UIManager : Node
         var info = new Label
         {
             Text =
-                $"{t.NameKey} ({t.Code})\n" +
+                $"{world.CountryName(t, LocalizationManager.Instance.Language)} ({t.Code})\n" +
                 $"Relation: {t.RelationWith(playerId):0}\n" +
                 $"Status: {DiplomacyManager.Instance.GetStatus(playerId, _targetCountry)}\n" +
                 $"Trade: {DiplomacyManager.Instance.GetTradeAgreement(playerId, _targetCountry)}\n" +
