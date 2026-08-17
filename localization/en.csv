@@ -176,3 +176,12 @@ PANEL_BUILD,Build
 MACRO_HINT,Building selected — click provinces on the map to build
 MACRO_CHOOSE,Choose a building, then click provinces
 MACRO_CANCEL,Cancel building
+REL,rel
+REL_IMPROVE,improving relations
+REL_INSULT,insult
+REL_ALLIANCE,alliance
+REL_WAR,war declared
+REL_PEACE,peace treaty
+REL_TRADE,trade
+REL_EVENT,event
+REL_EMBARGO,embargo

@@ -125,10 +125,46 @@ public partial class AIDirector : Node
                 break;
         }
 
-        // 4. Общее: армия, строительство, законы (все профили).
+        // 4. Общее: армия, строительство, законы, дип.поза (все профили).
         ConsiderRecruitment(world, countryId, threat);
         ConsiderConstruction(world, countryId, rng);
         ConsiderLaws(world, countryId);
+        ConsiderDiplomaticStance(world, countryId, rng);
+    }
+
+    /// <summary>Дипломатическая поза: эмбарго заклятым врагам, оскорбления соперникам, разрядка с угрозой.</summary>
+    private void ConsiderDiplomaticStance(WorldData world, int countryId, Rng rng)
+    {
+        CountryData country = world.Countries[countryId];
+
+        foreach (int pid in country.OwnedProvinceIds)
+        {
+            ProvinceData p = world.GetProvince(pid);
+            foreach (int nid in p.NeighborIds)
+            {
+                ProvinceData n = world.GetProvince(nid);
+                if (n.OwnerId < 0 || n.OwnerId == countryId)
+                    continue;
+                int other = n.OwnerId;
+                if (DiplomacyManager.Instance.AreAtWar(countryId, other))
+                    continue;
+
+                float rel = country.RelationWith(other);
+
+                // Заклятый враг -> эмбарго (с ухудшением отношений).
+                if (rel < -60 && !country.TradePolicy.Embargoed.Contains(other) && rng.Chance(0.3))
+                {
+                    country.TradePolicy.Embargoed.Add(other);
+                    DiplomacyManager.Instance.ChangeRelation(countryId, other, -5f, "REL_EMBARGO");
+                }
+                // Соперник (не враг) -> агрессивные профили оскорбляют (демонстрация силы).
+                else if (rel < -30 && rng.Chance(0.2) &&
+                         country.AiProfile is AiProfile.Militarist or AiProfile.Expansionist or AiProfile.Opportunist)
+                {
+                    DiplomacyManager.Instance.Insult(countryId, other);
+                }
+            }
+        }
     }
 
     // ===================== УГРОЗА =====================

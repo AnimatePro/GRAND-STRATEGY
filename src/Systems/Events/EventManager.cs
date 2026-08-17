@@ -4,6 +4,7 @@ using System.Text.Json;
 using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
+using GrandStrategy.Systems.Diplomacy;
 using GrandStrategy.Utils;
 using FileAccess = Godot.FileAccess; // implicit System.IO конфликтует с Godot.FileAccess
 
@@ -149,7 +150,7 @@ public partial class EventManager : Node
                 break;
             case "change_relations":
                 if (int.TryParse(fx.Target, out int other))
-                    country.SetRelation(other, country.RelationWith(other) + (float)fx.Value);
+                    DiplomacyManager.Instance.ChangeRelation(countryId, other, (float)fx.Value, "REL_EVENT");
                 break;
             case "add_modifier":
                 var mod = new Modifier

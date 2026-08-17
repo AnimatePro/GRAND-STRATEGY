@@ -130,8 +130,8 @@ public partial class DiplomacyManager : Node
         SetStatus(attackerId, defenderId, DiplomacyStatus.War);
 
         WorldData world = DataManager.Instance.World;
-        world.Countries[attackerId].SetRelation(defenderId, -100f);
-        world.Countries[defenderId].SetRelation(attackerId, -100f);
+        ChangeRelation(attackerId, defenderId, -100f, "REL_WAR");
+        ChangeRelation(defenderId, attackerId, -100f, "REL_WAR");
 
         // Коалиции: союзники защищающегося встают на его сторону, союзники атакующего — на его.
         for (int c = 0; c < world.CountryCount; c++)
@@ -145,13 +145,13 @@ public partial class DiplomacyManager : Node
             {
                 war.AllyIds.Add(c);
                 SetStatus(c, attackerId, DiplomacyStatus.War);
-                world.Countries[c].SetRelation(attackerId, -100f);
+                ChangeRelation(c, attackerId, -100f, "REL_WAR");
             }
             else if (GetStatus(c, attackerId) == DiplomacyStatus.Alliance && !AreAtWar(c, defenderId))
             {
                 war.AttackerAllies.Add(c);
                 SetStatus(c, defenderId, DiplomacyStatus.War);
-                world.Countries[c].SetRelation(defenderId, -100f);
+                ChangeRelation(c, defenderId, -100f, "REL_WAR");
             }
         }
 
@@ -244,8 +244,8 @@ public partial class DiplomacyManager : Node
             SetStatus(war.DefenderId, ally, DiplomacyStatus.Truce);
         }
 
-        ca.SetRelation(b, ca.RelationWith(b) + 20f);
-        cb.SetRelation(a, cb.RelationWith(a) + 20f);
+        ChangeRelation(a, b, 20f, "REL_PEACE");
+        ChangeRelation(b, a, 20f, "REL_PEACE");
         ca.WarExhaustion = 0f;
         cb.WarExhaustion = 0f;
 
@@ -255,16 +255,51 @@ public partial class DiplomacyManager : Node
         return true;
     }
 
-    public void ImproveRelations(int a, int b, float amount = 5f)
+    // --- Отношения (с причиной) ---------------------------------------------
+
+    /// <summary>
+    /// Единая точка изменения отношений. Отношения НЕ меняются сами по себе — только здесь,
+    /// с явной причиной. Каждое изменение логируется и показывается игроку (если он участник).
+    /// </summary>
+    public void ChangeRelation(int from, int to, float delta, string reason)
     {
+        if (from == to)
+            return;
         WorldData world = DataManager.Instance.World;
-        world.Countries[a].SetRelation(b, world.Countries[a].RelationWith(b) + amount);
+        CountryData cf = world.Countries[from];
+        CountryData ct = world.Countries[to];
+        if (cf == null || ct == null || !cf.IsAlive || !ct.IsAlive)
+            return;
+
+        float before = cf.RelationWith(to);
+        float after = Mathf.Clamp(before + delta, -100f, 100f);
+        cf.Relations[to] = after;
+
+        if (Math.Abs(after - before) < 0.5f)
+            return; // нет заметного изменения — не спамим
+
+        string dir = after > before ? "+" : "";
+        LogService.Instance.Info($"Relations: {cf.Code} -> {ct.Code} {dir}{after - before:0} ({reason})");
+
+        // Показываем игроку, если он — одна из сторон.
+        int playerId = GameManager.Instance.ActiveOptions?.PlayerCountryId ?? -1;
+        if (from == playerId || to == playerId)
+        {
+            string otherName = world.CountryName(from == playerId ? ct : cf, LocalizationManager.Instance.Language);
+            EventBus.Instance.EmitUINotification(
+                $"{otherName}: {(after > before ? "+" : "")}{after - before:0} {LocalizationManager.Instance.Get("REL")} ({LocalizationManager.Instance.Get(reason)})");
+        }
+        EventBus.Instance.EmitDiplomacyUpdated();
+    }
+
+    public void ImproveRelations(int a, int b, float amount = 5f, string reason = "REL_IMPROVE")
+    {
+        ChangeRelation(a, b, amount, reason);
     }
 
     public void Insult(int a, int b)
     {
-        WorldData world = DataManager.Instance.World;
-        world.Countries[a].SetRelation(b, world.Countries[a].RelationWith(b) - 10f);
+        ChangeRelation(a, b, -10f, "REL_INSULT");
     }
 
     public bool FormAlliance(int a, int b)
@@ -272,8 +307,8 @@ public partial class DiplomacyManager : Node
         if (AreAtWar(a, b) || GetStatus(a, b) == DiplomacyStatus.Alliance)
             return false;
         SetStatus(a, b, DiplomacyStatus.Alliance);
-        ImproveRelations(a, b, 25f);
-        ImproveRelations(b, a, 25f);
+        ImproveRelations(a, b, 25f, "REL_ALLIANCE");
+        ImproveRelations(b, a, 25f, "REL_ALLIANCE");
         EventBus.Instance.EmitDiplomacyUpdated();
         return true;
     }
@@ -320,25 +355,11 @@ public partial class DiplomacyManager : Node
 
     public void Tick()
     {
-        // Дрейф отношений к нейтрали.
-        WorldData world = DataManager.Instance.World;
-        for (int a = 0; a < world.CountryCount; a++)
-        {
-            CountryData ca = world.Countries[a];
-            if (ca == null || !ca.IsAlive)
-                continue;
-            var keys = new List<int>(ca.Relations.Keys);
-            foreach (int b in keys)
-            {
-                if (AreAtWar(a, b))
-                    continue; // воюющие отношения не дрейфуют
-                float v = ca.RelationWith(b);
-                float drift = v > 0 ? 0.01f : v < 0 ? -0.01f : 0f;
-                ca.SetRelation(b, v - drift);
-            }
-        }
+        // Отношения НЕ дрейфуют сами по себе: они меняются только через ChangeRelation
+        // с явной причиной (война/мир/альянс/оскорбление/событие/торговля).
 
-        // Военное истощение растёт у воюющих.
+        // Военное истощение растёт у воюющих (это отдельная механика, не отношения).
+        WorldData world = DataManager.Instance.World;
         foreach (WarData w in Wars)
         {
             world.Countries[w.AttackerId].WarExhaustion =

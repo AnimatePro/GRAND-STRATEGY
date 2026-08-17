@@ -101,9 +101,9 @@ public partial class TradeManager : Node
                 economy.Countries[b].BudgetRevenue += value * tariff;
                 economy.Countries[a].BudgetRevenue += value * exportTax;
 
-                // Торговля мягко улучшает отношения.
-                world.Countries[a].SetRelation(b, world.Countries[a].RelationWith(b) + 0.001f);
-                world.Countries[b].SetRelation(a, world.Countries[b].RelationWith(a) + 0.001f);
+                // Торговля мягко улучшает отношения (с причиной).
+                DiplomacyManager.Instance.ChangeRelation(a, b, 0.01f, "REL_TRADE");
+                DiplomacyManager.Instance.ChangeRelation(b, a, 0.01f, "REL_TRADE");
             }
         }
     }

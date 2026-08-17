@@ -176,3 +176,12 @@ PANEL_BUILD,Строительство
 MACRO_HINT,Здание выбрано — кликайте по провинциям, чтобы строить
 MACRO_CHOOSE,Выберите здание, затем кликайте по провинциям
 MACRO_CANCEL,Отменить строительство
+REL,отн
+REL_IMPROVE,улучшение отношений
+REL_INSULT,оскорбление
+REL_ALLIANCE,союз
+REL_WAR,объявление войны
+REL_PEACE,мирный договор
+REL_TRADE,торговля
+REL_EVENT,событие
+REL_EMBARGO,эмбарго
