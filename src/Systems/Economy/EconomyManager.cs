@@ -5,6 +5,7 @@ using GrandStrategy.Data;
 using GrandStrategy.Systems.Population;
 using GrandStrategy.Systems.Tech;
 using GrandStrategy.Systems.Trade;
+using GrandStrategy.SimCore;
 
 namespace GrandStrategy.Systems.Economy;
 
@@ -234,14 +235,7 @@ public partial class EconomyManager : Node
             for (int g = 0; g < world.GoodCount; g++)
             {
                 GoodData good = world.Goods[g];
-                double supply = Math.Max(eco.Supply[g], 1.0);
-                double demand = eco.Demand[g];
-                double ratio = demand / supply;
-                double factor = Math.Pow(ratio, good.ElasticityDemand);
-                double price = good.BasePrice * factor;
-                eco.Price[g] = Math.Clamp(price,
-                    good.BasePrice * EconomyConstants.MinPriceMult,
-                    good.BasePrice * EconomyConstants.MaxPriceMult);
+                eco.Price[g] = SimFormulas.PriceFor(good.BasePrice, eco.Supply[g], eco.Demand[g], good.ElasticityDemand);
             }
         }
     }
@@ -326,16 +320,11 @@ public partial class EconomyManager : Node
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryEconomy eco = Economy.Countries[c];
-            // Денежная эмиссия (финансирование дефицита) + перегрев спроса.
             double baseInflation = world.Countries[c].Inflation;
-            double moneyPrinting = (Math.Max(eco.Deficit, 0.0) / Math.Max(eco.Gdp, 1.0)) * EconomyConstants.MoneyPrintingInflationFactor;
-            double demandPull = 0.0;
-            for (int g = 0; g < world.GoodCount; g++)
-                demandPull += Math.Max(eco.Demand[g] - eco.Supply[g], 0.0) / Math.Max(eco.Supply[g], 1.0);
-            demandPull = demandPull / Math.Max(world.GoodCount, 1) * EconomyConstants.DemandInflationFactor;
+            double moneyPrinting = SimFormulas.MoneyPrinting(eco.Deficit, eco.Gdp);
+            double demandPull = SimFormulas.DemandPull(eco.Demand, eco.Supply, world.GoodCount);
 
-            double target = baseInflation + moneyPrinting + demandPull;
-            eco.Inflation = Math.Clamp(eco.Inflation + (target - eco.Inflation) * 0.2, -0.05, 3.0);
+            eco.Inflation = SimFormulas.InflationStep(eco.Inflation, baseInflation, moneyPrinting, demandPull);
             world.Countries[c].Inflation = eco.Inflation;
         }
     }
@@ -350,20 +339,16 @@ public partial class EconomyManager : Node
             CountryData country = world.Countries[c];
 
             // Дефицит наращивает долг, профицит гасит (Deficit — знаковый).
-            eco.Debt = Math.Max(eco.Debt + eco.Deficit, 0.0);
+            eco.Debt = SimFormulas.DebtNext(eco.Debt, eco.Deficit);
 
-            // Процентная ставка растёт с долгом.
             double debtRatio = eco.Debt / Math.Max(eco.Gdp, 1.0);
             eco.DebtToGdp = debtRatio;
-            eco.InterestRate = Math.Clamp(
-                country.BaseInterestRate + debtRatio * 0.05 + Math.Max(eco.Inflation, 0) * 0.3,
-                0.001, 0.5);
+            eco.InterestRate = SimFormulas.InterestRate(country.BaseInterestRate, debtRatio, eco.Inflation);
 
-            // Кредитный рейтинг от долговой нагрузки.
-            country.CreditRating = RatingFromDebt(debtRatio);
+            country.CreditRating = (CreditRating)SimFormulas.RatingFromDebt(debtRatio);
 
             // Дефолт: долг > порога ВВП -> списание части, потеря резервов, инфляционный шок.
-            if (debtRatio > EconomyConstants.DefaultDebtToGdp)
+            if (debtRatio > SimFormulas.DefaultDebtToGdp)
             {
                 eco.Debt *= 0.5;
                 eco.Reserves *= 0.5;
@@ -403,17 +388,5 @@ public partial class EconomyManager : Node
             if (world.Goods[g].Category == GoodCategory.Food)
                 return g;
         return -1;
-    }
-
-    private static CreditRating RatingFromDebt(double debtRatio)
-    {
-        if (debtRatio < 0.3) return CreditRating.AAA;
-        if (debtRatio < 0.5) return CreditRating.AA;
-        if (debtRatio < 0.7) return CreditRating.A;
-        if (debtRatio < 0.9) return CreditRating.BBB;
-        if (debtRatio < 1.1) return CreditRating.BB;
-        if (debtRatio < 1.3) return CreditRating.B;
-        if (debtRatio < 1.5) return CreditRating.CCC;
-        return CreditRating.CC;
     }
 }

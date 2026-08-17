@@ -5,6 +5,7 @@ using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Systems.Diplomacy;
 using GrandStrategy.Systems.Tech;
+using GrandStrategy.SimCore;
 using GrandStrategy.Utils;
 
 namespace GrandStrategy.Systems.Military;
@@ -273,7 +274,7 @@ public partial class MilitaryManager : Node
         if (total <= 0)
             return;
 
-        double attackerWin = attackP / total;
+        double attackerWin = SimFormulas.CombatWinChance(attackP, defenseP);
         // Потери доли юнитов.
         ApplyCasualties(a, (int)(a.TotalUnits * (1.0 - attackerWin) * 0.3));
         ApplyCasualties(b, (int)(b.TotalUnits * attackerWin * 0.3));
@@ -297,7 +298,7 @@ public partial class MilitaryManager : Node
         int total = army.TotalUnits;
         if (total <= 0 || casualties <= 0)
             return;
-        double share = Math.Clamp((double)casualties / total, 0.0, 1.0);
+        double share = SimFormulas.CasualtyShare(total, casualties);
         var keys = new List<int>(army.UnitCounts.Keys);
         foreach (int k in keys)
         {

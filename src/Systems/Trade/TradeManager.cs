@@ -5,6 +5,7 @@ using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Systems.Diplomacy;
 using GrandStrategy.Systems.Economy;
+using GrandStrategy.SimCore;
 
 namespace GrandStrategy.Systems.Trade;
 
@@ -127,36 +128,20 @@ public partial class TradeManager : Node
         CountryData cb = world.Countries[b];
 
         double relations = (ca.RelationWith(b) + 100.0) / 200.0; // 0..1
-        double eff = 0.3 + 0.7 * Math.Clamp(relations, 0.0, 1.0);
+        int agreement = cb.TradePolicy.Agreements.TryGetValue(a, out TradeAgreement agree)
+            ? (int)agree : 0;
+        bool sanctioned = ca.TradePolicy.Sanctioned.Contains(b) || cb.TradePolicy.Sanctioned.Contains(a);
 
-        // Торговое соглашение.
-        if (cb.TradePolicy.Agreements.TryGetValue(a, out TradeAgreement agree))
-        {
-            eff *= agree switch
-            {
-                TradeAgreement.FreeTrade => 1.5,
-                TradeAgreement.Preferential => 1.3,
-                TradeAgreement.CustomsUnion => 1.8,
-                TradeAgreement.CommonMarket => 2.0,
-                _ => 1.0,
-            };
-        }
-
-        // Санкции снижают поток.
-        if (ca.TradePolicy.Sanctioned.Contains(b) || cb.TradePolicy.Sanctioned.Contains(a))
-            eff *= 0.4;
-
-        // Расстояние (по столицам).
+        double dist = 0.0;
         int caPro = ca.CapitalProvinceId;
         int cbPro = cb.CapitalProvinceId;
         if (caPro >= 0 && cbPro >= 0)
         {
             Vector2 pa = world.GetProvince(caPro).Centroid;
             Vector2 pb = world.GetProvince(cbPro).Centroid;
-            double dist = pa.DistanceTo(pb);
-            eff *= 1.0 / (1.0 + dist / 800.0);
+            dist = pa.DistanceTo(pb);
         }
 
-        return Math.Clamp(eff, 0.0, 2.0);
+        return SimFormulas.TradeEfficiency(relations, agreement, sanctioned, dist);
     }
 }
