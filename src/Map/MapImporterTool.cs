@@ -16,6 +16,10 @@ namespace GrandStrategy.Map;
 #endif
 public partial class MapImporterTool : Node
 {
+    // Источники Natural Earth (GeoJSON, ветка geojson). ~4400 регионов admin-1.
+    private const string Admin0Url = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson";
+    private const string Admin1Url = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson";
+
     [Export] public string Admin0Path = "res://data/source/ne_10m_admin_0_countries.geojson";
     [Export] public string Admin1Path = "res://data/source/ne_10m_admin_1_states_provinces.geojson";
     [Export] public string PopulationCsvPath = ""; // опционально: iso_3166_2 -> population
@@ -36,6 +40,8 @@ public partial class MapImporterTool : Node
         GD.Print("MapImporterTool: starting import...");
         try
         {
+            EnsureSources();
+
             string admin0 = ReadSource(Admin0Path);
             string admin1 = ReadSource(Admin1Path);
 
@@ -73,5 +79,39 @@ public partial class MapImporterTool : Node
         if (!File.Exists(abs))
             throw new FileNotFoundException($"Source not found: {resPath} (place GeoJSON there first)");
         return File.ReadAllText(abs);
+    }
+
+    /// <summary>Скачивает исходники Natural Earth, если их нет локально.</summary>
+    private void EnsureSources()
+    {
+        string dir = ProjectSettings.GlobalizePath("res://data/source");
+        Directory.CreateDirectory(dir);
+
+        string admin0 = ProjectSettings.GlobalizePath(Admin0Path);
+        string admin1 = ProjectSettings.GlobalizePath(Admin1Path);
+
+        if (!File.Exists(admin0))
+            Download(Admin0Url, admin0);
+        if (!File.Exists(admin1))
+            Download(Admin1Url, admin1);
+    }
+
+    private static void Download(string url, string dest)
+    {
+        GD.Print($"MapImporterTool: downloading {url} ...");
+        try
+        {
+            using var client = new System.Net.Http.HttpClient();
+            client.Timeout = TimeSpan.FromMinutes(10);
+            using System.IO.Stream stream = client.GetStreamAsync(url).GetAwaiter().GetResult();
+            using var fs = File.Create(dest);
+            stream.CopyTo(fs);
+            GD.Print($"MapImporterTool: downloaded -> {dest} ({new FileInfo(dest).Length / 1024 / 1024} MB)");
+        }
+        catch (Exception ex)
+        {
+            throw new FileNotFoundException($"Download failed for {url}: {ex.Message}. " +
+                "Place the GeoJSON files into data/source/ manually if offline.");
+        }
     }
 }
