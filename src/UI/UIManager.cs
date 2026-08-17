@@ -261,7 +261,7 @@ public partial class UIManager : Node
         _stabilityLabel.Text = country != null ? $"{L("HUD_STAB")} {country.Stability:0}%" : "";
     }
 
-    /// <summary>Людской запас страны: сумма взрослых мужчин по владениям.</summary>
+    /// <summary>Людской запас страны: взрослые мужчины + резерв по законам о призыве.</summary>
     private static long ManpowerOf(WorldData world, int countryId)
     {
         if (countryId < 0 || countryId >= world.Countries.Length)
@@ -269,10 +269,11 @@ public partial class UIManager : Node
         CountryData c = world.Countries[countryId];
         if (c == null)
             return 0;
+        double conscription = world.AggregateLaws(c).ConscriptionRate;
         long mp = 0;
         foreach (int pid in c.OwnedProvinceIds)
             mp += world.GetProvince(pid).MaleAdults;
-        return mp;
+        return mp + (long)(c.Population * conscription);
     }
 
     private static string Sign(double v) => v >= 0 ? "+" : "";
@@ -455,6 +456,38 @@ public partial class UIManager : Node
             GovernanceSystem.ChangeIdeology(world, playerId);
             RebuildPlayerPanel();
         });
+
+        // Законы: переключение каждого закона.
+        _playerBox.AddChild(new Label { Text = L("PANEL_LAWS") });
+        foreach (LawData law in world.Laws)
+        {
+            bool active = System.Array.IndexOf(c.Laws, law.Id) >= 0;
+            string marker = active ? "[x]" : "[ ]";
+            AddButton(_playerBox, $"{marker} {LocalizationManager.Instance.Get(law.NameKey)}", () =>
+            {
+                ToggleLaw(world, playerId, law.Id);
+                RebuildPlayerPanel();
+            });
+        }
+    }
+
+    /// <summary>Принять/отменить закон (с учётом политической цены в стабильности).</summary>
+    private void ToggleLaw(WorldData world, int countryId, int lawId)
+    {
+        CountryData c = world.GetCountry(countryId);
+        var list = new System.Collections.Generic.List<int>(c.Laws);
+        if (list.Contains(lawId))
+        {
+            list.Remove(lawId);
+            c.Stability = Mathf.Clamp(c.Stability - 5f, 0f, 100f);
+        }
+        else
+        {
+            LawData law = world.Laws[lawId];
+            list.Add(lawId);
+            c.Stability = Mathf.Clamp(c.Stability - (float)law.PoliticalCost, 0f, 100f);
+        }
+        c.Laws = list.ToArray();
     }
 
     // --- Панель армии ----------------------------------------------------------

@@ -125,7 +125,11 @@ public partial class EconomyManager : Node
             CountryEconomy eco = Economy.Countries[c];
             eco.LaborForce = Math.Max(laborByCountry[c], 1.0);
             world.Countries[c].Population = popByCountry[c];
-            eco.Employment = eco.LaborForce * (0.9 + 0.1 * world.Countries[c].Stability / 100.0);
+
+            // Стабильность с бонусом от законов.
+            double stability = world.Countries[c].Stability + world.AggregateLaws(world.Countries[c]).StabilityBonus;
+            stability = Math.Clamp(stability, 0.0, 100.0);
+            eco.Employment = eco.LaborForce * (0.9 + 0.1 * stability / 100.0);
             eco.UnemploymentRate = Math.Clamp(1.0 - eco.Employment / Math.Max(eco.LaborForce, 1.0), 0.0, 1.0);
         }
     }
@@ -292,7 +296,10 @@ public partial class EconomyManager : Node
             double vat = consumptionValue * eco.Taxes.Vat;
             double resource = outputValue * eco.Taxes.Resource * 0.3;
 
-            eco.BudgetRevenue = (income + corporate + vat + resource) * TechManager.Instance.TaxMult(c);
+            // Технологии + законы.
+            double lawTaxMult = world.AggregateLaws(world.Countries[c]).TaxMult;
+            eco.BudgetRevenue = (income + corporate + vat + resource)
+                * TechManager.Instance.TaxMult(c) * lawTaxMult;
         }
     }
 
@@ -307,7 +314,7 @@ public partial class EconomyManager : Node
             double debtService = eco.Debt * eco.InterestRate;
             double discretionary = Math.Max(revenue - debtService, 0.0);
 
-            // Содержание зданий (реальный расход за ход).
+            // Содержание зданий + законов (реальный расход за ход).
             double buildingUpkeep = 0.0;
             foreach (int pid in world.Countries[c].OwnedProvinceIds)
             {
@@ -316,8 +323,9 @@ public partial class EconomyManager : Node
                     if (bid >= 0 && bid < world.Buildings.Length)
                         buildingUpkeep += world.Buildings[bid].Upkeep;
             }
+            double lawUpkeep = world.AggregateLaws(world.Countries[c]).UpkeepPerTurn;
 
-            double expenses = debtService + buildingUpkeep;
+            double expenses = debtService + buildingUpkeep + lawUpkeep;
             expenses += discretionary * eco.Spending.Administration;
             expenses += discretionary * eco.Spending.Military;
             expenses += discretionary * eco.Spending.Education;

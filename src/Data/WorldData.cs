@@ -108,6 +108,26 @@ public sealed class WorldData
         return country.Code;
     }
 
+    /// <summary>Суммарный эффект принятых законов страны (множители по умолчанию = 1.0).</summary>
+    public LawData AggregateLaws(CountryData country)
+    {
+        var agg = new LawData { TaxMult = 1.0, MilitaryCostMult = 1.0, ResearchMult = 1.0, TradeMult = 1.0 };
+        foreach (int lawId in country.Laws)
+        {
+            if (lawId < 0 || lawId >= Laws.Length)
+                continue;
+            LawData l = Laws[lawId];
+            agg.TaxMult *= l.TaxMult;
+            agg.ConscriptionRate += l.ConscriptionRate;
+            agg.StabilityBonus += l.StabilityBonus;
+            agg.MilitaryCostMult *= l.MilitaryCostMult;
+            agg.ResearchMult *= l.ResearchMult;
+            agg.TradeMult *= l.TradeMult;
+            agg.UpkeepPerTurn += l.UpkeepPerTurn;
+        }
+        return agg;
+    }
+
     public int ProvinceCount => Provinces.Length;
     public int CountryCount => Countries.Length;
     public int GoodCount => Goods.Length;

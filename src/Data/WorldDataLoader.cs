@@ -248,6 +248,12 @@ public static class WorldDataLoader
                 (LawCategory)CsvTableLoader.Int(row, "category"));
             l.PoliticalCost = CsvTableLoader.Double(row, "political_cost");
             l.UpkeepPerTurn = CsvTableLoader.Double(row, "upkeep");
+            l.TaxMult = CsvTableLoader.Double(row, "tax_mult", 1.0);
+            l.ConscriptionRate = CsvTableLoader.Double(row, "conscription_rate");
+            l.StabilityBonus = CsvTableLoader.Double(row, "stability_bonus");
+            l.MilitaryCostMult = CsvTableLoader.Double(row, "military_cost_mult", 1.0);
+            l.ResearchMult = CsvTableLoader.Double(row, "research_mult", 1.0);
+            l.TradeMult = CsvTableLoader.Double(row, "trade_mult", 1.0);
             list.Add(l);
         }
         world.Laws = list.ToArray();
