@@ -69,17 +69,13 @@ EVT_POP_GROWTH_DESC,Ваше население растёт.
 EVT_OPT_OK,ОК
 unclaimed,Ничья земля
 TECH_AGRICULTURE,Сельское хозяйство
-TECH_INDUSTRIALIZATION,Индустриализация
 TECH_ECONOMICS,Экономика
 TECH_MILITARY_DOCTRINE,Военная доктрина
-TECH_CONSCRIPTION_DOCTRINE,Призывная доктрина
 TECH_EDUCATION,Образование
 TECH_ADVANCED_INDUSTRY,Передовая промышленность
 TECH_MODERN_LOGISTICS,Современная логистика
 FORM_SCANDINAVIA,Скандинавия
-FORM_GERMANY,Германская конфедерация
 FORM_ARAB_LEAGUE,Арабская лига
-FORM_GRAN_COLOMBIA,Великая Колумбия
 FORM_CENTRAL_ASIA,Центральноазиатский союз
 HUD_PAUSE,Пауза
 HUD_SPEED_DOWN,Скорость -
@@ -276,7 +272,13 @@ CUL_MAORI,Маори
 CUL_OTHER,Прочие
 PANEL_TEMPLATES,Шаблоны армий
 TPL_INFANTRY,Пехота
-TPL_CAV,Пехота + кавалерия
 TPL_ART,Пехота + артиллерия
 TPL_MIXED,Смешанная
 MACRO_RECRUIT_HINT,Шаблон выбран — кликайте по провинциям для найма
+UNIT_ARMOR,Танки
+TPL_MOBILE,Пехота + мобильные части
+FORM_EU,Европейский союз
+FORM_EAF,Восточноафриканская федерация
+FORM_ASEAN,Федерация АСЕАН
+TECH_AUTOMATION,Промышленная автоматизация
+TECH_RESERVE_MOBILIZATION,Мобилизация резерва

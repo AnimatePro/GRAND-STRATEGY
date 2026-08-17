@@ -19,11 +19,45 @@ public partial class MilitaryManager : Node
 {
     public static MilitaryManager Instance { get; private set; } = null!;
 
-    public static readonly UnitTypeData[] UnitTypes =
+    // --- Юниты по эпохам (слот 0=пехота, 1=мобильные, 2=артиллерия) ---
+    // До 1900 — кавалерия; с 1900 — танки. Никаких анахронизмов между эпохами.
+
+    public static readonly UnitTypeData[] ClassicUnits =
     {
         new() { Id = 0, NameKey = "UNIT_INFANTRY", Attack = 1.0f, Defense = 2.0f, Mobility = 1f, Cost = 10, Upkeep = 0.2, ManpowerCost = 100 },
         new() { Id = 1, NameKey = "UNIT_CAVALRY", Attack = 2.0f, Defense = 1.0f, Mobility = 2f, Cost = 20, Upkeep = 0.4, ManpowerCost = 100 },
         new() { Id = 2, NameKey = "UNIT_ARTILLERY", Attack = 3.0f, Defense = 1.5f, Mobility = 1f, Cost = 40, Upkeep = 0.8, ManpowerCost = 100 },
+    };
+
+    public static readonly UnitTypeData[] ModernUnits =
+    {
+        new() { Id = 0, NameKey = "UNIT_INFANTRY", Attack = 1.0f, Defense = 2.0f, Mobility = 1f, Cost = 10, Upkeep = 0.2, ManpowerCost = 100 },
+        new() { Id = 1, NameKey = "UNIT_ARMOR", Attack = 2.5f, Defense = 1.5f, Mobility = 1.5f, Cost = 30, Upkeep = 0.6, ManpowerCost = 100 },
+        new() { Id = 2, NameKey = "UNIT_ARTILLERY", Attack = 3.0f, Defense = 1.5f, Mobility = 1f, Cost = 40, Upkeep = 0.8, ManpowerCost = 100 },
+    };
+
+    /// <summary>Юниты текущей эпохи (по игровому году).</summary>
+    public static UnitTypeData[] UnitTypes
+    {
+        get
+        {
+            int year = TimeManager.Instance != null ? TimeManager.Instance.CurrentYear : GameConstants.DefaultStartYear;
+            return year >= 1900 ? ModernUnits : ClassicUnits;
+        }
+    }
+
+    /// <summary>Множество юнитов для конкретного года (для тестов/прогноза).</summary>
+    public static UnitTypeData[] UnitsForYear(int year) => year >= 1900 ? ModernUnits : ClassicUnits;
+
+    // --- Командиры по эпохам ---
+    private static readonly string[] ClassicCommanders =
+    {
+        "Napoleon", "Wellington", "Kutuzov", "Blucher", "Suworow", "Nelson", "Ney", "Bagration",
+    };
+    private static readonly string[] ModernCommanders =
+    {
+        "Zhukov", "Rommel", "Patton", "Eisenhower", "Montgomery", "Guderian",
+        "MacArthur", "Manstein", "Schwarzkopf", "Petraeus", "Zaluzhnyi", "Grant",
     };
 
     public List<ArmyData> Armies { get; private set; } = new();
@@ -39,23 +73,18 @@ public partial class MilitaryManager : Node
     public int MacroRecruitTemplate = -1;
 
     // --- Шаблоны армий (id = индекс; словарь юнит -> количество) ---
+    // Слот 1 = мобильные части: кавалерия (до 1900) или танки (с 1900).
     public static readonly Dictionary<int, int>[] Templates =
     {
         new() { { 0, 5 } },                    // 0: Пехота
-        new() { { 0, 4 }, { 1, 2 } },          // 1: Пехота + кавалерия
+        new() { { 0, 4 }, { 1, 2 } },          // 1: Пехота + мобильные
         new() { { 0, 6 }, { 2, 3 } },          // 2: Пехота + артиллерия
         new() { { 0, 4 }, { 1, 2 }, { 2, 2 } },// 3: Смешанная
     };
 
     public static readonly string[] TemplateNames =
     {
-        "TPL_INFANTRY", "TPL_CAV", "TPL_ART", "TPL_MIXED",
-    };
-
-    private static readonly string[] CommanderNames =
-    {
-        "Alexander", "Caesar", "Napoleon", "Zhukov", "Rommel", "Patton",
-        "Sun Tzu", "Hannibal", "Saladin", "Moltke", "Guderian", "Wellington",
+        "TPL_INFANTRY", "TPL_MOBILE", "TPL_ART", "TPL_MIXED",
     };
 
     private int _nextArmyId = 1;
@@ -136,11 +165,12 @@ public partial class MilitaryManager : Node
 
         c.Treasury -= cost;
         var rng = new Rng(_seed + _nextCommanderId * 7919L + TimeManager.Instance.CurrentTurn);
+        string[] pool = TimeManager.Instance.CurrentYear >= 1900 ? ModernCommanders : ClassicCommanders;
         var commander = new CommanderData
         {
             Id = _nextCommanderId++,
             OwnerId = ownerId,
-            Name = CommanderNames[rng.NextInt(0, CommanderNames.Length - 1)],
+            Name = pool[rng.NextInt(0, pool.Length - 1)],
             Skill = rng.NextInt(1, 5),
         };
         Commanders.Add(commander);

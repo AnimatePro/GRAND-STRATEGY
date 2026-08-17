@@ -6,10 +6,10 @@
     "color_hex": "#005BAA"
   },
   {
-    "id": "form_german_confederation",
-    "name_key": "FORM_GERMANY",
-    "requires_codes": ["DEU", "AUT", "CHE"],
-    "color_hex": "#111111"
+    "id": "form_european_union",
+    "name_key": "FORM_EU",
+    "requires_codes": ["FRA", "DEU", "ITA", "ESP", "NLD", "BEL"],
+    "color_hex": "#003399"
   },
   {
     "id": "form_arab_league",
@@ -18,15 +18,21 @@
     "color_hex": "#006C35"
   },
   {
-    "id": "form_greater_colombia",
-    "name_key": "FORM_GRAN_COLOMBIA",
-    "requires_codes": ["COL", "VEN", "ECU", "PAN"],
-    "color_hex": "#FCD116"
+    "id": "form_east_african_federation",
+    "name_key": "FORM_EAF",
+    "requires_codes": ["KEN", "TZA", "UGA", "RWA", "BDI", "SSD"],
+    "color_hex": "#1B4D3E"
   },
   {
     "id": "form_central_asia",
     "name_key": "FORM_CENTRAL_ASIA",
     "requires_codes": ["KAZ", "UZB", "TKM", "KGZ", "TJK"],
     "color_hex": "#0099B5"
+  },
+  {
+    "id": "form_asean",
+    "name_key": "FORM_ASEAN",
+    "requires_codes": ["THA", "VNM", "MYS", "IDN", "PHL", "SGP"],
+    "color_hex": "#B22222"
   }
 ]

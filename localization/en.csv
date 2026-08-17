@@ -69,17 +69,13 @@ EVT_POP_GROWTH_DESC,Your population is growing.
 EVT_OPT_OK,OK
 unclaimed,Unclaimed
 TECH_AGRICULTURE,Agriculture
-TECH_INDUSTRIALIZATION,Industrialization
 TECH_ECONOMICS,Economics
 TECH_MILITARY_DOCTRINE,Military Doctrine
-TECH_CONSCRIPTION_DOCTRINE,Conscription Doctrine
 TECH_EDUCATION,Education
 TECH_ADVANCED_INDUSTRY,Advanced Industry
 TECH_MODERN_LOGISTICS,Modern Logistics
 FORM_SCANDINAVIA,Scandinavia
-FORM_GERMANY,German Confederation
 FORM_ARAB_LEAGUE,Arab League
-FORM_GRAN_COLOMBIA,Gran Colombia
 FORM_CENTRAL_ASIA,Central Asian Union
 HUD_PAUSE,Pause
 HUD_SPEED_DOWN,Speed -
@@ -276,7 +272,13 @@ CUL_MAORI,Maori
 CUL_OTHER,Other
 PANEL_TEMPLATES,Army Templates
 TPL_INFANTRY,Infantry
-TPL_CAV,Infantry + Cavalry
 TPL_ART,Infantry + Artillery
 TPL_MIXED,Mixed
 MACRO_RECRUIT_HINT,Template selected — click provinces to recruit
+UNIT_ARMOR,Armor
+TPL_MOBILE,Infantry + Mobile Corps
+FORM_EU,European Union
+FORM_EAF,East African Federation
+FORM_ASEAN,ASEAN Federation
+TECH_AUTOMATION,Industrial Automation
+TECH_RESERVE_MOBILIZATION,Reserve Mobilization
