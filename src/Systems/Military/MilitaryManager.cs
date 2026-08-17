@@ -32,6 +32,9 @@ public partial class MilitaryManager : Node
     /// <summary>Выбранная игроком армия для приказа движения (-1 = не выбрана).</summary>
     public int SelectedArmyId = -1;
 
+    /// <summary>Макробилдер: id здания для массовой застройки кликом (-1 = выкл).</summary>
+    public int MacroBuildId = -1;
+
     private static readonly string[] CommanderNames =
     {
         "Alexander", "Caesar", "Napoleon", "Zhukov", "Rommel", "Patton",

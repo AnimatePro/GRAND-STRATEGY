@@ -209,6 +209,19 @@ public partial class GameRoot : Node
             return;
         }
 
+        // Макробилдер: массовая застройка кликом (не сбрасывается до отмены).
+        if (MilitaryManager.Instance.MacroBuildId >= 0)
+        {
+            if (index >= 0)
+            {
+                if (MilitaryManager.Instance.BuildBuilding(PlayerCountryId(), index, MilitaryManager.Instance.MacroBuildId))
+                    EventBus.Instance.EmitUINotification("Built");
+                else
+                    EventBus.Instance.EmitUINotification("Cannot build here");
+            }
+            return;
+        }
+
         if (index < 0)
         {
             ClearSelection();

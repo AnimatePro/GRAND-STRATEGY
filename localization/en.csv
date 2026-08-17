@@ -172,3 +172,7 @@ HUD_GDP,GDP
 HUD_POP,Pop
 HUD_STAB,Stab
 PANEL_LAWS,Laws
+PANEL_BUILD,Build
+MACRO_HINT,Building selected — click provinces on the map to build
+MACRO_CHOOSE,Choose a building, then click provinces
+MACRO_CANCEL,Cancel building

@@ -37,6 +37,7 @@ public partial class UIManager : Node
     private VBoxContainer _playerBox = null!;    // вкладка «Страна»
     private VBoxContainer _militaryBox = null!;  // вкладка «Армия»
     private VBoxContainer _diplomacyBox = null!; // вкладка «Дипломатия»
+    private VBoxContainer _buildBox = null!;     // вкладка «Строительство» (макробилдер)
     private VBoxContainer _targetBox = null!;
     private VBoxContainer _techBox = null!;      // вкладка «Технологии»
 
@@ -156,6 +157,7 @@ public partial class UIManager : Node
         _playerBox = MakeTab(sidebar, L("PANEL_COUNTRY"));
         _militaryBox = MakeTab(sidebar, L("PANEL_MILITARY"));
         _diplomacyBox = MakeTab(sidebar, L("PANEL_DIPLOMACY"));
+        _buildBox = MakeTab(sidebar, L("PANEL_BUILD"));
         _techBox = MakeTab(sidebar, L("PANEL_TECHNOLOGY"));
 
         // Панель целевой страны (справа).
@@ -310,6 +312,7 @@ public partial class UIManager : Node
         RebuildPlayerPanel();
         RebuildMilitaryPanel();
         RebuildDiplomacyPanel();
+        RebuildBuildPanel();
         RebuildTargetPanel();
         RebuildTechPanel();
     }
@@ -566,6 +569,44 @@ public partial class UIManager : Node
                 EventBus.Instance.EmitUINotification(world.CountryName(c, lang));
             });
         }
+    }
+
+    // --- Вкладка строительства (макробилдер) ----------------------------------
+
+    private void RebuildBuildPanel()
+    {
+        ClearChildren(_buildBox);
+        if (!DataManager.Instance.IsLoaded)
+            return;
+
+        WorldData world = DataManager.Instance.World;
+        MilitaryManager mil = MilitaryManager.Instance;
+
+        var header = new Label
+        {
+            Text = mil.MacroBuildId >= 0
+                ? L("MACRO_HINT")
+                : L("MACRO_CHOOSE"),
+        };
+        _buildBox.AddChild(header);
+
+        // Кнопки выбора здания для массовой застройки.
+        foreach (BuildingData b in world.Buildings)
+        {
+            bool active = mil.MacroBuildId == b.Id;
+            string marker = active ? "▶ " : "";
+            AddButton(_buildBox, $"{marker}{LocalizationManager.Instance.Get(b.NameKey)} ({b.BuildCost:N0})", () =>
+            {
+                mil.MacroBuildId = active ? -1 : b.Id;
+                RebuildBuildPanel();
+            });
+        }
+
+        AddButton(_buildBox, L("MACRO_CANCEL"), () =>
+        {
+            mil.MacroBuildId = -1;
+            RebuildBuildPanel();
+        });
     }
 
     // --- Панель целевой страны ------------------------------------------------
