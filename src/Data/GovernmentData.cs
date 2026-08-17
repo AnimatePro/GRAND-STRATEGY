@@ -3,6 +3,8 @@ namespace GrandStrategy.Data;
 /// <summary>Форма правления (государственный строй) с базовыми модификаторами страны.</summary>
 public struct GovernmentData
 {
+    public GovernmentData() { } // CS8983
+
     public int Id;
     public GovernmentType Type;
     public string NameKey = string.Empty;

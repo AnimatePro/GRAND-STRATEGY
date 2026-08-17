@@ -6,6 +6,8 @@ namespace GrandStrategy.Data;
 /// </summary>
 public struct BuildingData
 {
+    public BuildingData() { } // CS8983
+
     public int Id;
     public string NameKey = string.Empty;
     public BuildingCategory Category;

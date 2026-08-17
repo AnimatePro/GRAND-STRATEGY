@@ -10,6 +10,8 @@ public enum TechCategory
 /// <summary>Технология (data-driven, data/techs.csv). Эффекты — аддитивные множители.</summary>
 public struct TechData
 {
+    public TechData() { } // CS8983
+
     public int Id;
     public string NameKey = string.Empty;
     public TechCategory Category;

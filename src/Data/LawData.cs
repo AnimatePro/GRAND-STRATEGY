@@ -3,6 +3,8 @@ namespace GrandStrategy.Data;
 /// <summary>Закон (политика), принимается страной, даёт модификаторы.</summary>
 public struct LawData
 {
+    public LawData() { } // CS8983
+
     public int Id;
     public string NameKey = string.Empty;
     public LawCategory Category;

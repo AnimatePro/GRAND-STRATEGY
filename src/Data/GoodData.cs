@@ -8,6 +8,8 @@ namespace GrandStrategy.Data;
 /// </summary>
 public struct GoodData
 {
+    public GoodData() { } // CS8983: struct с инициализаторами полей требует явный конструктор
+
     public int Id;
     public string NameKey = string.Empty;
     public GoodCategory Category;
@@ -44,6 +46,8 @@ public struct GoodData
 /// <summary>Валюта страны.</summary>
 public struct CurrencyData
 {
+    public CurrencyData() { } // CS8983
+
     public int Id;
     public string Code = string.Empty;     // ISO 4217, напр. "USD"
     public string NameKey = string.Empty;
