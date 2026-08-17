@@ -1,0 +1,44 @@
+; Engine configuration file.
+; Godot 4.7.1 (C# / .NET 8) — GRAND STRATEGY
+; M1: core autoload singletons + boot scene.
+
+config_version=5
+
+[application]
+
+config/name="GRAND-STRATEGY"
+config/description="2D grand strategy in the spirit of Age of History 3"
+config/version="0.1.0"
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+EventBus="*res://src/Core/EventBus.cs"
+LogService="*res://src/Core/LogService.cs"
+SettingsManager="*res://src/Core/SettingsManager.cs"
+LocalizationManager="*res://src/Core/LocalizationManager.cs"
+DataManager="*res://src/Core/DataManager.cs"
+TimeManager="*res://src/Core/TimeManager.cs"
+GameManager="*res://src/Core/GameManager.cs"
+SaveManager="*res://src/Core/SaveManager.cs"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[dotnet]
+
+project/assembly_name="GrandStrategy"

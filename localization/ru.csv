@@ -1,0 +1,59 @@
+APP_NAME,Гранд Стратегия
+BOOT_TITLE,ГРАНД СТРАТЕГИЯ
+BOOT_STATUS_LOADING,Загрузка...
+BOOT_STATUS_READY,Готово
+GOOD_FOOD,Продовольствие
+GOOD_TIMBER,Древесина
+GOOD_IRON,Железная руда
+GOOD_COAL,Уголь
+GOOD_OIL,Нефть
+GOOD_GAS,Природный газ
+GOOD_STEEL,Сталь
+GOOD_CEMENT,Цемент
+GOOD_TEXTILES,Текстиль
+GOOD_ELECTRONICS,Электроника
+GOOD_MACHINERY,Машины
+GOOD_VEHICLES,Транспорт
+GOOD_GOLD,Золото
+GOOD_RARE_METALS,Редкие металлы
+GOOD_CONSUMER_GOODS,Товары потребления
+GOOD_ELECTRICITY,Электроэнергия
+CUR_USD,Доллар США
+CUR_EUR,Евро
+CUR_GBP,Фунт стерлингов
+CUR_JPY,Иена
+CUR_CNY,Юань
+CUR_RUB,Рубль
+CUR_INR,Рупия
+CUR_CHF,Швейцарский франк
+CUR_BRL,Реал
+CUR_OTHER,Прочая
+BLD_FARM,Ферма
+BLD_MINE,Шахта
+BLD_FACTORY,Завод
+BLD_PORT,Порт
+BLD_BARRACKS,Казармы
+BLD_FORT,Форт
+BLD_UNIVERSITY,Университет
+BLD_HOSPITAL,Больница
+BLD_ROAD,Дорога
+BLD_POWER_PLANT,Электростанция
+GOV_MONARCHY,Монархия
+GOV_REPUBLIC,Республика
+GOV_THEOCRACY,Теократия
+GOV_DICTATORSHIP,Диктатура
+GOV_TRIBAL,Племенной строй
+GOV_CONSTITUTIONAL_MONARCHY,Конституционная монархия
+GOV_PARLIAMENTARY_REPUBLIC,Парламентская республика
+GOV_PRESIDENTIAL_REPUBLIC,Президентская республика
+LAW_CONSCRIPTION,Воинская повинность
+LAW_PROFESSIONAL_ARMY,Профессиональная армия
+LAW_FREE_TRADE,Свободная торговля
+LAW_PROTECTIONISM,Протекционизм
+LAW_PLANNED_ECONOMY,Плановая экономика
+LAW_MARKET_ECONOMY,Рыночная экономика
+LAW_WELFARE_STATE,Социальное государство
+LAW_COMPULSORY_EDUCATION,Обязательное образование
+LAW_UNIVERSAL_HEALTHCARE,Всеобщее здравоохранение
+LAW_CENSORSHIP,Цензура
+LAW_FREE_PRESS,Свободная пресса

@@ -1,0 +1,13 @@
+# Godot 4 + C# (.NET) ignores
+.godot/
+.mono/
+bin/
+obj/
+*.user
+*.userprefs
+.idea/
+.vs/
+.vscode/
+*.tmp
+*.log
+export_presets.cfg.bak

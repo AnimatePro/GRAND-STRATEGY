@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Main.cs" id="1_main"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="BootUI" type="Control" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="CanvasLayer/BootUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/BootUI/Center"]
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="CanvasLayer/BootUI/Center/VBox"]
+text = "GRAND STRATEGY"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 48
+
+[node name="Status" type="Label" parent="CanvasLayer/BootUI/Center/VBox"]
+text = "Loading..."
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
