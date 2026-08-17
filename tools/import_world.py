@@ -445,9 +445,10 @@ def main():
     border[:-1, :] |= ~same_v
     border[:, -1] = True
     border[-1, :] = True
-    # Утолщение границ на 1px (компенсация высокого разрешения — границы видны при отдалении).
-    border = (border | np.roll(border, 1, axis=0) | np.roll(border, -1, axis=0)
-              | np.roll(border, 1, axis=1) | np.roll(border, -1, axis=1))
+    # Утолщение границ (два прохода дилатации) — видны при любом зуме.
+    for _ in range(2):
+        border = (border | np.roll(border, 1, axis=0) | np.roll(border, -1, axis=0)
+                  | np.roll(border, 1, axis=1) | np.roll(border, -1, axis=1))
     bm = np.zeros((Hh, Ww, 3), dtype=np.uint8)
     bm[border] = 255
     Image.fromarray(bm).save(os.path.join(OUT_DIR, "border_mask.png"))

@@ -21,6 +21,9 @@ public partial class Main : Node
         };
         ThemeDB.FallbackFont = sysFont;
 
+        // Единая тёмная тема интерфейса.
+        ThemeDB.FallbackTheme = GrandStrategy.UI.GameTheme.Build();
+
         // 1. Настройки.
         SettingsManager.Instance.Load();
         ApplyDisplaySettings();

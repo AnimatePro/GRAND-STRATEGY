@@ -71,11 +71,13 @@ public partial class MapRenderer : TextureRect
         {
             Shader = GD.Load<Shader>("res://assets/map/map.gdshader"),
         };
+        _material.SetShaderParameter("id_map", _idTexture);
         _material.SetShaderParameter("color_lut", _colorLut);
         _material.SetShaderParameter("country_lut", _countryLut);
         _material.SetShaderParameter("border_mask", _borderTexture);
         _material.SetShaderParameter("province_count", (float)n);
-        _material.SetShaderParameter("texel_size", new Vector2(1f / _idImage.GetWidth(), 1f / _idImage.GetHeight()));
+        _material.SetShaderParameter("map_width", (float)_idImage.GetWidth());
+        _material.SetShaderParameter("map_height", (float)_idImage.GetHeight());
         Material = _material;
 
         SetMapMode(MapMode.Political);

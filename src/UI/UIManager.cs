@@ -99,9 +99,11 @@ public partial class UIManager : Node
         _canvas = new CanvasLayer();
         AddChild(_canvas);
 
-        // Верхняя панель.
+        // Верхняя панель (полоса управления).
         var topBar = new PanelContainer();
         topBar.SetAnchorsPreset(Control.LayoutPreset.TopWide);
+        topBar.AddThemeStyleboxOverride("panel", GameTheme.Style(
+            new Color(0.11f, 0.14f, 0.20f, 0.98f), new Color(0.22f, 0.28f, 0.40f)));
         _canvas.AddChild(topBar);
 
         var topHBox = new HBoxContainer();
