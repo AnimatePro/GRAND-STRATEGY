@@ -47,6 +47,16 @@ public static class WorldDataLoader
         LoadCultures(world);
 
         // --- Страны ---
+        // Лидеры (реальные главы государств на дату сценария).
+        var leaderByCode = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/leaders.csv"))
+        {
+            string code = CsvTableLoader.Str(row, "code");
+            string leader = CsvTableLoader.Str(row, "leader");
+            if (code.Length > 0 && leader.Length > 0)
+                leaderByCode[code] = leader;
+        }
+
         world.Countries = new CountryData[dto.Countries.Count];
         foreach (CountryDto cdto in dto.Countries)
         {
@@ -68,6 +78,7 @@ public static class WorldDataLoader
                 Treasury = cdto.Treasury,
                 StateReligionId = cdto.ReligionId,
                 PrimaryCultureId = cdto.CultureId,
+                LeaderName = leaderByCode.TryGetValue(cdto.Code, out string? l) ? l : string.Empty,
             };
             world.Countries[cdto.Id] = country;
             world.CountryCodeToId[cdto.Code] = cdto.Id;

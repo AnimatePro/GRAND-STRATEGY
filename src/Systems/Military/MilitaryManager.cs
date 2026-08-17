@@ -19,21 +19,26 @@ public partial class MilitaryManager : Node
 {
     public static MilitaryManager Instance { get; private set; } = null!;
 
-    // --- Юниты по эпохам (слот 0=пехота, 1=мобильные, 2=артиллерия) ---
-    // До 1900 — кавалерия; с 1900 — танки. Никаких анахронизмов между эпохами.
+    // --- Юниты по эпохам (реалистичные роды войск для каждого периода) ---
+    // До 1900 — пехота/кавалерия/артиллерия; с 1900 — пехота/танки/артиллерия/
+    // ПВО/дроны/авиация/флот. Никаких анахронизмов между эпохами.
 
     public static readonly UnitTypeData[] ClassicUnits =
     {
-        new() { Id = 0, NameKey = "UNIT_INFANTRY", Attack = 1.0f, Defense = 2.0f, Mobility = 1f, Cost = 10, Upkeep = 0.2, ManpowerCost = 100 },
-        new() { Id = 1, NameKey = "UNIT_CAVALRY", Attack = 2.0f, Defense = 1.0f, Mobility = 2f, Cost = 20, Upkeep = 0.4, ManpowerCost = 100 },
-        new() { Id = 2, NameKey = "UNIT_ARTILLERY", Attack = 3.0f, Defense = 1.5f, Mobility = 1f, Cost = 40, Upkeep = 0.8, ManpowerCost = 100 },
+        new() { Id = 0, NameKey = "UNIT_INFANTRY", Role = UnitRole.Infantry, Attack = 1.0f, Defense = 2.0f, Mobility = 1f, Cost = 10, Upkeep = 0.2, ManpowerCost = 100 },
+        new() { Id = 1, NameKey = "UNIT_CAVALRY", Role = UnitRole.Mobile, Attack = 2.0f, Defense = 1.0f, Mobility = 2f, Cost = 20, Upkeep = 0.4, ManpowerCost = 100 },
+        new() { Id = 2, NameKey = "UNIT_ARTILLERY", Role = UnitRole.Artillery, Attack = 3.0f, Defense = 1.5f, Mobility = 1f, Cost = 40, Upkeep = 0.8, ManpowerCost = 100 },
     };
 
     public static readonly UnitTypeData[] ModernUnits =
     {
-        new() { Id = 0, NameKey = "UNIT_INFANTRY", Attack = 1.0f, Defense = 2.0f, Mobility = 1f, Cost = 10, Upkeep = 0.2, ManpowerCost = 100 },
-        new() { Id = 1, NameKey = "UNIT_ARMOR", Attack = 2.5f, Defense = 1.5f, Mobility = 1.5f, Cost = 30, Upkeep = 0.6, ManpowerCost = 100 },
-        new() { Id = 2, NameKey = "UNIT_ARTILLERY", Attack = 3.0f, Defense = 1.5f, Mobility = 1f, Cost = 40, Upkeep = 0.8, ManpowerCost = 100 },
+        new() { Id = 0, NameKey = "UNIT_INFANTRY", Role = UnitRole.Infantry, Attack = 1.0f, Defense = 2.0f, Mobility = 1f, Cost = 10, Upkeep = 0.2, ManpowerCost = 100 },
+        new() { Id = 1, NameKey = "UNIT_ARMOR", Role = UnitRole.Mobile, Attack = 2.5f, Defense = 1.5f, Mobility = 1.5f, Cost = 30, Upkeep = 0.6, ManpowerCost = 100 },
+        new() { Id = 2, NameKey = "UNIT_ARTILLERY", Role = UnitRole.Artillery, Attack = 3.0f, Defense = 1.5f, Mobility = 1f, Cost = 40, Upkeep = 0.8, ManpowerCost = 100 },
+        new() { Id = 3, NameKey = "UNIT_AIR_DEFENSE", Role = UnitRole.AirDefense, Attack = 1.5f, Defense = 2.5f, Mobility = 1f, Cost = 35, Upkeep = 0.7, ManpowerCost = 80 },
+        new() { Id = 4, NameKey = "UNIT_DRONE", Role = UnitRole.Drone, Attack = 2.2f, Defense = 0.5f, Mobility = 1.5f, Cost = 25, Upkeep = 0.4, ManpowerCost = 40 },
+        new() { Id = 5, NameKey = "UNIT_AIR_FORCE", Role = UnitRole.AirForce, Attack = 3.5f, Defense = 0.8f, Mobility = 2f, Cost = 50, Upkeep = 1.0, ManpowerCost = 60 },
+        new() { Id = 6, NameKey = "UNIT_NAVY", Role = UnitRole.Navy, Attack = 1.8f, Defense = 2.0f, Mobility = 2f, Cost = 45, Upkeep = 0.9, ManpowerCost = 120 },
     };
 
     /// <summary>Юниты текущей эпохи (по игровому году).</summary>
@@ -73,18 +78,19 @@ public partial class MilitaryManager : Node
     public int MacroRecruitTemplate = -1;
 
     // --- Шаблоны армий (id = индекс; словарь юнит -> количество) ---
-    // Слот 1 = мобильные части: кавалерия (до 1900) или танки (с 1900).
+    // Слоты: 0 пехота, 1 мобильные, 2 артиллерия, 3 ПВО, 4 дроны, 5 авиация, 6 флот.
     public static readonly Dictionary<int, int>[] Templates =
     {
-        new() { { 0, 5 } },                    // 0: Пехота
-        new() { { 0, 4 }, { 1, 2 } },          // 1: Пехота + мобильные
-        new() { { 0, 6 }, { 2, 3 } },          // 2: Пехота + артиллерия
-        new() { { 0, 4 }, { 1, 2 }, { 2, 2 } },// 3: Смешанная
+        new() { { 0, 5 } },                             // 0: Пехота
+        new() { { 0, 4 }, { 1, 2 } },                   // 1: Пехота + мобильные
+        new() { { 0, 6 }, { 2, 3 } },                   // 2: Пехота + артиллерия
+        new() { { 0, 4 }, { 1, 2 }, { 2, 2 } },         // 3: Смешанная (классика)
+        new() { { 0, 5 }, { 2, 2 }, { 3, 1 }, { 4, 2 } }, // 4: Современная общевойсковая
     };
 
     public static readonly string[] TemplateNames =
     {
-        "TPL_INFANTRY", "TPL_MOBILE", "TPL_ART", "TPL_MIXED",
+        "TPL_INFANTRY", "TPL_MOBILE", "TPL_ART", "TPL_MIXED", "TPL_MODERN",
     };
 
     private int _nextArmyId = 1;
@@ -404,10 +410,26 @@ public partial class MilitaryManager : Node
         double bCommander = CommanderMult(b);
         double aLanding = a.NavalLandingTurns > 0 ? 0.7 : 1.0;
 
+        // Ролевые взаимодействия родов войск (реалистично):
+        // - флот атакующего снимает штраф десанта;
+        // - ПВО обороняющегося сбивает авиацию/дроны атакующего;
+        // - дроны дают разведку (бонус атаки).
+        double aAirPower = RolePower(a, UnitRole.AirForce) + RolePower(a, UnitRole.Drone);
+        double bAirDefense = RolePower(b, UnitRole.AirDefense);
+        double aDroneRecon = RolePower(a, UnitRole.Drone);
+        bool aHasNavy = HasRole(a, UnitRole.Navy);
+
+        if (aHasNavy && a.NavalLandingTurns > 0)
+            aLanding = 1.0; // флот обеспечивает десант без штрафа
+
+        double airReduction = Mathf.Clamp((float)(bAirDefense / Math.Max(aAirPower, 1.0)), 0f, 0.8f);
+        double airFactor = 1.0 - airReduction;
+        double reconFactor = 1.0 + Mathf.Min((float)aDroneRecon * 0.02f, 0.3f);
+
         double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength
             * TechManager.Instance.MilitaryMult(a.OwnerId)
             * DifficultyModifiers.MilitaryMult(a.OwnerId)
-            * aCommander * aLanding;
+            * aCommander * aLanding * airFactor * reconFactor;
         double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef)
             * TechManager.Instance.MilitaryMult(b.OwnerId)
             * DifficultyModifiers.MilitaryMult(b.OwnerId)
@@ -434,6 +456,24 @@ public partial class MilitaryManager : Node
             war.WarScore += (attackerWin - 0.5) * 2.0; // атакующий выигрывает/проигрывает
             war.WarScore = Mathf.Clamp((float)war.WarScore, -100f, 100f);
         }
+    }
+
+    /// <summary>Суммарная сила юнитов определённой роли в армии.</summary>
+    private static float RolePower(ArmyData army, UnitRole role)
+    {
+        float p = 0f;
+        foreach (KeyValuePair<int, int> kv in army.UnitCounts)
+            if (kv.Key >= 0 && kv.Key < UnitTypes.Length && UnitTypes[kv.Key].Role == role)
+                p += UnitTypes[kv.Key].Attack * kv.Value;
+        return p;
+    }
+
+    private static bool HasRole(ArmyData army, UnitRole role)
+    {
+        foreach (KeyValuePair<int, int> kv in army.UnitCounts)
+            if (kv.Key >= 0 && kv.Key < UnitTypes.Length && UnitTypes[kv.Key].Role == role)
+                return true;
+        return false;
     }
 
     private static void ApplyCasualties(ArmyData army, int casualties)

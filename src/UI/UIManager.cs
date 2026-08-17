@@ -456,6 +456,7 @@ public partial class UIManager : Node
         {
             Text =
                 $"{world.CountryName(c, LocalizationManager.Instance.Language)} ({c.Code})\n" +
+                $"{(c.LeaderName.Length > 0 ? $"{L("LEADER")}: {c.LeaderName}\n" : "")}" +
                 $"Gov: {c.GovernmentType}  Ideology: {c.Ideology}\n" +
                 $"{L("PANEL_RELIGION")}: {world.ReligionName(c.StateReligionId, LocalizationManager.Instance.Language)}\n" +
                 $"{L("PANEL_CULTURE")}: {world.CultureName(c.PrimaryCultureId, LocalizationManager.Instance.Language)}\n" +
@@ -668,6 +669,7 @@ public partial class UIManager : Node
         {
             Text =
                 $"{world.CountryName(t, LocalizationManager.Instance.Language)} ({t.Code})\n" +
+                $"{(t.LeaderName.Length > 0 ? $"{L("LEADER")}: {t.LeaderName}\n" : "")}" +
                 $"Relation: {t.RelationWith(playerId):0}\n" +
                 $"Status: {DiplomacyManager.Instance.GetStatus(playerId, _targetCountry)}\n" +
                 $"Trade: {DiplomacyManager.Instance.GetTradeAgreement(playerId, _targetCountry)}\n" +

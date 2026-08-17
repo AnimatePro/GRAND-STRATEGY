@@ -40,6 +40,7 @@ public sealed class CountryData
 
     public int StateReligionId;   // государственная религия (индекс в WorldData.Religions)
     public int PrimaryCultureId;  // основная культура (индекс в WorldData.Cultures)
+    public string LeaderName = string.Empty; // реальный лидер/глава государства на дату сценария
 
     /// <summary>Отношения с другими странами: countryId -> [-100..100].</summary>
     public Dictionary<int, float> Relations = new();

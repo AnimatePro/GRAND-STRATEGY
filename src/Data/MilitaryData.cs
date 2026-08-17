@@ -2,11 +2,26 @@ using System.Collections.Generic;
 
 namespace GrandStrategy.Data;
 
+/// <summary>Боевая роль юнита (для реалистичных взаимодействий родов войск).</summary>
+public enum UnitRole
+{
+    Infantry = 0,
+    Mobile = 1,     // кавалерия (до 1900) / танки (с 1900)
+    Artillery = 2,
+    AirDefense = 3, // ПВО — сбивает авиацию и дроны
+    Drone = 4,      // дроны — разведка + удар
+    AirForce = 5,   // авиация — удар, уязвима к ПВО
+    Navy = 6,       // флот — снижает штраф десанта, морское снабжение
+}
+
 /// <summary>Тип юнита (базовые боевые характеристики).</summary>
 public struct UnitTypeData
 {
+    public UnitTypeData() { } // CS8983
+
     public int Id;
     public string NameKey;
+    public UnitRole Role;
     public float Attack;
     public float Defense;
     public float Mobility;

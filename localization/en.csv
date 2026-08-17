@@ -282,3 +282,9 @@ FORM_EAF,East African Federation
 FORM_ASEAN,ASEAN Federation
 TECH_AUTOMATION,Industrial Automation
 TECH_RESERVE_MOBILIZATION,Reserve Mobilization
+UNIT_AIR_DEFENSE,Air Defense
+UNIT_DRONE,Drones
+UNIT_AIR_FORCE,Air Force
+UNIT_NAVY,Navy
+TPL_MODERN,Modern Combined Arms
+LEADER,Leader

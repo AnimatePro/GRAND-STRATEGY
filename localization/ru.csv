@@ -282,3 +282,9 @@ FORM_EAF,Восточноафриканская федерация
 FORM_ASEAN,Федерация АСЕАН
 TECH_AUTOMATION,Промышленная автоматизация
 TECH_RESERVE_MOBILIZATION,Мобилизация резерва
+UNIT_AIR_DEFENSE,ПВО
+UNIT_DRONE,Дроны
+UNIT_AIR_FORCE,Авиация
+UNIT_NAVY,Флот
+TPL_MODERN,Современные общевойсковые
+LEADER,Лидер
