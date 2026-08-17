@@ -29,6 +29,9 @@ public partial class MilitaryManager : Node
     public List<ArmyData> Armies { get; private set; } = new();
     public List<CommanderData> Commanders { get; private set; } = new();
 
+    /// <summary>Выбранная игроком армия для приказа движения (-1 = не выбрана).</summary>
+    public int SelectedArmyId = -1;
+
     private static readonly string[] CommanderNames =
     {
         "Alexander", "Caesar", "Napoleon", "Zhukov", "Rommel", "Patton",

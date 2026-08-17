@@ -164,3 +164,10 @@ PANEL_BUILDINGS,Buildings
 PANEL_BUILT,Built
 MSG_BUILD_FAIL,Cannot build here
 PANEL_DIPLOMACY,Diplomacy
+MIL_SELECT_HINT,Army selected — click a province on the map to move it
+HUD_GOLD,Gold
+HUD_PER_DAY,/d
+HUD_MANPOWER,MP
+HUD_GDP,GDP
+HUD_POP,Pop
+HUD_STAB,Stab

@@ -197,6 +197,18 @@ public partial class GameRoot : Node
     private void OnMapClicked(Vector2 world)
     {
         int index = _picker.WorldToProvinceIndex(world);
+
+        // Приказ движения выбранной армии.
+        if (MilitaryManager.Instance.SelectedArmyId >= 0)
+        {
+            if (index >= 0 && MilitaryManager.Instance.OrderMove(MilitaryManager.Instance.SelectedArmyId, index))
+                EventBus.Instance.EmitUINotification("Army ordered to move");
+            else
+                EventBus.Instance.EmitUINotification("Cannot move army there");
+            MilitaryManager.Instance.SelectedArmyId = -1;
+            return;
+        }
+
         if (index < 0)
         {
             ClearSelection();

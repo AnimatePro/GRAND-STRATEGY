@@ -253,12 +253,12 @@ public partial class UIManager : Node
             _flagTex.Texture = LoadFlag(country.FlagId);
 
         double balance = eco != null ? eco.BudgetRevenue - eco.BudgetExpenses : 0.0;
-        _treasuryLabel.Text = country != null ? $"Gold {country.Treasury:N0}" : "";
-        _incomeLabel.Text = eco != null ? $"{Sign(balance)}{balance:N0}/d" : "";
-        _manpowerLabel.Text = country != null ? $"MP {ManpowerOf(world, playerId):N0}" : "";
-        _gdpLabel.Text = country != null ? $"GDP {country.Gdp:N0}" : "";
-        _popLabel.Text = country != null ? $"Pop {country.Population:N0}" : "";
-        _stabilityLabel.Text = country != null ? $"Stab {country.Stability:0}%" : "";
+        _treasuryLabel.Text = country != null ? $"{L("HUD_GOLD")} {country.Treasury:N0}" : "";
+        _incomeLabel.Text = eco != null ? $"{Sign(balance)}{balance:N0}{L("HUD_PER_DAY")}" : "";
+        _manpowerLabel.Text = country != null ? $"{L("HUD_MANPOWER")} {ManpowerOf(world, playerId):N0}" : "";
+        _gdpLabel.Text = country != null ? $"{L("HUD_GDP")} {country.Gdp:N0}" : "";
+        _popLabel.Text = country != null ? $"{L("HUD_POP")} {country.Population:N0}" : "";
+        _stabilityLabel.Text = country != null ? $"{L("HUD_STAB")} {country.Stability:0}%" : "";
     }
 
     /// <summary>Людской запас страны: сумма взрослых мужчин по владениям.</summary>
@@ -474,16 +474,22 @@ public partial class UIManager : Node
         };
         _militaryBox.AddChild(header);
 
-        // Армии игрока.
+        if (mil.SelectedArmyId >= 0)
+        {
+            _militaryBox.AddChild(new Label { Text = L("MIL_SELECT_HINT") });
+        }
+
+        // Армии игрока (кнопка Select + клик по карте = приказ движения).
         foreach (ArmyData army in mil.Armies)
         {
             if (army.OwnerId != playerId)
                 continue;
             CommanderData? cmd = mil.Commanders.Find(c => c.Id == army.CommanderId);
-            _militaryBox.AddChild(new Label
+            string label = $"{(army.Id == mil.SelectedArmyId ? "▶ " : "")}{army.TotalUnits} {L("MIL_UNITS")} @ {DataManager.Instance.World.ProvinceName(army.ProvinceId, LocalizationManager.Instance.Language)} ({cmd?.Name ?? "-"})";
+            AddButton(_militaryBox, label, () =>
             {
-                Text = $"  ⚔ {army.TotalUnits} {L("MIL_UNITS")} @ {DataManager.Instance.World.ProvinceName(army.ProvinceId, LocalizationManager.Instance.Language)}" +
-                       $"  ({(cmd != null ? cmd.Name : "-")})",
+                mil.SelectedArmyId = army.Id;
+                RebuildMilitaryPanel();
             });
         }
 

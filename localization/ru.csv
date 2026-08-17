@@ -164,3 +164,10 @@ PANEL_BUILDINGS,Постройки
 PANEL_BUILT,Построено
 MSG_BUILD_FAIL,Нельзя построить здесь
 PANEL_DIPLOMACY,Дипломатия
+MIL_SELECT_HINT,Армия выбрана — кликните по провинции на карте, чтобы двинуть её
+HUD_GOLD,Золото
+HUD_PER_DAY,/д
+HUD_MANPOWER,Рекруты
+HUD_GDP,ВВП
+HUD_POP,Население
+HUD_STAB,Стабильность
