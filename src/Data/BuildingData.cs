@@ -14,7 +14,8 @@ public struct BuildingData
     public double BuildCost;      // стоимость строительства
     public double Upkeep;         // содержание за ход
     public int BuildTurns;        // время постройки (в ходах)
-    public double[] Effects;      // эффекты: прирост производства/инфраструктуры/форт и т.д.
+    public double DevelopmentBonus;    // +к развитию провинции (производство)
+    public double InfrastructureBonus; // +к инфраструктуре провинции
     public int MaxPerProvince = 1;
     public bool RequiresCoast;
 

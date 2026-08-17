@@ -479,6 +479,38 @@ public partial class MilitaryManager : Node
         return true;
     }
 
+    /// <summary>Постройка здания в провинции (проверка цены/лимитов/побережья).</summary>
+    public bool BuildBuilding(int ownerId, int provinceId, int buildingId)
+    {
+        WorldData world = DataManager.Instance.World;
+        if (buildingId < 0 || buildingId >= world.Buildings.Length)
+            return false;
+        BuildingData b = world.Buildings[buildingId];
+        ProvinceData p = world.GetProvince(provinceId);
+        if (p.EffectiveOwnerId != ownerId)
+            return false;
+        if (b.RequiresCoast && !p.IsCoastal)
+            return false;
+
+        int count = 0;
+        foreach (int bid in p.BuildingIds)
+            if (bid == buildingId)
+                count++;
+        if (count >= b.MaxPerProvince)
+            return false;
+
+        CountryData c = world.GetCountry(ownerId);
+        if (c == null || c.Treasury < b.BuildCost)
+            return false;
+
+        c.Treasury -= b.BuildCost;
+        var list = new List<int>(p.BuildingIds) { buildingId };
+        p.BuildingIds = list.ToArray();
+        world.SetProvince(provinceId, in p);
+        LogService.Instance.Info($"Military: {ownerId} built {b.NameKey} in province {provinceId}");
+        return true;
+    }
+
     /// <summary>Постройка форта (уровень +1, до 5).</summary>
     public bool BuildFort(int ownerId, int provinceId)
     {

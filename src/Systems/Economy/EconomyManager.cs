@@ -146,8 +146,19 @@ public partial class EconomyManager : Node
                 continue;
 
             double[] production = Economy.Countries[p.OwnerId].Production;
-            double dev = Math.Clamp(p.Development, 0.01, 1.0);
-            double infra = 0.5 + 0.5 * Math.Clamp(p.Infrastructure, 0.0, 1.0);
+
+            // Эффекты зданий провинции.
+            double devBonus = 0.0, infraBonus = 0.0;
+            foreach (int bid in p.BuildingIds)
+            {
+                if (bid >= 0 && bid < world.Buildings.Length)
+                {
+                    devBonus += world.Buildings[bid].DevelopmentBonus;
+                    infraBonus += world.Buildings[bid].InfrastructureBonus;
+                }
+            }
+            double dev = Math.Clamp(p.Development + devBonus, 0.01, 2.0);
+            double infra = 0.5 + 0.5 * Math.Clamp(p.Infrastructure + infraBonus, 0.0, 1.0);
 
             // Продовольствие (сельские работники провинции).
             double rural = PopulationSystem.LaborForce(p) * (1.0 - world.Countries[p.OwnerId].Urbanization);
@@ -270,10 +281,11 @@ public partial class EconomyManager : Node
             double wageBill = outputValue * EconomyConstants.WageShare;
             double profit = outputValue - wageBill;
 
-            // База НДС — национальное потребление (стоимость спроса).
+            // База НДС — фактическое потребление = min(доступное предложение, спрос).
+            // (Supply уже включает импорт после торговли; Demand — полный спрос.)
             double consumptionValue = 0.0;
             for (int g = 0; g < world.GoodCount; g++)
-                consumptionValue += eco.Demand[g] * eco.Price[g];
+                consumptionValue += Math.Min(eco.Supply[g], eco.Demand[g]) * eco.Price[g];
 
             double income = wageBill * eco.Taxes.Income;
             double corporate = profit * eco.Taxes.Corporate;
@@ -295,7 +307,17 @@ public partial class EconomyManager : Node
             double debtService = eco.Debt * eco.InterestRate;
             double discretionary = Math.Max(revenue - debtService, 0.0);
 
-            double expenses = debtService;
+            // Содержание зданий (реальный расход за ход).
+            double buildingUpkeep = 0.0;
+            foreach (int pid in world.Countries[c].OwnedProvinceIds)
+            {
+                ProvinceData p = world.GetProvince(pid);
+                foreach (int bid in p.BuildingIds)
+                    if (bid >= 0 && bid < world.Buildings.Length)
+                        buildingUpkeep += world.Buildings[bid].Upkeep;
+            }
+
+            double expenses = debtService + buildingUpkeep;
             expenses += discretionary * eco.Spending.Administration;
             expenses += discretionary * eco.Spending.Military;
             expenses += discretionary * eco.Spending.Education;

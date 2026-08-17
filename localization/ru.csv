@@ -160,3 +160,7 @@ MSG_COMMANDER_FAIL,Нельзя нанять командира
 PANEL_MILITARY,Армия
 MIL_ARMIES,армий
 MIL_UNITS,отрядов
+PANEL_BUILDINGS,Постройки
+PANEL_BUILT,Построено
+MSG_BUILD_FAIL,Нельзя построить здесь
+PANEL_DIPLOMACY,Дипломатия

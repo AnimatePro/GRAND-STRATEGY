@@ -211,6 +211,8 @@ public static class WorldDataLoader
             b.BuildTurns = CsvTableLoader.Int(row, "build_turns", 1);
             b.MaxPerProvince = CsvTableLoader.Int(row, "max_per_province", 1);
             b.RequiresCoast = CsvTableLoader.Bool(row, "requires_coast");
+            b.DevelopmentBonus = CsvTableLoader.Double(row, "dev_bonus");
+            b.InfrastructureBonus = CsvTableLoader.Double(row, "infra_bonus");
             list.Add(b);
         }
         world.Buildings = list.ToArray();

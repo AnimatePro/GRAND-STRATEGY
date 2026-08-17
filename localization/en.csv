@@ -160,3 +160,7 @@ MSG_COMMANDER_FAIL,Cannot recruit commander
 PANEL_MILITARY,Military
 MIL_ARMIES,armies
 MIL_UNITS,units
+PANEL_BUILDINGS,Buildings
+PANEL_BUILT,Built
+MSG_BUILD_FAIL,Cannot build here
+PANEL_DIPLOMACY,Diplomacy

@@ -23,7 +23,7 @@ public partial class UIManager : Node
     public static UIManager Instance { get; private set; } = null!;
 
     private CanvasLayer _canvas = null!;
-    private ColorRect _flagRect = null!;
+    private TextureRect _flagTex = null!;
     private Label _countryNameLabel = null!;
     private Label _dateLabel = null!;
     private Label _treasuryLabel = null!;
@@ -36,6 +36,7 @@ public partial class UIManager : Node
     private VBoxContainer _provinceBox = null!;
     private VBoxContainer _playerBox = null!;    // вкладка «Страна»
     private VBoxContainer _militaryBox = null!;  // вкладка «Армия»
+    private VBoxContainer _diplomacyBox = null!; // вкладка «Дипломатия»
     private VBoxContainer _targetBox = null!;
     private VBoxContainer _techBox = null!;      // вкладка «Технологии»
 
@@ -115,12 +116,13 @@ public partial class UIManager : Node
         topBar.AddChild(topHBox);
 
         // Флаг + название страны.
-        _flagRect = new ColorRect
+        _flagTex = new TextureRect
         {
-            CustomMinimumSize = new Vector2(26, 17),
+            CustomMinimumSize = new Vector2(30, 20),
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
             SizeFlagsVertical = Control.SizeFlags.ShrinkCenter,
         };
-        topHBox.AddChild(_flagRect);
+        topHBox.AddChild(_flagTex);
         _countryNameLabel = MakeLabel(topHBox);
 
         _dateLabel = MakeLabel(topHBox);
@@ -153,6 +155,7 @@ public partial class UIManager : Node
 
         _playerBox = MakeTab(sidebar, L("PANEL_COUNTRY"));
         _militaryBox = MakeTab(sidebar, L("PANEL_MILITARY"));
+        _diplomacyBox = MakeTab(sidebar, L("PANEL_DIPLOMACY"));
         _techBox = MakeTab(sidebar, L("PANEL_TECHNOLOGY"));
 
         // Панель целевой страны (справа).
@@ -247,7 +250,7 @@ public partial class UIManager : Node
         _dateLabel.Text = TimeManager.Instance.CurrentDateString;
         _countryNameLabel.Text = country != null ? world.CountryName(country, LocalizationManager.Instance.Language) : "";
         if (country != null)
-            _flagRect.Color = country.Color;
+            _flagTex.Texture = LoadFlag(country.FlagId);
 
         double balance = eco != null ? eco.BudgetRevenue - eco.BudgetExpenses : 0.0;
         _treasuryLabel.Text = country != null ? $"Gold {country.Treasury:N0}" : "";
@@ -274,6 +277,13 @@ public partial class UIManager : Node
 
     private static string Sign(double v) => v >= 0 ? "+" : "";
 
+    /// <summary>Загрузка текстуры флага (SVG импортируется Godot'ом в текстуру); null при отсутствии.</summary>
+    private static Texture2D? LoadFlag(string flagId)
+    {
+        string path = $"res://assets/flags/{flagId}.svg";
+        return ResourceLoader.Exists(path) ? GD.Load<Texture2D>(path) : null;
+    }
+
     // --- События выбора ------------------------------------------------------
 
     private void OnProvinceSelected(int provinceId)
@@ -298,6 +308,7 @@ public partial class UIManager : Node
         RebuildProvincePanel();
         RebuildPlayerPanel();
         RebuildMilitaryPanel();
+        RebuildDiplomacyPanel();
         RebuildTargetPanel();
         RebuildTechPanel();
     }
@@ -362,6 +373,29 @@ public partial class UIManager : Node
                 else
                     EventBus.Instance.EmitUINotification(L("MSG_FORT_FAIL"));
             });
+
+            // Сетка зданий: кнопка постройки на каждый тип.
+            _provinceBox.AddChild(new Label { Text = L("PANEL_BUILDINGS") });
+            foreach (BuildingData b in world.Buildings)
+            {
+                AddButton(_provinceBox, $"{LocalizationManager.Instance.Get(b.NameKey)} ({b.BuildCost:N0})", () =>
+                {
+                    if (MilitaryManager.Instance.BuildBuilding(playerId, _selectedProvince, b.Id))
+                        RebuildProvincePanel();
+                    else
+                        EventBus.Instance.EmitUINotification(L("MSG_BUILD_FAIL"));
+                });
+            }
+
+            // Построенные здания.
+            if (p.BuildingIds.Length > 0)
+            {
+                var built = new System.Text.StringBuilder();
+                foreach (int bid in p.BuildingIds)
+                    if (bid >= 0 && bid < world.Buildings.Length)
+                        built.Append(LocalizationManager.Instance.Get(world.Buildings[bid].NameKey)).Append(", ");
+                _provinceBox.AddChild(new Label { Text = $"{L("PANEL_BUILT")}: {built.ToString().TrimEnd(',', ' ')}" });
+            }
         }
         else if (p.OwnerId < 0 && !world.TryGetCountry(p.OwnerId, out _))
         {
@@ -462,6 +496,37 @@ public partial class UIManager : Node
                 EventBus.Instance.EmitUINotification(L("MSG_COMMANDER_FAIL"));
             RebuildMilitaryPanel();
         });
+    }
+
+    // --- Вкладка дипломатии ---------------------------------------------------
+
+    private void RebuildDiplomacyPanel()
+    {
+        ClearChildren(_diplomacyBox);
+        if (!DataManager.Instance.IsLoaded)
+            return;
+
+        WorldData world = DataManager.Instance.World;
+        int playerId = PlayerId();
+        string lang = LocalizationManager.Instance.Language;
+
+        var countries = new System.Collections.Generic.List<CountryData>();
+        foreach (CountryData c in world.Countries)
+            if (c != null && c.IsAlive && c.Id != playerId)
+                countries.Add(c);
+        countries.Sort((a, b) => world.CountryName(a, lang).CompareTo(world.CountryName(b, lang)));
+
+        foreach (CountryData c in countries)
+        {
+            float rel = c.RelationWith(playerId);
+            string status = DiplomacyManager.Instance.GetStatus(playerId, c.Id).ToString();
+            AddButton(_diplomacyBox, $"{world.CountryName(c, lang)}  (rel {rel:0}, {status})", () =>
+            {
+                _targetCountry = c.Id;
+                RebuildTargetPanel();
+                EventBus.Instance.EmitUINotification(world.CountryName(c, lang));
+            });
+        }
     }
 
     // --- Панель целевой страны ------------------------------------------------
