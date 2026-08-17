@@ -305,6 +305,8 @@ public partial class MilitaryManager : Node
         }
     }
 
+    private readonly Dictionary<int, float> _siege = new();
+
     private void ApplyOccupation(WorldData world)
     {
         foreach (ArmyData army in Armies)
@@ -312,15 +314,105 @@ public partial class MilitaryManager : Node
             ProvinceData p = world.GetProvince(army.ProvinceId);
             if (p.OwnerId < 0 || p.OwnerId == army.OwnerId)
                 continue;
+            if (p.ControllerId == army.OwnerId)
+                continue; // уже оккупировано
             if (!DiplomacyManager.Instance.AreAtWar(army.OwnerId, p.OwnerId))
                 continue;
-            // Враждебная армия в провинции без гарнизона -> оккупация.
-            if (!HasHostileArmy(world, army.ProvinceId, army.OwnerId))
+            if (HasHostileArmy(world, army.ProvinceId, army.OwnerId))
+                continue; // есть защитники — идёт бой
+
+            // Осада гарнизона провинции.
+            float garrison = _siege.TryGetValue(army.ProvinceId, out float g)
+                ? g : GarrisonStrength(p);
+            garrison -= army.AttackPower(UnitTypes) * 0.5f;
+
+            if (garrison <= 0f)
             {
                 p.ControllerId = army.OwnerId;
+                p.Unrest = Mathf.Clamp(p.Unrest + 0.2f, 0f, 1f);
                 world.SetProvince(army.ProvinceId, in p);
+                _siege.Remove(army.ProvinceId);
+
+                WarData? war = DiplomacyManager.Instance.FindWar(army.OwnerId, p.OwnerId);
+                if (war != null)
+                {
+                    if (!war.OccupiedProvinces.Contains(army.ProvinceId))
+                        war.OccupiedProvinces.Add(army.ProvinceId);
+                    war.WarScore = Mathf.Clamp((float)war.WarScore + 3f, -100f, 100f);
+                }
+                LogService.Instance.Info($"Military: province {army.ProvinceId} occupied by {army.OwnerId}");
+            }
+            else
+            {
+                _siege[army.ProvinceId] = garrison;
             }
         }
+
+        // Сброс осад провинций, где больше нет осаждающих.
+        var stale = new List<int>();
+        foreach (KeyValuePair<int, float> kv in _siege)
+        {
+            if (!HasHostileArmy(world, kv.Key, world.GetProvince(kv.Key).OwnerId))
+                stale.Add(kv.Key);
+        }
+        foreach (int pid in stale)
+            _siege.Remove(pid);
+    }
+
+    private static float GarrisonStrength(in ProvinceData p) =>
+        50f + p.FortLevel * 80f + p.Development * 60f;
+
+    /// <summary>Колонизация пустой провинции (owner < 0) соседней страной.</summary>
+    public bool Colonize(int ownerId, int provinceId)
+    {
+        WorldData world = DataManager.Instance.World;
+        ProvinceData p = world.GetProvince(provinceId);
+        if (p.OwnerId >= 0)
+            return false; // уже заселена
+
+        bool adjacent = false;
+        foreach (int nid in p.NeighborIds)
+        {
+            ProvinceData n = world.GetProvince(nid);
+            if (n.OwnerId == ownerId)
+            {
+                adjacent = true;
+                break;
+            }
+        }
+        if (!adjacent)
+            return false;
+
+        CountryData c = world.GetCountry(ownerId);
+        double cost = 2000 + p.TotalPopulation * 0.5;
+        if (c.Treasury < cost)
+            return false;
+
+        c.Treasury -= cost;
+        p.OwnerId = ownerId;
+        p.ControllerId = -1;
+        p.Unrest = 0.3f;
+        world.SetProvince(provinceId, in p);
+        c.OwnedProvinceIds.Add(provinceId);
+        LogService.Instance.Info($"Military: {ownerId} colonized province {provinceId}");
+        return true;
+    }
+
+    /// <summary>Постройка форта (уровень +1, до 5).</summary>
+    public bool BuildFort(int ownerId, int provinceId)
+    {
+        WorldData world = DataManager.Instance.World;
+        ProvinceData p = world.GetProvince(provinceId);
+        if (p.EffectiveOwnerId != ownerId || p.FortLevel >= 5)
+            return false;
+        CountryData c = world.GetCountry(ownerId);
+        double cost = 350 * (p.FortLevel + 1);
+        if (c.Treasury < cost)
+            return false;
+        c.Treasury -= cost;
+        p.FortLevel++;
+        world.SetProvince(provinceId, in p);
+        return true;
     }
 
     private bool HasHostileArmy(WorldData world, int provinceId, int friendlyOwner)

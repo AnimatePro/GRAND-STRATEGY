@@ -77,7 +77,8 @@ public sealed class WarData
     public int Id;
     public int AttackerId;
     public int DefenderId;
-    public List<int> AllyIds = new();
+    public List<int> AllyIds = new();      // союзники защищающегося
+    public List<int> AttackerAllies = new(); // союзники атакующего
     public string WarGoals = string.Empty;
     public int StartTurn;
     public int Battles;

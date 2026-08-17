@@ -31,6 +31,7 @@ TechManager="*res://src/Systems/Tech/TechManager.cs"
 FormableManager="*res://src/Systems/Decisions/FormableManager.cs"
 EventManager="*res://src/Systems/Events/EventManager.cs"
 AIDirector="*res://src/AI/AIDirector.cs"
+AudioManager="*res://src/UI/AudioManager.cs"
 UIManager="*res://src/UI/UIManager.cs"
 
 [display]

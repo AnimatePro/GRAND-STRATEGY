@@ -55,10 +55,26 @@ public partial class UIManager : Node
 
     private void OnGameStarted()
     {
-        if (_canvas == null)
-            BuildHud();
+        EnsureHud();
         UpdateTopBar();
         RebuildPanels();
+    }
+
+    /// <summary>Строит HUD, если ещё не построен (вызывается из GameRoot после загрузки сцены).</summary>
+    public void EnsureHud()
+    {
+        if (_canvas == null)
+            BuildHud();
+        _canvas.Visible = true;
+        UpdateTopBar();
+        RebuildPanels();
+    }
+
+    /// <summary>Скрывает HUD (при выходе из игровой сцены в меню).</summary>
+    public void HideHud()
+    {
+        if (_canvas != null)
+            _canvas.Visible = false;
     }
 
     private int PlayerId() => GameManager.Instance.ActiveOptions?.PlayerCountryId ?? 0;
@@ -93,7 +109,7 @@ public partial class UIManager : Node
         AddButton(topHBox, L("HUD_SPEED_UP"), () => TimeManager.Instance.SetSpeed(TimeManager.Instance.Speed + 1));
         AddButton(topHBox, L("HUD_END_TURN"), () => GameManager.Instance.EndTurn());
         AddButton(topHBox, L("HUD_SAVE"), () => GameManager.Instance.SaveGame("manual"));
-        AddButton(topHBox, L("HUD_LOAD"), () => GameManager.Instance.LoadGame("manual"));
+        AddButton(topHBox, L("HUD_MENU"), () => GetTree().ChangeSceneToFile("res://scenes/MainMenu.tscn"));
 
         // Панель провинции (слева сверху).
         _provinceBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 64), new Vector2(360, 260), L("PANEL_PROVINCE"));
@@ -121,7 +137,11 @@ public partial class UIManager : Node
     private static void AddButton(Container parent, string text, Action onPressed)
     {
         var btn = new Button { Text = text };
-        btn.Pressed += onPressed;
+        btn.Pressed += () =>
+        {
+            AudioManager.Instance.PlayClick();
+            onPressed();
+        };
         parent.AddChild(btn);
     }
 
@@ -232,7 +252,7 @@ public partial class UIManager : Node
                 $"  Children: {p.MaleChildren + p.FemaleChildren:N0}  Seniors: {p.MaleSeniors + p.FemaleSeniors:N0}\n" +
                 $"Terrain: {p.Terrain}  Climate: {p.Climate}  Coastal: {p.IsCoastal}\n" +
                 $"Infra: {p.Infrastructure:P0}  Dev: {p.Development:P0}  Unrest: {p.Unrest:P0}\n" +
-                $"Neighbors: {p.NeighborIds.Length}",
+                $"Fort: {p.FortLevel}  Neighbors: {p.NeighborIds.Length}",
         };
         _provinceBox.AddChild(info);
 
@@ -257,6 +277,25 @@ public partial class UIManager : Node
                 MilitaryManager.Instance.RecruitArmy(playerId, _selectedProvince,
                     new System.Collections.Generic.Dictionary<int, int> { { 0, 5 } });
                 EventBus.Instance.EmitUINotification(L("MSG_ARMY_RECRUITED"));
+            });
+
+            AddButton(_provinceBox, L("ACT_BUILD_FORT"), () =>
+            {
+                if (MilitaryManager.Instance.BuildFort(playerId, _selectedProvince))
+                    RebuildProvincePanel();
+                else
+                    EventBus.Instance.EmitUINotification(L("MSG_FORT_FAIL"));
+            });
+        }
+        else if (p.OwnerId < 0 && !world.TryGetCountry(p.OwnerId, out _))
+        {
+            // Пустая провинция, граничащая с владениями игрока — колонизация.
+            AddButton(_provinceBox, L("ACT_COLONIZE"), () =>
+            {
+                if (MilitaryManager.Instance.Colonize(playerId, _selectedProvince))
+                    RebuildProvincePanel();
+                else
+                    EventBus.Instance.EmitUINotification(L("MSG_COLONIZE_FAIL"));
             });
         }
     }

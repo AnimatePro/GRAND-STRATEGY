@@ -18,7 +18,8 @@ public partial class MapModeController : Node
     private static readonly MapMode[] Order =
     {
         MapMode.Political, MapMode.Terrain, MapMode.Population, MapMode.Economy,
-        MapMode.Development, MapMode.Infrastructure, MapMode.Unrest, MapMode.Debug,
+        MapMode.Trade, MapMode.Resources, MapMode.Development, MapMode.Infrastructure,
+        MapMode.Diplomacy, MapMode.War, MapMode.Unrest, MapMode.Debug,
     };
 
     public void Initialize(MapRenderer renderer, Minimap minimap)

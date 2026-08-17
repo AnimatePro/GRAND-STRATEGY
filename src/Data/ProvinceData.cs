@@ -35,6 +35,7 @@ public struct ProvinceData
     public float TaxBase;        // денежная база налогообложения
     public float Unrest;         // 0..1
     public float Autonomy;       // 0..1 (автономия от центра)
+    public int FortLevel;        // уровень форта (гарнизон обороны)
 
     public int[] CoreIds;      // страны, имеющие ядро на провинцию
     public int[] ResourceIds;  // id ресурсов (см. GoodData)

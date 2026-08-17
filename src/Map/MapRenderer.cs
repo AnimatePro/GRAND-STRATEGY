@@ -79,6 +79,29 @@ public partial class MapRenderer : TextureRect
         Material = _material;
 
         SetMapMode(MapMode.Political);
+
+        // Живое обновление динамических режимов карты.
+        EventBus.Instance.EconomyUpdated += OnDataChanged;
+        EventBus.Instance.DiplomacyUpdated += OnDataChanged;
+        EventBus.Instance.WarDeclared += OnWarDeclared;
+        EventBus.Instance.PeaceSigned += OnPeaceSigned;
+    }
+
+    public override void _ExitTree()
+    {
+        EventBus.Instance.EconomyUpdated -= OnDataChanged;
+        EventBus.Instance.DiplomacyUpdated -= OnDataChanged;
+        EventBus.Instance.WarDeclared -= OnWarDeclared;
+        EventBus.Instance.PeaceSigned -= OnPeaceSigned;
+    }
+
+    private void OnWarDeclared(int a, int b) => OnDataChanged();
+    private void OnPeaceSigned(int a, int b) => OnDataChanged();
+
+    private void OnDataChanged()
+    {
+        if (_mode is MapMode.Trade or MapMode.Diplomacy or MapMode.War or MapMode.Economy or MapMode.Population)
+            BuildColorLut();
     }
 
     /// <summary>Заполняет country_lut: провинция -> (countryId+1).</summary>
@@ -135,6 +158,50 @@ public partial class MapRenderer : TextureRect
 
             case MapMode.Unrest:
                 return GradientByValue(p.Unrest, 0, 1);
+
+            case MapMode.Resources:
+                return p.ResourceIds.Length > 0
+                    ? new Color(0.5f, 0.4f, 0.15f)
+                    : new Color(0.25f, 0.3f, 0.25f);
+
+            case MapMode.Trade:
+                {
+                    var eco = GrandStrategy.Systems.Economy.EconomyManager.Instance.Economy;
+                    if (p.OwnerId >= 0 && p.OwnerId < eco.Countries.Length)
+                    {
+                        double tb = eco.Countries[p.OwnerId].TradeBalance;
+                        if (tb > 0) return new Color(0.2f, 0.6f, 0.3f);
+                        if (tb < 0) return new Color(0.75f, 0.15f, 0.1f);
+                        return new Color(0.5f, 0.5f, 0.5f);
+                    }
+                    return Colors.DimGray;
+                }
+
+            case MapMode.Diplomacy:
+                if (p.OwnerId >= 0)
+                {
+                    int playerId = GrandStrategy.Core.GameManager.Instance.ActiveOptions?.PlayerCountryId ?? -1;
+                    if (playerId >= 0 && p.OwnerId == playerId)
+                        return new Color(0.2f, 0.5f, 0.9f);
+                    if (playerId >= 0)
+                    {
+                        float rel = _world!.Countries[p.OwnerId].RelationWith(playerId);
+                        if (rel > 30) return new Color(0.2f, 0.7f, 0.3f);
+                        if (rel < -30) return new Color(0.8f, 0.2f, 0.2f);
+                        return new Color(0.6f, 0.6f, 0.5f);
+                    }
+                }
+                return Colors.DimGray;
+
+            case MapMode.War:
+                if (p.OwnerId >= 0 && GrandStrategy.Systems.Diplomacy.DiplomacyManager.Instance != null)
+                {
+                    foreach (var w in GrandStrategy.Systems.Diplomacy.DiplomacyManager.Instance.Wars)
+                        if (w.AttackerId == p.OwnerId || w.DefenderId == p.OwnerId)
+                            return new Color(0.75f, 0.1f, 0.1f);
+                    return new Color(0.4f, 0.45f, 0.4f);
+                }
+                return Colors.DimGray;
 
             default:
                 return Colors.SlateGray;

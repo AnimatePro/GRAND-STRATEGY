@@ -24,6 +24,7 @@ public sealed class ProvinceSaveDto
     public long MaleChildren, FemaleChildren, MaleTeens, FemaleTeens;
     public long MaleAdults, FemaleAdults, MaleSeniors, FemaleSeniors;
     public float Infrastructure, Development, TaxBase, Unrest, Autonomy;
+    public int FortLevel;
     public List<int> BuildingIds = new();
 }
 
@@ -65,6 +66,7 @@ public sealed class WarSaveDto
 {
     public int Id, AttackerId, DefenderId;
     public List<int> AllyIds = new();
+    public List<int> AttackerAllies = new();
     public string WarGoals = string.Empty;
     public int StartTurn, Battles;
     public List<int> OccupiedProvinces = new();
@@ -116,6 +118,7 @@ public static class WorldSaveCodec
                 MaleSeniors = p.MaleSeniors, FemaleSeniors = p.FemaleSeniors,
                 Infrastructure = p.Infrastructure, Development = p.Development,
                 TaxBase = p.TaxBase, Unrest = p.Unrest, Autonomy = p.Autonomy,
+                FortLevel = p.FortLevel,
                 BuildingIds = new List<int>(p.BuildingIds),
             });
         }
@@ -157,7 +160,9 @@ public static class WorldSaveCodec
             dto.Wars.Add(new WarSaveDto
             {
                 Id = w.Id, AttackerId = w.AttackerId, DefenderId = w.DefenderId,
-                AllyIds = new List<int>(w.AllyIds), WarGoals = w.WarGoals,
+                AllyIds = new List<int>(w.AllyIds),
+                AttackerAllies = new List<int>(w.AttackerAllies),
+                WarGoals = w.WarGoals,
                 StartTurn = w.StartTurn, Battles = w.Battles,
                 OccupiedProvinces = new List<int>(w.OccupiedProvinces), WarScore = w.WarScore,
             });
@@ -206,6 +211,7 @@ public static class WorldSaveCodec
             cur.MaleSeniors = (int)p.MaleSeniors; cur.FemaleSeniors = (int)p.FemaleSeniors;
             cur.Infrastructure = p.Infrastructure; cur.Development = p.Development;
             cur.TaxBase = p.TaxBase; cur.Unrest = p.Unrest; cur.Autonomy = p.Autonomy;
+            cur.FortLevel = p.FortLevel;
             cur.BuildingIds = p.BuildingIds.ToArray();
             world.Provinces[idx] = cur;
         }
@@ -274,7 +280,9 @@ public static class WorldSaveCodec
             warsOut.Add(new WarData
             {
                 Id = w.Id, AttackerId = w.AttackerId, DefenderId = w.DefenderId,
-                AllyIds = new List<int>(w.AllyIds), WarGoals = w.WarGoals,
+                AllyIds = new List<int>(w.AllyIds),
+                AttackerAllies = new List<int>(w.AttackerAllies),
+                WarGoals = w.WarGoals,
                 StartTurn = w.StartTurn, Battles = w.Battles,
                 OccupiedProvinces = new List<int>(w.OccupiedProvinces), WarScore = w.WarScore,
             });

@@ -80,7 +80,12 @@ public partial class DiplomacyManager : Node
             return false;
         foreach (WarData w in Wars)
         {
-            if ((w.AttackerId == a && w.DefenderId == b) || (w.AttackerId == b && w.DefenderId == a))
+            bool aAttacker = IsAttackerSide(w, a);
+            bool bAttacker = IsAttackerSide(w, b);
+            bool aDefender = IsDefenderSide(w, a);
+            bool bDefender = IsDefenderSide(w, b);
+            // Разные стороны => воюют.
+            if ((aAttacker && bDefender) || (aDefender && bAttacker))
                 return true;
         }
         return false;
@@ -89,10 +94,22 @@ public partial class DiplomacyManager : Node
     public WarData? FindWar(int a, int b)
     {
         foreach (WarData w in Wars)
-            if ((w.AttackerId == a && w.DefenderId == b) || (w.AttackerId == b && w.DefenderId == a))
+        {
+            bool aAttacker = IsAttackerSide(w, a);
+            bool bAttacker = IsAttackerSide(w, b);
+            bool aDefender = IsDefenderSide(w, a);
+            bool bDefender = IsDefenderSide(w, b);
+            if ((aAttacker && bDefender) || (aDefender && bAttacker))
                 return w;
+        }
         return null;
     }
+
+    private static bool IsAttackerSide(WarData w, int c) =>
+        c == w.AttackerId || w.AttackerAllies.Contains(c);
+
+    private static bool IsDefenderSide(WarData w, int c) =>
+        c == w.DefenderId || w.AllyIds.Contains(c);
 
     // --- Действия ------------------------------------------------------------
 
@@ -115,6 +132,28 @@ public partial class DiplomacyManager : Node
         WorldData world = DataManager.Instance.World;
         world.Countries[attackerId].SetRelation(defenderId, -100f);
         world.Countries[defenderId].SetRelation(attackerId, -100f);
+
+        // Коалиции: союзники защищающегося встают на его сторону, союзники атакующего — на его.
+        for (int c = 0; c < world.CountryCount; c++)
+        {
+            if (c == attackerId || c == defenderId)
+                continue;
+            CountryData cc = world.Countries[c];
+            if (cc == null || !cc.IsAlive)
+                continue;
+            if (GetStatus(c, defenderId) == DiplomacyStatus.Alliance && !AreAtWar(c, attackerId))
+            {
+                war.AllyIds.Add(c);
+                SetStatus(c, attackerId, DiplomacyStatus.War);
+                world.Countries[c].SetRelation(attackerId, -100f);
+            }
+            else if (GetStatus(c, attackerId) == DiplomacyStatus.Alliance && !AreAtWar(c, defenderId))
+            {
+                war.AttackerAllies.Add(c);
+                SetStatus(c, defenderId, DiplomacyStatus.War);
+                world.Countries[c].SetRelation(defenderId, -100f);
+            }
+        }
 
         LogService.Instance.Info($"Diplomacy: {attackerId} declared war on {defenderId} ({warGoals})");
         EventBus.Instance.EmitWarDeclared(attackerId, defenderId);
@@ -192,6 +231,18 @@ public partial class DiplomacyManager : Node
         Wars.Remove(war);
         SetStatus(a, b, DiplomacyStatus.Truce);
         SetStatus(b, a, DiplomacyStatus.Truce);
+
+        // Перемирие со всеми участниками коалиции.
+        foreach (int ally in war.AllyIds)
+        {
+            SetStatus(ally, war.AttackerId, DiplomacyStatus.Truce);
+            SetStatus(war.AttackerId, ally, DiplomacyStatus.Truce);
+        }
+        foreach (int ally in war.AttackerAllies)
+        {
+            SetStatus(ally, war.DefenderId, DiplomacyStatus.Truce);
+            SetStatus(war.DefenderId, ally, DiplomacyStatus.Truce);
+        }
 
         ca.SetRelation(b, ca.RelationWith(b) + 20f);
         cb.SetRelation(a, cb.RelationWith(a) + 20f);

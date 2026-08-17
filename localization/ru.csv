@@ -110,3 +110,47 @@ ACT_PEACE_ANNEX,Мир: аннексия
 ACT_EMBARGO,Переключить эмбарго
 ACT_TRADE_AGREEMENT,Сменить торг. соглашение
 ACT_FORM,Сформировать
+MENU_NEW_GAME,Новая игра
+MENU_CONTINUE,Продолжить
+MENU_LOAD,Загрузить
+MENU_SETTINGS,Настройки
+MENU_CREDITS,О создании
+MENU_QUIT,Выход
+MENU_BACK,Назад
+MENU_NO_DATA,Данные мира не найдены — сначала запустите MapImporterTool
+NEWGAME_TITLE,Новая игра
+NEWGAME_DATE,Дата начала
+NEWGAME_DIFFICULTY,Сложность
+NEWGAME_COUNTRY,Страна
+NEWGAME_SEARCH,Поиск страны...
+NEWGAME_SEED,Зерно
+NEWGAME_IRONMAN,Железный режим
+NEWGAME_START,Начать игру
+DIFF_VERY_EASY,Очень легко
+DIFF_EASY,Легко
+DIFF_NORMAL,Нормально
+DIFF_HARD,Сложно
+DIFF_VERY_HARD,Очень сложно
+SETTINGS_TITLE,Настройки
+SETTINGS_LANGUAGE,Язык
+SETTINGS_UI_SCALE,Масштаб UI
+SETTINGS_FULLSCREEN,Режим дисплея
+SETTINGS_WINDOWED,Оконный
+SETTINGS_BORDERLESS,Без рамки
+SETTINGS_OPT_FULLSCREEN,Полноэкранный
+SETTINGS_VSYNC,Вертикальная синхронизация
+SETTINGS_MASTER_VOLUME,Общая громкость
+SETTINGS_UI_VOLUME,Громкость интерфейса
+SETTINGS_SFX_VOLUME,Громкость эффектов
+LOAD_TITLE,Загрузить игру
+LOAD_EMPTY,Сохранений нет
+LOAD_LOAD,Загрузить
+LOAD_DELETE,Удалить
+CREDITS_TITLE,О создании
+CREDITS_ENGINE,Движок
+CREDITS_DESC,Двумерная гранд-стратегия в духе Age of History 3.
+HUD_MENU,Меню
+ACT_BUILD_FORT,Построить форт
+MSG_FORT_FAIL,Нельзя построить форт здесь
+ACT_COLONIZE,Колонизировать
+MSG_COLONIZE_FAIL,Нельзя колонизировать эту провинцию

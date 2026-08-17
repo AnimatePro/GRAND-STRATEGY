@@ -28,11 +28,14 @@ public partial class GameRoot : Node
 
     public override void _Ready()
     {
-        // 1. Данные.
-        if (!DataManager.Instance.LoadWorldData())
+        // 1. Данные (уже загружены на boot; перезагружаем только если их нет).
+        if (!DataManager.Instance.IsLoaded)
         {
-            ShowFatal("World data not found.\nRun MapImporterTool to generate data/cache/world.json");
-            return;
+            if (!DataManager.Instance.LoadWorldData())
+            {
+                ShowFatal("World data not found.\nRun MapImporterTool to generate data/cache/world.json");
+                return;
+            }
         }
         DataManager.Instance.ValidateData();
         LogService.Instance.Info(DataManager.Instance.DumpStats());
@@ -66,13 +69,8 @@ public partial class GameRoot : Node
 
         EventBus.Instance.UINotification += OnNotification;
 
-        // 7. Старт новой партии (M4 заменит на экран новой игры с выбором страны/зерна).
-        GameManager.Instance.StartNewGame(new NewGameOptions
-        {
-            PlayerCountryId = 0,
-            Seed = 20260817,
-            Difficulty = "normal",
-        });
+        // 7. HUD (игра уже запущена из экрана новой игры/загрузки).
+        GrandStrategy.UI.UIManager.Instance.EnsureHud();
 
         LogService.Instance.Info("GameRoot ready");
     }
@@ -116,6 +114,23 @@ public partial class GameRoot : Node
         _debug.OffsetLeft = 8;
         _debug.OffsetTop = 8;
         _uiRoot.AddChild(_debug);
+    }
+
+    public override void _ExitTree()
+    {
+        // Возврат в меню — прячем HUD (он живёт в автозагрузке и переживает смены сцен).
+        GrandStrategy.UI.UIManager.Instance.HideHud();
+        EventBus.Instance.UINotification -= OnNotification;
+    }
+
+    public override void _UnhandledInput(InputEvent ev)
+    {
+        // ESC — возврат в главное меню.
+        if (ev is InputEventKey key && key.Pressed && !key.Echo && key.Keycode == Key.Escape)
+        {
+            GetTree().ChangeSceneToFile("res://scenes/MainMenu.tscn");
+            GetViewport().SetInputAsHandled();
+        }
     }
 
     public override void _Process(double delta)
