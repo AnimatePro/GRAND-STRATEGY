@@ -38,6 +38,7 @@ public partial class MapModeBar : Control
         hbox.AddThemeConstantOverride("separation", 6);
         scroll.AddChild(hbox);
 
+        var group = new ButtonGroup();
         for (int i = 0; i < MapModeController.Order.Length; i++)
         {
             int idx = i;
@@ -45,8 +46,10 @@ public partial class MapModeBar : Control
             {
                 Text = Labels[idx],
                 ToggleMode = true,
-                ButtonGroup = new ButtonGroup(),
+                ButtonGroup = group,
             };
+            if (idx == 0)
+                btn.ButtonPressed = true;
             btn.Pressed += () => _controller?.SetMode(MapModeController.Order[idx]);
             hbox.AddChild(btn);
         }
