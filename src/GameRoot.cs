@@ -20,6 +20,7 @@ public partial class GameRoot : Node
     private Minimap _minimap = null!;
     private ArmyLayer _armyLayer = null!;
     private MapModeController _modeController = null!;
+    private TooltipLayer _tooltip = null!;
     private DebugOverlay _debug = null!;
     private Control _uiRoot = null!;
 
@@ -115,6 +116,11 @@ public partial class GameRoot : Node
         _uiRoot.AddChild(_minimap);
         _minimap.Initialize(_mapRenderer, _camera);
 
+        // Тултип провинции.
+        _tooltip = new TooltipLayer();
+        _tooltip.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _uiRoot.AddChild(_tooltip);
+
         // Отладка.
         _debug = new DebugOverlay();
         _debug.SetAnchorsPreset(Control.LayoutPreset.TopLeft);
@@ -186,6 +192,10 @@ public partial class GameRoot : Node
                 _hoverProvince = hover;
                 _mapRenderer.SetHover(hover);
             }
+            if (hover >= 0)
+                _tooltip.ShowProvince(DataManager.Instance.World, hover, mouse);
+            else
+                _tooltip.Hide();
         }
 
         // Метки, миникарта и маркеры армий.

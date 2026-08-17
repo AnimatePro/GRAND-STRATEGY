@@ -49,6 +49,9 @@ public partial class AIDirector : Node
 
             ManageEconomy(world, c);
 
+            // Армии в войне двигаются каждый ход (не только при стратегическом тике).
+            ConsiderMoves(world, c);
+
             if (!_nextThinkTurn.TryGetValue(c, out int next))
                 _nextThinkTurn[c] = next = rng.NextInt(0, 2);
             if (TimeManager.Instance.CurrentTurn >= next)
@@ -56,6 +59,59 @@ public partial class AIDirector : Node
                 Think(world, c, rng);
                 _nextThinkTurn[c] = TimeManager.Instance.CurrentTurn + 3;
             }
+        }
+    }
+
+    /// <summary>ИИ отдаёт приказы движения своим армиям к вражеским провинциям.</summary>
+    private void ConsiderMoves(WorldData world, int countryId)
+    {
+        // Собираем врагов (противоположная сторона всех войн).
+        var enemies = new HashSet<int>();
+        foreach (WarData w in DiplomacyManager.Instance.Wars)
+        {
+            int side = WarSide(w, countryId);
+            if (side == 0)
+                continue;
+            if (side > 0)
+            {
+                enemies.Add(w.DefenderId);
+                foreach (int a in w.AllyIds) enemies.Add(a);
+            }
+            else
+            {
+                enemies.Add(w.AttackerId);
+                foreach (int a in w.AttackerAllies) enemies.Add(a);
+            }
+        }
+        if (enemies.Count == 0)
+            return;
+
+        foreach (ArmyData army in MilitaryManager.Instance.Armies)
+        {
+            if (army.OwnerId != countryId || army.MoveOrder.Count > 0)
+                continue;
+
+            // Ближайшая провинция врага.
+            int target = -1;
+            float bestDist = float.MaxValue;
+            Vector2 myPos = world.GetProvince(army.ProvinceId).Centroid;
+            foreach (int e in enemies)
+            {
+                CountryData ec = world.GetCountry(e);
+                if (ec == null || !ec.IsAlive)
+                    continue;
+                foreach (int pid in ec.OwnedProvinceIds)
+                {
+                    float d = myPos.DistanceTo(world.GetProvince(pid).Centroid);
+                    if (d < bestDist)
+                    {
+                        bestDist = d;
+                        target = pid;
+                    }
+                }
+            }
+            if (target >= 0)
+                MilitaryManager.Instance.OrderMove(army.Id, target);
         }
     }
 
