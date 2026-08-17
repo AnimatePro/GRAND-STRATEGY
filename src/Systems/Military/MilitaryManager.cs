@@ -263,9 +263,11 @@ public partial class MilitaryManager : Node
         double fortDef = b.FortLevel * 0.05;
 
         double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength
-            * TechManager.Instance.MilitaryMult(a.OwnerId);
+            * TechManager.Instance.MilitaryMult(a.OwnerId)
+            * DifficultyModifiers.MilitaryMult(a.OwnerId);
         double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef)
-            * TechManager.Instance.MilitaryMult(b.OwnerId);
+            * TechManager.Instance.MilitaryMult(b.OwnerId)
+            * DifficultyModifiers.MilitaryMult(b.OwnerId);
 
         double total = attackP + defenseP;
         if (total <= 0)

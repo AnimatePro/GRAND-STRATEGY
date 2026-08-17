@@ -51,6 +51,7 @@ public partial class UIManager : Node
         EventBus.Instance.UINotification += ShowToast;
         EventBus.Instance.DiplomacyUpdated += RebuildPanels;
         EventBus.Instance.TradeUpdated += RebuildPanels;
+        EventBus.Instance.SettingsChanged += ApplyUiScale;
     }
 
     private void OnGameStarted()
@@ -66,8 +67,18 @@ public partial class UIManager : Node
         if (_canvas == null)
             BuildHud();
         _canvas.Visible = true;
+        ApplyUiScale();
         UpdateTopBar();
         RebuildPanels();
+    }
+
+    /// <summary>Применяет масштаб интерфейса из настроек к HUD-слою.</summary>
+    private void ApplyUiScale()
+    {
+        if (_canvas == null)
+            return;
+        float scale = SettingsManager.Instance.Current.Display.UiScale;
+        _canvas.Scale = new Vector2(scale, scale);
     }
 
     /// <summary>Скрывает HUD (при выходе из игровой сцены в меню).</summary>

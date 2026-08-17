@@ -183,6 +183,12 @@ public partial class EconomyManager : Node
                     if (world.Goods[g].Category is GoodCategory.Manufactured or GoodCategory.Strategic)
                         eco.Production[g] += perGood;
             }
+
+            // Модификатор сложности (промышленные товары).
+            double diffMult = DifficultyModifiers.EconomyMult(c);
+            for (int g = 0; g < world.GoodCount; g++)
+                if (world.Goods[g].Category != GoodCategory.Food)
+                    eco.Production[g] *= diffMult;
         }
     }
 
