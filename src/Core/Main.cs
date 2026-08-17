@@ -14,6 +14,13 @@ public partial class Main : Node
         LogService log = LogService.Instance;
         log.Info($"===== {GameConstants.AppVersion} boot start =====");
 
+        // Системный шрифт с поддержкой кириллицы (fallback-цепочка).
+        var sysFont = new SystemFont
+        {
+            FontNames = new[] { "DejaVu Sans", "Noto Sans", "Segoe UI", "Arial", "Liberation Sans" },
+        };
+        ThemeDB.FallbackFont = sysFont;
+
         // 1. Настройки.
         SettingsManager.Instance.Load();
         ApplyDisplaySettings();

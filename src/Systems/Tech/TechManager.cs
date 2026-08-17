@@ -137,6 +137,36 @@ public partial class TechManager : Node
         }
     }
 
+    // --- Сохранение/восстановление -------------------------------------------
+
+    public Dictionary<int, List<int>> GetResearchedForSave()
+    {
+        var result = new Dictionary<int, List<int>>();
+        foreach (KeyValuePair<int, HashSet<int>> kv in _researched)
+            result[kv.Key] = new List<int>(kv.Value);
+        return result;
+    }
+
+    public Dictionary<int, double> GetProgressForSave() => new(_progress);
+
+    public void RestoreResearched(Dictionary<int, List<int>>? researched)
+    {
+        _researched.Clear();
+        if (researched == null)
+            return;
+        foreach (KeyValuePair<int, List<int>> kv in researched)
+            _researched[kv.Key] = new HashSet<int>(kv.Value);
+    }
+
+    public void RestoreProgress(Dictionary<int, double>? progress)
+    {
+        _progress.Clear();
+        if (progress == null)
+            return;
+        foreach (KeyValuePair<int, double> kv in progress)
+            _progress[kv.Key] = kv.Value;
+    }
+
     /// <summary>Множитель производства для страны (1 + эффекты промышленности).</summary>
     public double ProductionMult(int countryId) => 1.0 + GetEffects(countryId).Production;
 

@@ -2,6 +2,7 @@ using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Map;
+using GrandStrategy.Systems.Military;
 
 namespace GrandStrategy;
 

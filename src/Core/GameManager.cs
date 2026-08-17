@@ -160,6 +160,8 @@ public partial class GameManager : Node
             Ironman = ActiveOptions?.Ironman ?? false,
             Settings = SettingsManager.Instance.Current,
             WorldState = worldState,
+            ResearchedTechs = TechManager.Instance.GetResearchedForSave(),
+            TechProgress = TechManager.Instance.GetProgressForSave(),
         };
     }
 
@@ -184,6 +186,10 @@ public partial class GameManager : Node
             MilitaryManager.Instance.RestoreArmies(armies);
             DiplomacyManager.Instance.RestoreWars(wars);
         }
+
+        // Технологии.
+        TechManager.Instance.RestoreResearched(snapshot.ResearchedTechs);
+        TechManager.Instance.RestoreProgress(snapshot.TechProgress);
 
         // Время.
         TimeManager.Instance.StartNewGame(snapshot.CurrentYear);

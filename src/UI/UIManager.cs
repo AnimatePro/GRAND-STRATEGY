@@ -191,12 +191,12 @@ public partial class UIManager : Node
             ? EconomyManager.Instance.Economy.Countries[playerId] : null;
 
         _dateLabel.Text = TimeManager.Instance.CurrentDateString;
-        _treasuryLabel.Text = country != null ? $"💰 {country.Treasury:N0}" : "";
+        _treasuryLabel.Text = country != null ? $"$ {country.Treasury:N0}" : "";
         _incomeLabel.Text = eco != null
             ? $"{Sign(eco.BudgetRevenue - eco.BudgetExpenses)}{eco.BudgetRevenue - eco.BudgetExpenses:N0}/d" : "";
         _gdpLabel.Text = country != null ? $"GDP {country.Gdp:N0}" : "";
-        _popLabel.Text = country != null ? $"👥 {country.Population:N0}" : "";
-        _stabilityLabel.Text = country != null ? $"⚖ {country.Stability:0}%" : "";
+        _popLabel.Text = country != null ? $"pop {country.Population:N0}" : "";
+        _stabilityLabel.Text = country != null ? $"stab {country.Stability:0}%" : "";
     }
 
     private static string Sign(double v) => v >= 0 ? "+" : "";
@@ -442,7 +442,7 @@ public partial class UIManager : Node
             bool done = tech.IsResearched(playerId, t.Id);
             _techBox.AddChild(new Label
             {
-                Text = $"{(done ? "✅" : "⬜")} {LocalizationManager.Instance.Get(t.NameKey)}",
+                Text = $"{(done ? "[x]" : "[ ]")} {LocalizationManager.Instance.Get(t.NameKey)}",
             });
         }
 

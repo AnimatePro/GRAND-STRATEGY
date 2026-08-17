@@ -27,6 +27,8 @@ public sealed class GameSnapshot
     public bool Ironman { get; init; }
     public Settings? Settings { get; init; }
     public WorldStateSaveDto? WorldState { get; init; }
+    public Dictionary<int, List<int>>? ResearchedTechs { get; init; }
+    public Dictionary<int, double>? TechProgress { get; init; }
 }
 
 /// <summary>
