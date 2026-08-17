@@ -16,6 +16,8 @@ public struct ProvinceData
     public int RegionId;     // регион (субъект/штат/область)
     public int ContinentId;
     public bool IsCoastal;   // имеет выход к морю (для морской переброски армий)
+    public int ReligionId;   // религия провинции (индекс в WorldData.Religions)
+    public int CultureId;    // культура провинции (индекс в WorldData.Cultures)
     public Terrain Terrain;
     public Climate Climate;
     public float AreaKm2;

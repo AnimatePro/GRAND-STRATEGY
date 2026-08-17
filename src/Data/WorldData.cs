@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GrandStrategy.Core;
 
 namespace GrandStrategy.Data;
 
@@ -16,6 +17,8 @@ public sealed class WorldData
     public BuildingData[] Buildings = System.Array.Empty<BuildingData>();
     public GovernmentData[] Governments = System.Array.Empty<GovernmentData>();
     public LawData[] Laws = System.Array.Empty<LawData>();
+    public ReligionData[] Religions = System.Array.Empty<ReligionData>();
+    public CultureData[] Cultures = System.Array.Empty<CultureData>();
 
     /// <summary>Названия провинций (индекс = id провинции), EN и RU.</summary>
     public string[] ProvinceNamesEn = System.Array.Empty<string>();
@@ -106,6 +109,22 @@ public sealed class WorldData
         if (!string.IsNullOrEmpty(country.NameKey))
             return country.NameKey;
         return country.Code;
+    }
+
+    /// <summary>Название религии на текущем языке (fallback — EN, затем id).</summary>
+    public string ReligionName(int id, string language = "en")
+    {
+        if (id >= 0 && id < Religions.Length && !string.IsNullOrEmpty(Religions[id].NameKey))
+            return Core.LocalizationManager.Instance.Get(Religions[id].NameKey);
+        return id.ToString();
+    }
+
+    /// <summary>Название культуры на текущем языке (fallback — EN, затем id).</summary>
+    public string CultureName(int id, string language = "en")
+    {
+        if (id >= 0 && id < Cultures.Length && !string.IsNullOrEmpty(Cultures[id].NameKey))
+            return Core.LocalizationManager.Instance.Get(Cultures[id].NameKey);
+        return id.ToString();
     }
 
     /// <summary>Суммарный эффект принятых законов страны (множители по умолчанию = 1.0).</summary>

@@ -1,0 +1,12 @@
+id,name_key,group
+1,REL_CHRISTIANITY,Abrahamic
+2,REL_ISLAM,Abrahamic
+3,REL_HINDUISM,Dharmic
+4,REL_BUDDHISM,Dharmic
+5,REL_JUDAISM,Abrahamic
+6,REL_SIKHISM,Dharmic
+7,REL_FOLK,Traditional
+8,REL_IRRELIGION,Secular
+9,REL_CHINESE_FOLK,East Asian
+10,REL_SHINTO,East Asian
+11,REL_OTHER,Other

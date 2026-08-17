@@ -12,7 +12,7 @@ public partial class MapModeBar : Control
     {
         "Political", "Terrain", "Population", "Economy",
         "Trade", "Resources", "Development", "Infrastructure",
-        "Diplomacy", "War", "Unrest", "Debug",
+        "Diplomacy", "War", "Unrest", "Religion", "Culture",
     };
 
     private MapModeController? _controller;

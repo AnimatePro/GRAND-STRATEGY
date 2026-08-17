@@ -43,6 +43,8 @@ public static class WorldDataLoader
         LoadBuildings(world);
         LoadGovernments(world);
         LoadLaws(world);
+        LoadReligions(world);
+        LoadCultures(world);
 
         // --- Страны ---
         world.Countries = new CountryData[dto.Countries.Count];
@@ -64,6 +66,8 @@ public static class WorldDataLoader
                 Literacy = cdto.Literacy,
                 Urbanization = cdto.Urbanization,
                 Treasury = cdto.Treasury,
+                StateReligionId = cdto.ReligionId,
+                PrimaryCultureId = cdto.CultureId,
             };
             world.Countries[cdto.Id] = country;
             world.CountryCodeToId[cdto.Code] = cdto.Id;
@@ -86,6 +90,8 @@ public static class WorldDataLoader
             province.AreaKm2 = pdto.AreaKm2;
             province.Development = pdto.Development;
             province.Infrastructure = pdto.Infrastructure;
+            province.ReligionId = pdto.ReligionId;
+            province.CultureId = pdto.CultureId;
             province.Centroid = new Vector2(pdto.CentroidX, pdto.CentroidY);
             province.NeighborIds = pdto.NeighborIds.ToArray();
             // Ресурсы: явные из данных, иначе детерминированный fallback по ландшафту.
@@ -257,6 +263,36 @@ public static class WorldDataLoader
             list.Add(l);
         }
         world.Laws = list.ToArray();
+    }
+
+    private static void LoadReligions(WorldData world)
+    {
+        var list = new List<ReligionData>();
+        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/religions.csv"))
+        {
+            list.Add(new ReligionData
+            {
+                Id = list.Count,
+                NameKey = CsvTableLoader.Str(row, "name_key"),
+                Group = CsvTableLoader.Str(row, "group"),
+            });
+        }
+        world.Religions = list.ToArray();
+    }
+
+    private static void LoadCultures(WorldData world)
+    {
+        var list = new List<CultureData>();
+        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/cultures.csv"))
+        {
+            list.Add(new CultureData
+            {
+                Id = list.Count,
+                NameKey = CsvTableLoader.Str(row, "name_key"),
+                Family = CsvTableLoader.Str(row, "family"),
+            });
+        }
+        world.Cultures = list.ToArray();
     }
 
     private static string ReadText(string resPath)

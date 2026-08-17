@@ -31,6 +31,8 @@ public sealed class CountryDto
     public float Literacy = 0.5f;
     public float Urbanization = 0.5f;
     public double Treasury = 1000.0;
+    public int ReligionId;
+    public int CultureId;
 }
 
 public sealed class ProvinceDto
@@ -50,6 +52,8 @@ public sealed class ProvinceDto
     public float CentroidX;
     public float CentroidY;
     public long TotalPopulation;
+    public int ReligionId;
+    public int CultureId;
     public List<int> NeighborIds = new();
     public List<int> ResourceIds = new();
     public List<string> CoreCodes = new();

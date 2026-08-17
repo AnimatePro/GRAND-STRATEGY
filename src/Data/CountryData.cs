@@ -38,6 +38,9 @@ public sealed class CountryData
 
     public int[] Laws = System.Array.Empty<int>();   // id принятых законов
 
+    public int StateReligionId;   // государственная религия (индекс в WorldData.Religions)
+    public int PrimaryCultureId;  // основная культура (индекс в WorldData.Cultures)
+
     /// <summary>Отношения с другими странами: countryId -> [-100..100].</summary>
     public Dictionary<int, float> Relations = new();
 

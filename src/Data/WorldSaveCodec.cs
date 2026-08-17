@@ -25,6 +25,8 @@ public sealed class ProvinceSaveDto
     public long MaleAdults, FemaleAdults, MaleSeniors, FemaleSeniors;
     public float Infrastructure, Development, TaxBase, Unrest, Autonomy;
     public int FortLevel;
+    public int ReligionId;
+    public int CultureId;
     public List<int> BuildingIds = new();
 }
 
@@ -50,6 +52,8 @@ public sealed class CountrySaveDto
     public bool IsPlayer, IsAlive;
     public string ColorHex = "#888888";
     public string FlagId = string.Empty;
+    public int StateReligionId;
+    public int PrimaryCultureId;
 }
 
 public sealed class ArmySaveDto
@@ -119,6 +123,7 @@ public static class WorldSaveCodec
                 Infrastructure = p.Infrastructure, Development = p.Development,
                 TaxBase = p.TaxBase, Unrest = p.Unrest, Autonomy = p.Autonomy,
                 FortLevel = p.FortLevel,
+                ReligionId = p.ReligionId, CultureId = p.CultureId,
                 BuildingIds = new List<int>(p.BuildingIds),
             });
         }
@@ -143,6 +148,7 @@ public static class WorldSaveCodec
                 ControlledProvinceIds = new List<int>(c.ControlledProvinceIds),
                 AiProfile = (int)c.AiProfile, IsPlayer = c.IsPlayer, IsAlive = c.IsAlive,
                 ColorHex = c.Color.ToHtml(), FlagId = c.FlagId,
+                StateReligionId = c.StateReligionId, PrimaryCultureId = c.PrimaryCultureId,
             });
         }
 
@@ -212,6 +218,7 @@ public static class WorldSaveCodec
             cur.Infrastructure = p.Infrastructure; cur.Development = p.Development;
             cur.TaxBase = p.TaxBase; cur.Unrest = p.Unrest; cur.Autonomy = p.Autonomy;
             cur.FortLevel = p.FortLevel;
+            cur.ReligionId = p.ReligionId; cur.CultureId = p.CultureId;
             cur.BuildingIds = p.BuildingIds.ToArray();
             world.Provinces[idx] = cur;
         }
@@ -238,6 +245,7 @@ public static class WorldSaveCodec
             cur.AiProfile = (AiProfile)c.AiProfile;
             cur.IsPlayer = c.IsPlayer; cur.IsAlive = c.IsAlive;
             cur.FlagId = c.FlagId;
+            cur.StateReligionId = c.StateReligionId; cur.PrimaryCultureId = c.PrimaryCultureId;
             try { cur.Color = new Godot.Color(c.ColorHex); } catch { }
         }
 

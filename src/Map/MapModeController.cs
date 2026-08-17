@@ -20,7 +20,7 @@ public partial class MapModeController : Node
     {
         MapMode.Political, MapMode.Terrain, MapMode.Population, MapMode.Economy,
         MapMode.Trade, MapMode.Resources, MapMode.Development, MapMode.Infrastructure,
-        MapMode.Diplomacy, MapMode.War, MapMode.Unrest, MapMode.Debug,
+        MapMode.Diplomacy, MapMode.War, MapMode.Unrest, MapMode.Religion, MapMode.Culture,
     };
 
     public MapMode CurrentMode => Order[Mathf.Clamp(_modeIndex, 0, Order.Length - 1)];

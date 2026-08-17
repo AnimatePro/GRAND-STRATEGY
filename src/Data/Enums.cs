@@ -142,6 +142,8 @@ public enum MapMode
     Unrest = 9,
     Development = 10,
     Debug = 11,
+    Religion = 12,
+    Culture = 13,
 }
 
 public enum LawCategory

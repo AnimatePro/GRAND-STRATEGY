@@ -343,6 +343,8 @@ public partial class UIManager : Node
                 $"  Children: {p.MaleChildren + p.FemaleChildren:N0}  Seniors: {p.MaleSeniors + p.FemaleSeniors:N0}\n" +
                 $"Terrain: {p.Terrain}  Climate: {p.Climate}  Coastal: {p.IsCoastal}\n" +
                 $"Infra: {p.Infrastructure:P0}  Dev: {p.Development:P0}  Unrest: {p.Unrest:P0}\n" +
+                $"{L("PANEL_RELIGION")}: {world.ReligionName(p.ReligionId, lang)}\n" +
+                $"{L("PANEL_CULTURE")}: {world.CultureName(p.CultureId, lang)}\n" +
                 $"Fort: {p.FortLevel}  Neighbors: {p.NeighborIds.Length}",
         };
         _provinceBox.AddChild(info);
@@ -400,6 +402,29 @@ public partial class UIManager : Node
                         built.Append(LocalizationManager.Instance.Get(world.Buildings[bid].NameKey)).Append(", ");
                 _provinceBox.AddChild(new Label { Text = $"{L("PANEL_BUILT")}: {built.ToString().TrimEnd(',', ' ')}" });
             }
+
+            // Религия/культура: обращение/ассимиляция.
+            CountryData pc = world.GetCountry(playerId);
+            if (pc.StateReligionId >= 0 && p.ReligionId != pc.StateReligionId)
+            {
+                AddButton(_provinceBox, L("ACT_CONVERT"), () =>
+                {
+                    if (GovernanceSystem.ConvertReligion(world, playerId, _selectedProvince))
+                        RebuildProvincePanel();
+                    else
+                        EventBus.Instance.EmitUINotification(L("MSG_CONVERT_FAIL"));
+                });
+            }
+            if (pc.PrimaryCultureId >= 0 && p.CultureId != pc.PrimaryCultureId)
+            {
+                AddButton(_provinceBox, L("ACT_ASSIMILATE"), () =>
+                {
+                    if (GovernanceSystem.AssimilateCulture(world, playerId, _selectedProvince))
+                        RebuildProvincePanel();
+                    else
+                        EventBus.Instance.EmitUINotification(L("MSG_ASSIMILATE_FAIL"));
+                });
+            }
         }
         else if (p.OwnerId < 0 && !world.TryGetCountry(p.OwnerId, out _))
         {
@@ -432,6 +457,8 @@ public partial class UIManager : Node
             Text =
                 $"{world.CountryName(c, LocalizationManager.Instance.Language)} ({c.Code})\n" +
                 $"Gov: {c.GovernmentType}  Ideology: {c.Ideology}\n" +
+                $"{L("PANEL_RELIGION")}: {world.ReligionName(c.StateReligionId, LocalizationManager.Instance.Language)}\n" +
+                $"{L("PANEL_CULTURE")}: {world.CultureName(c.PrimaryCultureId, LocalizationManager.Instance.Language)}\n" +
                 $"GDP: {c.Gdp:N0}  Pop: {c.Population:N0}\n" +
                 $"Debt: {c.Debt:N0}  Inflation: {eco.Inflation * 100:0.0}%\n" +
                 $"Stability: {c.Stability:0}  Legitimacy: {c.Legitimacy:0}  WarExh: {c.WarExhaustion:0}\n" +

@@ -91,7 +91,18 @@ public partial class AIDirector : Node
             if (army.OwnerId != countryId || army.MoveOrder.Count > 0)
                 continue;
 
-            // Ближайшая провинция врага.
+            // Отступление разбитой/истощённой армии в дружественную провинцию.
+            if (army.Strength < 0.3f || army.Morale < 0.3f || army.Supply < 15.0)
+            {
+                int retreat = NearestOwned(world, countryId, army.ProvinceId);
+                if (retreat >= 0 && retreat != army.ProvinceId)
+                {
+                    MilitaryManager.Instance.OrderMove(army.Id, retreat);
+                    continue;
+                }
+            }
+
+            // Ближайшая провинция врага (морской десант тоже работает: BFS по морю).
             int target = -1;
             float bestDist = float.MaxValue;
             Vector2 myPos = world.GetProvince(army.ProvinceId).Centroid;
@@ -113,6 +124,27 @@ public partial class AIDirector : Node
             if (target >= 0)
                 MilitaryManager.Instance.OrderMove(army.Id, target);
         }
+    }
+
+    /// <summary>Ближайшая дружественная (своя) провинция для отступления.</summary>
+    private static int NearestOwned(WorldData world, int countryId, int fromProvinceId)
+    {
+        CountryData country = world.GetCountry(countryId);
+        Vector2 myPos = world.GetProvince(fromProvinceId).Centroid;
+        int best = -1;
+        float bestDist = float.MaxValue;
+        foreach (int pid in country.OwnedProvinceIds)
+        {
+            if (pid == fromProvinceId)
+                continue;
+            float d = myPos.DistanceTo(world.GetProvince(pid).Centroid);
+            if (d < bestDist)
+            {
+                bestDist = d;
+                best = pid;
+            }
+        }
+        return best;
     }
 
     // ===================== ЭКОНОМИКА (каждый ход) =====================

@@ -205,6 +205,12 @@ public partial class MapRenderer : TextureRect
                 }
                 return Colors.DimGray;
 
+            case MapMode.Religion:
+                return ReligionColor(p.ReligionId);
+
+            case MapMode.Culture:
+                return CultureColor(p.CultureId);
+
             default:
                 return Colors.SlateGray;
         }
@@ -268,6 +274,32 @@ public partial class MapRenderer : TextureRect
             Terrain.Coast => new Color(0.55f, 0.68f, 0.62f),
             _ => new Color(0.2f, 0.3f, 0.5f),
         };
+    }
+
+    private static Color ReligionColor(int religionId)
+    {
+        // Устойчивая палитра по id религии.
+        return religionId switch
+        {
+            1 => new Color(0.60f, 0.60f, 0.60f), // Христианство (нейтрально-серый)
+            2 => new Color(0.20f, 0.55f, 0.30f), // Ислам (зелёный)
+            3 => new Color(0.85f, 0.50f, 0.15f), // Индуизм (оранжевый)
+            4 => new Color(0.95f, 0.80f, 0.20f), // Буддизм (золотой)
+            5 => new Color(0.30f, 0.45f, 0.85f), // Иудаизм (синий)
+            6 => new Color(0.70f, 0.55f, 0.20f), // Сикхизм (горчичный)
+            7 => new Color(0.55f, 0.35f, 0.15f), // Народные (коричневый)
+            8 => new Color(0.75f, 0.75f, 0.75f), // Атеизм (светло-серый)
+            9 => new Color(0.75f, 0.25f, 0.25f), // Китайские народные (красный)
+            10 => new Color(0.85f, 0.20f, 0.40f), // Синто (розовый)
+            _ => new Color(0.45f, 0.45f, 0.45f),
+        };
+    }
+
+    private static Color CultureColor(int cultureId)
+    {
+        // Детерминированный цвет из id культуры (HSL-распределение).
+        float hue = (cultureId * 47) % 360 / 360f;
+        return Color.FromHsv(hue, 0.55f, 0.75f);
     }
 
     /// <summary>Линейный градиент белый->зелёный->красный для тепловых режимов.</summary>

@@ -58,13 +58,25 @@ public static class GovernanceSystem
             LogService.Instance.Warning($"Governance: coup in {country.Code}");
         }
 
-        // --- Мятежи/сепаратизм по провинциям ---
+        // --- Религиозная/культурная напряжённость + мятежи/сепаратизм ---
         foreach (int pid in country.OwnedProvinceIds)
         {
             int idx = world.ProvinceIdToIndex[pid];
             ProvinceData p = world.Provinces[idx];
+
+            // Дрейф unrest к уровню, заданному религиозным/культурным несовпадением.
+            float mismatch = 0f;
+            if (country.StateReligionId >= 0 && p.ReligionId != country.StateReligionId)
+                mismatch += 0.15f;
+            if (country.PrimaryCultureId >= 0 && p.CultureId != country.PrimaryCultureId)
+                mismatch += 0.15f;
+            p.Unrest = Mathf.MoveToward(p.Unrest, mismatch, 0.01f);
+
             if (p.Unrest < 0.3f)
+            {
+                world.Provinces[idx] = p;
                 continue;
+            }
 
             double unrest = p.Unrest;
             // Ущерб инфраструктуре и развитию.
@@ -134,5 +146,45 @@ public static class GovernanceSystem
         int next = (cur + 1) % IdeologyOrder.Length;
         country.Ideology = IdeologyOrder[next];
         country.Stability = Mathf.Clamp(country.Stability - 5f, 0f, 100f);
+    }
+
+    // --- Религия и культура: обращение/ассимиляция провинции ---
+
+    /// <summary>Обращение провинции в государственную религию (деньги + недовольство).</summary>
+    public static bool ConvertReligion(WorldData world, int countryId, int provinceId)
+    {
+        CountryData country = world.GetCountry(countryId);
+        ProvinceData p = world.GetProvince(provinceId);
+        if (country == null || p.OwnerId != countryId || country.StateReligionId < 0)
+            return false;
+        if (p.ReligionId == country.StateReligionId)
+            return false;
+        double cost = 300 + p.TotalPopulation * 0.01;
+        if (country.Treasury < cost)
+            return false;
+        country.Treasury -= cost;
+        p.ReligionId = country.StateReligionId;
+        p.Unrest = Mathf.Clamp(p.Unrest + 0.2f, 0f, 1f); // временное недовольство
+        world.SetProvince(provinceId, in p);
+        return true;
+    }
+
+    /// <summary>Ассимиляция провинции в основную культуру (дороже, медленнее).</summary>
+    public static bool AssimilateCulture(WorldData world, int countryId, int provinceId)
+    {
+        CountryData country = world.GetCountry(countryId);
+        ProvinceData p = world.GetProvince(provinceId);
+        if (country == null || p.OwnerId != countryId || country.PrimaryCultureId < 0)
+            return false;
+        if (p.CultureId == country.PrimaryCultureId)
+            return false;
+        double cost = 600 + p.TotalPopulation * 0.02;
+        if (country.Treasury < cost)
+            return false;
+        country.Treasury -= cost;
+        p.CultureId = country.PrimaryCultureId;
+        p.Unrest = Mathf.Clamp(p.Unrest + 0.3f, 0f, 1f);
+        world.SetProvince(provinceId, in p);
+        return true;
     }
 }

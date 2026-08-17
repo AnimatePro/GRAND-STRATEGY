@@ -185,3 +185,92 @@ REL_PEACE,мирный договор
 REL_TRADE,торговля
 REL_EVENT,событие
 REL_EMBARGO,эмбарго
+PANEL_RELIGION,Религия
+PANEL_CULTURE,Культура
+ACT_CONVERT,Обратить в религию
+ACT_ASSIMILATE,Ассимилировать культуру
+MSG_CONVERT_FAIL,Нельзя обратить эту провинцию
+MSG_ASSIMILATE_FAIL,Нельзя ассимилировать эту провинцию
+REL_CHRISTIANITY,Христианство
+REL_ISLAM,Ислам
+REL_HINDUISM,Индуизм
+REL_BUDDHISM,Буддизм
+REL_JUDAISM,Иудаизм
+REL_SIKHISM,Сикхизм
+REL_FOLK,Народные верования
+REL_IRRELIGION,Атеизм/секуляризм
+REL_CHINESE_FOLK,Китайские народные
+REL_SHINTO,Синтоизм
+REL_OTHER,Прочие
+CUL_ENGLISH,Англичане
+CUL_FRENCH,Французы
+CUL_GERMAN,Немцы
+CUL_SPANISH,Испанцы
+CUL_PORTUGUESE,Португальцы
+CUL_ITALIAN,Итальянцы
+CUL_RUSSIAN,Русские
+CUL_UKRAINIAN,Украинцы
+CUL_POLISH,Поляки
+CUL_CZECH,Чехи
+CUL_DUTCH,Голландцы
+CUL_SCANDINAVIAN,Скандинавы
+CUL_GREEK,Греки
+CUL_SOUTH_SLAVIC,Южные славяне
+CUL_ROMANIAN,Румыны
+CUL_HUNGARIAN,Венгры
+CUL_FINNISH,Финны
+CUL_BALTIC,Прибалты
+CUL_IRISH,Ирландцы
+CUL_SCOTTISH,Шотландцы
+CUL_WELSH,Валлийцы
+CUL_BASQUE,Баски
+CUL_CATALAN,Каталонцы
+CUL_ALBANIAN,Албанцы
+CUL_BULGARIAN,Болгары
+CUL_BELARUSIAN,Белорусы
+CUL_ARABIC,Арабы
+CUL_PERSIAN,Персы
+CUL_TURKISH,Турки
+CUL_KURDISH,Курды
+CUL_HEBREW,Евреи
+CUL_BERBER,Берберы
+CUL_HINDI,Хинди
+CUL_BENGALI,Бенгальцы
+CUL_PUNJABI,Пенджабцы
+CUL_TAMIL,Тамилы
+CUL_TELUGU,Телугу
+CUL_MARATHI,Маратхи
+CUL_GUJARATI,Гуджаратцы
+CUL_URDU,Урду
+CUL_PASHTUN,Пуштуны
+CUL_SINHALESE,Сингалы
+CUL_NEPALI,Непальцы
+CUL_TIBETAN,Тибетцы
+CUL_CHINESE,Китайцы (хань)
+CUL_MONGOLIAN,Монголы
+CUL_KOREAN,Корейцы
+CUL_JAPANESE,Японцы
+CUL_VIETNAMESE,Вьетнамцы
+CUL_THAI,Тайцы
+CUL_BURMESE,Бирманцы
+CUL_KHMER,Кхмеры
+CUL_FILIPINO,Филиппинцы
+CUL_MALAY,Малайцы
+CUL_KAZAKH,Казахи
+CUL_UZBEK,Узбеки
+CUL_AMHARIC,Амхара
+CUL_SOMALI,Сомалийцы
+CUL_SWAHILI,Суахили
+CUL_YORUBA,Йоруба
+CUL_IGBO,Игбо
+CUL_HAUSA,Хауса
+CUL_ZULU,Зулусы
+CUL_SHONA,Шона
+CUL_MALAGASY,Малагасийцы
+CUL_OROMO,Оромо
+CUL_NATIVE_AMERICAN,Коренные народы Америки
+CUL_MESTIZO,Метисы
+CUL_CREOLE,Креолы
+CUL_ANGLO_AUSTRALIAN,Англо-австралийцы
+CUL_MAORI,Маори
+CUL_OTHER,Прочие
