@@ -49,6 +49,10 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
 
+[gui]
+
+theme/custom="res://assets/ui/theme.tres"
+
 [dotnet]
 
 project/assembly_name="GrandStrategy"

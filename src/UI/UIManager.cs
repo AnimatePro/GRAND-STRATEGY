@@ -23,9 +23,12 @@ public partial class UIManager : Node
     public static UIManager Instance { get; private set; } = null!;
 
     private CanvasLayer _canvas = null!;
+    private ColorRect _flagRect = null!;
+    private Label _countryNameLabel = null!;
     private Label _dateLabel = null!;
     private Label _treasuryLabel = null!;
     private Label _incomeLabel = null!;
+    private Label _manpowerLabel = null!;
     private Label _gdpLabel = null!;
     private Label _popLabel = null!;
     private Label _stabilityLabel = null!;
@@ -107,12 +110,22 @@ public partial class UIManager : Node
         _canvas.AddChild(topBar);
 
         var topHBox = new HBoxContainer();
-        topHBox.AddThemeConstantOverride("separation", 12);
+        topHBox.AddThemeConstantOverride("separation", 14);
         topBar.AddChild(topHBox);
+
+        // Флаг + название страны.
+        _flagRect = new ColorRect
+        {
+            CustomMinimumSize = new Vector2(26, 17),
+            SizeFlagsVertical = Control.SizeFlags.ShrinkCenter,
+        };
+        topHBox.AddChild(_flagRect);
+        _countryNameLabel = MakeLabel(topHBox);
 
         _dateLabel = MakeLabel(topHBox);
         _treasuryLabel = MakeLabel(topHBox);
         _incomeLabel = MakeLabel(topHBox);
+        _manpowerLabel = MakeLabel(topHBox);
         _gdpLabel = MakeLabel(topHBox);
         _popLabel = MakeLabel(topHBox);
         _stabilityLabel = MakeLabel(topHBox);
@@ -204,12 +217,31 @@ public partial class UIManager : Node
             ? EconomyManager.Instance.Economy.Countries[playerId] : null;
 
         _dateLabel.Text = TimeManager.Instance.CurrentDateString;
-        _treasuryLabel.Text = country != null ? $"$ {country.Treasury:N0}" : "";
-        _incomeLabel.Text = eco != null
-            ? $"{Sign(eco.BudgetRevenue - eco.BudgetExpenses)}{eco.BudgetRevenue - eco.BudgetExpenses:N0}/d" : "";
+        _countryNameLabel.Text = country != null ? world.CountryName(country, LocalizationManager.Instance.Language) : "";
+        if (country != null)
+            _flagRect.Color = country.Color;
+
+        double balance = eco != null ? eco.BudgetRevenue - eco.BudgetExpenses : 0.0;
+        _treasuryLabel.Text = country != null ? $"Gold {country.Treasury:N0}" : "";
+        _incomeLabel.Text = eco != null ? $"{Sign(balance)}{balance:N0}/d" : "";
+        _manpowerLabel.Text = country != null ? $"MP {ManpowerOf(world, playerId):N0}" : "";
         _gdpLabel.Text = country != null ? $"GDP {country.Gdp:N0}" : "";
-        _popLabel.Text = country != null ? $"pop {country.Population:N0}" : "";
-        _stabilityLabel.Text = country != null ? $"stab {country.Stability:0}%" : "";
+        _popLabel.Text = country != null ? $"Pop {country.Population:N0}" : "";
+        _stabilityLabel.Text = country != null ? $"Stab {country.Stability:0}%" : "";
+    }
+
+    /// <summary>Людской запас страны: сумма взрослых мужчин по владениям.</summary>
+    private static long ManpowerOf(WorldData world, int countryId)
+    {
+        if (countryId < 0 || countryId >= world.Countries.Length)
+            return 0;
+        CountryData c = world.Countries[countryId];
+        if (c == null)
+            return 0;
+        long mp = 0;
+        foreach (int pid in c.OwnedProvinceIds)
+            mp += world.GetProvince(pid).MaleAdults;
+        return mp;
     }
 
     private static string Sign(double v) => v >= 0 ? "+" : "";

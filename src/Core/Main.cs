@@ -20,9 +20,8 @@ public partial class Main : Node
             FontNames = new[] { "DejaVu Sans", "Noto Sans", "Segoe UI", "Arial", "Liberation Sans" },
         };
         ThemeDB.FallbackFont = sysFont;
-
-        // Единая тёмная тема интерфейса.
-        ThemeDB.FallbackTheme = GrandStrategy.UI.GameTheme.Build();
+        // Глобальная тёмная тема задаётся ресурсом assets/ui/theme.tres через
+        // настройку проекта gui/theme/custom (см. project.godot).
 
         // 1. Настройки.
         SettingsManager.Instance.Load();
