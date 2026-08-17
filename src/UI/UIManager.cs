@@ -565,6 +565,22 @@ public partial class UIManager : Node
                 EventBus.Instance.EmitUINotification(L("MSG_COMMANDER_FAIL"));
             RebuildMilitaryPanel();
         });
+
+        // Шаблоны армий (макробилдер рекрутинга).
+        _militaryBox.AddChild(new Label { Text = L("PANEL_TEMPLATES") });
+        for (int t = 0; t < MilitaryManager.Templates.Length; t++)
+        {
+            int templateId = t;
+            bool active = mil.MacroRecruitTemplate == templateId;
+            string marker = active ? "▶ " : "";
+            AddButton(_militaryBox, $"{marker}{L(MilitaryManager.TemplateNames[templateId])}", () =>
+            {
+                mil.MacroRecruitTemplate = active ? -1 : templateId;
+                if (mil.MacroRecruitTemplate >= 0)
+                    EventBus.Instance.EmitUINotification(L("MACRO_RECRUIT_HINT"));
+                RebuildMilitaryPanel();
+            });
+        }
     }
 
     // --- Вкладка дипломатии ---------------------------------------------------

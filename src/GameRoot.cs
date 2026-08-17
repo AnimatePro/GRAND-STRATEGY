@@ -232,6 +232,20 @@ public partial class GameRoot : Node
             return;
         }
 
+        // Макробилдер рекрутинга: массовый найм по шаблону кликом.
+        if (MilitaryManager.Instance.MacroRecruitTemplate >= 0)
+        {
+            if (index >= 0)
+            {
+                var template = MilitaryManager.Instance.Templates[MilitaryManager.Instance.MacroRecruitTemplate];
+                if (MilitaryManager.Instance.RecruitArmy(PlayerCountryId(), index, template))
+                    EventBus.Instance.EmitUINotification("Army recruited");
+                else
+                    EventBus.Instance.EmitUINotification("Cannot recruit here");
+            }
+            return;
+        }
+
         if (index < 0)
         {
             ClearSelection();

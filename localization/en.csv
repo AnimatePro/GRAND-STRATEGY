@@ -274,3 +274,9 @@ CUL_CREOLE,Creole
 CUL_ANGLO_AUSTRALIAN,Anglo-Australian
 CUL_MAORI,Maori
 CUL_OTHER,Other
+PANEL_TEMPLATES,Army Templates
+TPL_INFANTRY,Infantry
+TPL_CAV,Infantry + Cavalry
+TPL_ART,Infantry + Artillery
+TPL_MIXED,Mixed
+MACRO_RECRUIT_HINT,Template selected — click provinces to recruit

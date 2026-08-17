@@ -30,6 +30,7 @@ public sealed class ArmyData
     public int FortLevel;
     public List<int> MoveOrder = new(); // очередь провинций пути (следующая — первая)
     public int NavalLandingTurns;       // >0 = армия только что высадилась с моря (штраф в бою)
+    public float MoveProgress;          // 0..1 — прогресс перехода между провинциями (анимация)
 
     public int TotalUnits
     {

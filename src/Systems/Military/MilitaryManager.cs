@@ -35,6 +35,23 @@ public partial class MilitaryManager : Node
     /// <summary>Макробилдер: id здания для массовой застройки кликом (-1 = выкл).</summary>
     public int MacroBuildId = -1;
 
+    /// <summary>Макробилдер рекрутинга: id шаблона для массового найма кликом (-1 = выкл).</summary>
+    public int MacroRecruitTemplate = -1;
+
+    // --- Шаблоны армий (id = индекс; словарь юнит -> количество) ---
+    public static readonly Dictionary<int, int>[] Templates =
+    {
+        new() { { 0, 5 } },                    // 0: Пехота
+        new() { { 0, 4 }, { 1, 2 } },          // 1: Пехота + кавалерия
+        new() { { 0, 6 }, { 2, 3 } },          // 2: Пехота + артиллерия
+        new() { { 0, 4 }, { 1, 2 }, { 2, 2 } },// 3: Смешанная
+    };
+
+    public static readonly string[] TemplateNames =
+    {
+        "TPL_INFANTRY", "TPL_CAV", "TPL_ART", "TPL_MIXED",
+    };
+
     private static readonly string[] CommanderNames =
     {
         "Alexander", "Caesar", "Napoleon", "Zhukov", "Rommel", "Patton",
@@ -292,8 +309,17 @@ public partial class MilitaryManager : Node
     private void MoveOneStep(WorldData world, ArmyData army)
     {
         if (army.MoveOrder.Count == 0)
+        {
+            army.MoveProgress = 0f;
+            return;
+        }
+
+        // Прогресс движения: армия переходит в следующую провинцию за несколько тиков.
+        army.MoveProgress += 1f / Math.Max(MoveTicksPerProvince, 1);
+        if (army.MoveProgress < 1f)
             return;
 
+        army.MoveProgress = 0f;
         int next = army.MoveOrder[0];
         // Блокируем движение в провинцию с враждебной армией.
         if (HasHostileArmy(world, next, army.OwnerId))
@@ -308,6 +334,9 @@ public partial class MilitaryManager : Node
         if (isSeaJump)
             army.NavalLandingTurns = 2; // штраф десанта на 2 хода
     }
+
+    /// <summary>Тиков на переход в соседнюю провинцию.</summary>
+    public const float MoveTicksPerProvince = 2f;
 
     private void ResolveBattles(WorldData world, Rng rng)
     {

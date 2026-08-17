@@ -274,3 +274,9 @@ CUL_CREOLE,Креолы
 CUL_ANGLO_AUSTRALIAN,Англо-австралийцы
 CUL_MAORI,Маори
 CUL_OTHER,Прочие
+PANEL_TEMPLATES,Шаблоны армий
+TPL_INFANTRY,Пехота
+TPL_CAV,Пехота + кавалерия
+TPL_ART,Пехота + артиллерия
+TPL_MIXED,Смешанная
+MACRO_RECRUIT_HINT,Шаблон выбран — кликайте по провинциям для найма
