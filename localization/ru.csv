@@ -81,3 +81,32 @@ FORM_GERMANY,Германская конфедерация
 FORM_ARAB_LEAGUE,Арабская лига
 FORM_GRAN_COLOMBIA,Великая Колумбия
 FORM_CENTRAL_ASIA,Центральноазиатский союз
+HUD_PAUSE,Пауза
+HUD_SPEED_DOWN,Скорость -
+HUD_SPEED_UP,Скорость +
+HUD_END_TURN,Конец хода
+HUD_SAVE,Сохранить
+HUD_LOAD,Загрузить
+PANEL_PROVINCE,Провинция
+PANEL_COUNTRY,Страна
+PANEL_TARGET,Цель
+PANEL_TECHNOLOGY,Технологии
+PANEL_RESEARCH,Исследования
+PANEL_DECISIONS,Решения
+ACT_BUILD_INFRA,Строить инфраструктуру (-500)
+ACT_RECRUIT,Нанять армию (Пехота x5)
+MSG_ARMY_RECRUITED,Армия нанята
+ACT_TAX_PLUS,Подоходный налог +
+ACT_TAX_MINUS,Подоходный налог -
+ACT_CHANGE_GOV,Сменить правление
+ACT_CHANGE_IDEOLOGY,Сменить идеологию
+ACT_IMPROVE_REL,Улучшить отношения
+ACT_ALLIANCE,Заключить альянс
+ACT_DECLARE_WAR,Объявить войну
+ACT_WHITE_PEACE,Белый мир
+ACT_PEACE_CEDE,Мир: уступить оккупированное
+ACT_PEACE_PUPPET,Мир: вассалитет
+ACT_PEACE_ANNEX,Мир: аннексия
+ACT_EMBARGO,Переключить эмбарго
+ACT_TRADE_AGREEMENT,Сменить торг. соглашение
+ACT_FORM,Сформировать

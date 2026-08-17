@@ -63,6 +63,8 @@ public partial class UIManager : Node
 
     private int PlayerId() => GameManager.Instance.ActiveOptions?.PlayerCountryId ?? 0;
 
+    private static string L(string key) => LocalizationManager.Instance.Get(key);
+
     // --- Построение HUD ------------------------------------------------------
 
     private void BuildHud()
@@ -86,21 +88,21 @@ public partial class UIManager : Node
         _popLabel = MakeLabel(topHBox);
         _stabilityLabel = MakeLabel(topHBox);
 
-        AddButton(topHBox, "⏸", () => GameManager.Instance.Pause());
-        AddButton(topHBox, "Speed -", () => TimeManager.Instance.SetSpeed(TimeManager.Instance.Speed - 1));
-        AddButton(topHBox, "Speed +", () => TimeManager.Instance.SetSpeed(TimeManager.Instance.Speed + 1));
-        AddButton(topHBox, "END TURN", () => GameManager.Instance.EndTurn());
-        AddButton(topHBox, "💾 Save", () => GameManager.Instance.SaveGame("manual"));
-        AddButton(topHBox, "📂 Load", () => GameManager.Instance.LoadGame("manual"));
+        AddButton(topHBox, L("HUD_PAUSE"), () => GameManager.Instance.Pause());
+        AddButton(topHBox, L("HUD_SPEED_DOWN"), () => TimeManager.Instance.SetSpeed(TimeManager.Instance.Speed - 1));
+        AddButton(topHBox, L("HUD_SPEED_UP"), () => TimeManager.Instance.SetSpeed(TimeManager.Instance.Speed + 1));
+        AddButton(topHBox, L("HUD_END_TURN"), () => GameManager.Instance.EndTurn());
+        AddButton(topHBox, L("HUD_SAVE"), () => GameManager.Instance.SaveGame("manual"));
+        AddButton(topHBox, L("HUD_LOAD"), () => GameManager.Instance.LoadGame("manual"));
 
         // Панель провинции (слева сверху).
-        _provinceBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 64), new Vector2(360, 260), "Province");
+        _provinceBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 64), new Vector2(360, 260), L("PANEL_PROVINCE"));
         // Панель игрока (слева снизу).
-        _playerBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 340), new Vector2(360, 640), "Country");
+        _playerBox = MakePanel(Control.LayoutPreset.TopLeft, new Vector2(8, 340), new Vector2(360, 640), L("PANEL_COUNTRY"));
         // Панель целевой страны (справа).
-        _targetBox = MakePanel(Control.LayoutPreset.TopRight, new Vector2(-380, 64), new Vector2(-8, 420), "Target");
+        _targetBox = MakePanel(Control.LayoutPreset.TopRight, new Vector2(-380, 64), new Vector2(-8, 420), L("PANEL_TARGET"));
         // Панель технологий (справа снизу).
-        _techBox = MakePanel(Control.LayoutPreset.TopRight, new Vector2(-380, 430), new Vector2(-8, 700), "Technology");
+        _techBox = MakePanel(Control.LayoutPreset.TopRight, new Vector2(-380, 430), new Vector2(-8, 700), L("PANEL_TECHNOLOGY"));
 
         // Тост.
         _toast = new Label { HorizontalAlignment = HorizontalAlignment.Center, Visible = false };
@@ -236,7 +238,7 @@ public partial class UIManager : Node
 
         if (p.OwnerId == playerId)
         {
-            AddButton(_provinceBox, "Build Infrastructure (-500)", () =>
+            AddButton(_provinceBox, L("ACT_BUILD_INFRA"), () =>
             {
                 CountryData c = world.GetCountry(playerId);
                 if (c.Treasury >= 500)
@@ -250,11 +252,11 @@ public partial class UIManager : Node
                 }
             });
 
-            AddButton(_provinceBox, "Recruit Army (Infantry x5)", () =>
+            AddButton(_provinceBox, L("ACT_RECRUIT"), () =>
             {
                 MilitaryManager.Instance.RecruitArmy(playerId, _selectedProvince,
                     new System.Collections.Generic.Dictionary<int, int> { { 0, 5 } });
-                EventBus.Instance.EmitUINotification("Army recruited");
+                EventBus.Instance.EmitUINotification(L("MSG_ARMY_RECRUITED"));
             });
         }
     }
@@ -284,22 +286,22 @@ public partial class UIManager : Node
         };
         _playerBox.AddChild(info);
 
-        AddButton(_playerBox, "Income Tax +", () =>
+        AddButton(_playerBox, L("ACT_TAX_PLUS"), () =>
         {
             eco.Taxes.Income = Math.Min(eco.Taxes.Income + 0.05, 0.5);
             UpdateTopBar(); RebuildPlayerPanel();
         });
-        AddButton(_playerBox, "Income Tax -", () =>
+        AddButton(_playerBox, L("ACT_TAX_MINUS"), () =>
         {
             eco.Taxes.Income = Math.Max(eco.Taxes.Income - 0.05, 0.0);
             UpdateTopBar(); RebuildPlayerPanel();
         });
-        AddButton(_playerBox, "Change Government", () =>
+        AddButton(_playerBox, L("ACT_CHANGE_GOV"), () =>
         {
             GovernanceSystem.ChangeGovernment(world, playerId);
             RebuildPlayerPanel();
         });
-        AddButton(_playerBox, "Change Ideology", () =>
+        AddButton(_playerBox, L("ACT_CHANGE_IDEOLOGY"), () =>
         {
             GovernanceSystem.ChangeIdeology(world, playerId);
             RebuildPlayerPanel();
@@ -329,50 +331,50 @@ public partial class UIManager : Node
         };
         _targetBox.AddChild(info);
 
-        AddButton(_targetBox, "Improve Relations", () =>
+        AddButton(_targetBox, L("ACT_IMPROVE_REL"), () =>
         {
             DiplomacyManager.Instance.ImproveRelations(playerId, _targetCountry, 10f);
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "Form Alliance", () =>
+        AddButton(_targetBox, L("ACT_ALLIANCE"), () =>
         {
             DiplomacyManager.Instance.FormAlliance(playerId, _targetCountry);
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "⚠ Declare War", () =>
+        AddButton(_targetBox, L("ACT_DECLARE_WAR"), () =>
         {
             DiplomacyManager.Instance.DeclareWar(playerId, _targetCountry, "conquest");
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "White Peace", () =>
+        AddButton(_targetBox, L("ACT_WHITE_PEACE"), () =>
         {
             DiplomacyManager.Instance.MakePeace(playerId, _targetCountry, new PeaceTerms());
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "Peace: Cede Occupied", () =>
+        AddButton(_targetBox, L("ACT_PEACE_CEDE"), () =>
         {
             DiplomacyManager.Instance.MakePeace(playerId, _targetCountry,
                 new PeaceTerms { CedeOccupied = true });
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "Peace: Puppet", () =>
+        AddButton(_targetBox, L("ACT_PEACE_PUPPET"), () =>
         {
             DiplomacyManager.Instance.MakePeace(playerId, _targetCountry,
                 new PeaceTerms { Puppet = true });
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "Peace: Annex", () =>
+        AddButton(_targetBox, L("ACT_PEACE_ANNEX"), () =>
         {
             DiplomacyManager.Instance.MakePeace(playerId, _targetCountry,
                 new PeaceTerms { Annex = true });
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "Toggle Embargo", () =>
+        AddButton(_targetBox, L("ACT_EMBARGO"), () =>
         {
             DiplomacyManager.Instance.ToggleEmbargo(playerId, _targetCountry);
             RebuildTargetPanel();
         });
-        AddButton(_targetBox, "Cycle Trade Agreement", () =>
+        AddButton(_targetBox, L("ACT_TRADE_AGREEMENT"), () =>
         {
             DiplomacyManager.Instance.CycleTradeAgreement(playerId, _targetCountry);
             RebuildTargetPanel();
@@ -392,7 +394,7 @@ public partial class UIManager : Node
 
         var header = new Label
         {
-            Text = $"Research: {tech.Progress(playerId):N0} pts  (speed {(1 + tech.GetEffects(playerId).Research):P0})",
+            Text = $"{L("PANEL_RESEARCH")}: {tech.Progress(playerId):N0}",
         };
         _techBox.AddChild(header);
 
@@ -410,10 +412,10 @@ public partial class UIManager : Node
         var avail = formable.AvailableFor(playerId);
         if (avail.Count > 0)
         {
-            _techBox.AddChild(new Label { Text = "—— Decisions ——" });
+            _techBox.AddChild(new Label { Text = L("PANEL_DECISIONS") });
             foreach (FormableData f in avail)
             {
-                AddButton(_techBox, $"Form: {LocalizationManager.Instance.Get(f.NameKey)}", () =>
+                AddButton(_techBox, $"{L("ACT_FORM")}: {LocalizationManager.Instance.Get(f.NameKey)}", () =>
                 {
                     formable.Form(playerId, f);
                     RebuildPanels();

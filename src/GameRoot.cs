@@ -17,6 +17,7 @@ public partial class GameRoot : Node
     private ProvincePicker _picker = null!;
     private LabelPool _labels = null!;
     private Minimap _minimap = null!;
+    private ArmyLayer _armyLayer = null!;
     private MapModeController _modeController = null!;
     private DebugOverlay _debug = null!;
     private Control _uiRoot = null!;
@@ -93,6 +94,12 @@ public partial class GameRoot : Node
         _uiRoot.AddChild(_labels);
         _labels.Initialize(DataManager.Instance.World, _camera);
 
+        // Маркеры армий (поверх меток).
+        _armyLayer = new ArmyLayer();
+        _armyLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _uiRoot.AddChild(_armyLayer);
+        _armyLayer.Initialize(DataManager.Instance.World, _camera);
+
         // Миникарта (правый нижний угол).
         _minimap = new Minimap();
         _minimap.SetAnchorsPreset(Control.LayoutPreset.BottomRight);
@@ -134,9 +141,10 @@ public partial class GameRoot : Node
             }
         }
 
-        // Метки и миникарта.
+        // Метки, миникарта и маркеры армий.
         _labels.Update(delta);
         _minimap.QueueRedraw();
+        _armyLayer.QueueRedraw();
     }
 
     private void OnMapClicked(Vector2 world)

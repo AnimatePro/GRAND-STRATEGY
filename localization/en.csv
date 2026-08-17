@@ -81,3 +81,32 @@ FORM_GERMANY,German Confederation
 FORM_ARAB_LEAGUE,Arab League
 FORM_GRAN_COLOMBIA,Gran Colombia
 FORM_CENTRAL_ASIA,Central Asian Union
+HUD_PAUSE,Pause
+HUD_SPEED_DOWN,Speed -
+HUD_SPEED_UP,Speed +
+HUD_END_TURN,End Turn
+HUD_SAVE,Save
+HUD_LOAD,Load
+PANEL_PROVINCE,Province
+PANEL_COUNTRY,Country
+PANEL_TARGET,Target
+PANEL_TECHNOLOGY,Technology
+PANEL_RESEARCH,Research
+PANEL_DECISIONS,Decisions
+ACT_BUILD_INFRA,Build Infrastructure (-500)
+ACT_RECRUIT,Recruit Army (Infantry x5)
+MSG_ARMY_RECRUITED,Army recruited
+ACT_TAX_PLUS,Income Tax +
+ACT_TAX_MINUS,Income Tax -
+ACT_CHANGE_GOV,Change Government
+ACT_CHANGE_IDEOLOGY,Change Ideology
+ACT_IMPROVE_REL,Improve Relations
+ACT_ALLIANCE,Form Alliance
+ACT_DECLARE_WAR,Declare War
+ACT_WHITE_PEACE,White Peace
+ACT_PEACE_CEDE,Peace: Cede Occupied
+ACT_PEACE_PUPPET,Peace: Puppet
+ACT_PEACE_ANNEX,Peace: Annex
+ACT_EMBARGO,Toggle Embargo
+ACT_TRADE_AGREEMENT,Cycle Trade Agreement
+ACT_FORM,Form
