@@ -43,7 +43,7 @@ public partial class DebugOverlay : Control
 
     public override void _Process(double delta)
     {
-        _fps = Engine.GetFramesPerSecond();
+        _fps = (float)Engine.GetFramesPerSecond();
         _frameMs = (float)(delta * 1000.0);
         _sb.Clear();
         _sb.AppendLine($"FPS: {_fps:0}  frame: {_frameMs:0.00} ms");
@@ -66,7 +66,7 @@ public partial class DebugOverlay : Control
             GetViewport().SetInputAsHandled();
         }
         else if (Visible && ev is InputEventKey k2 && k2.Pressed && !k2.Echo &&
-                 (k2.Keycode == Key.Quoteleft || k2.Keycode == Key.AsciiTilde))
+                 k2.Keycode == Key.Quoteleft)
         {
             _console.Visible = !_console.Visible;
             if (_console.Visible)

@@ -24,7 +24,7 @@ public static class ResourceAssigner
 
     public static int[] Assign(int provinceId, Terrain terrain, Climate climate)
     {
-        var rng = new Rng(provinceId * 0x9E3779B97F4A7C15L + 0x1234567);
+        var rng = new Rng((long)(provinceId * 0x9E3779B97F4A7C15L + 0x1234567));
         var result = new List<int>(2);
 
         switch (terrain)

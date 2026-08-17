@@ -66,7 +66,7 @@ public partial class UIManager : Node
     {
         if (_canvas == null)
             BuildHud();
-        _canvas.Visible = true;
+        _canvas!.Visible = true;
         ApplyUiScale();
         UpdateTopBar();
         RebuildPanels();
@@ -198,7 +198,7 @@ public partial class UIManager : Node
         WorldData world = DataManager.Instance.World;
         int playerId = PlayerId();
         CountryData country = world.GetCountry(playerId);
-        CountryEconomy eco = EconomyManager.Instance.Economy.Countries.Length > playerId
+        CountryEconomy? eco = EconomyManager.Instance.Economy.Countries.Length > playerId
             ? EconomyManager.Instance.Economy.Countries[playerId] : null;
 
         _dateLabel.Text = TimeManager.Instance.CurrentDateString;

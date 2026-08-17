@@ -67,7 +67,7 @@ public partial class LogService : Node
         {
             try
             {
-                File.AppendAllText(_logFilePath, line + Environment.NewLine);
+                File.AppendAllText(_logFilePath, line + System.Environment.NewLine);
             }
             catch
             {

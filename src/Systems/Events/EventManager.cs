@@ -5,6 +5,7 @@ using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Utils;
+using FileAccess = Godot.FileAccess; // implicit System.IO конфликтует с Godot.FileAccess
 
 namespace GrandStrategy.Systems.Events;
 

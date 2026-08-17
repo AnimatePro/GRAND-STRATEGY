@@ -75,7 +75,7 @@ public partial class MapRenderer : TextureRect
         _material.SetShaderParameter("country_lut", _countryLut);
         _material.SetShaderParameter("border_mask", _borderTexture);
         _material.SetShaderParameter("province_count", (float)n);
-        _material.SetShaderParameter("texel_size", new Vector2(1f / idImg.GetWidth(), 1f / idImg.GetHeight()));
+        _material.SetShaderParameter("texel_size", new Vector2(1f / _idImage.GetWidth(), 1f / _idImage.GetHeight()));
         Material = _material;
 
         SetMapMode(MapMode.Political);

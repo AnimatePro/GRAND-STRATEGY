@@ -126,9 +126,6 @@ public partial class CameraRig : Node
 
     private void ClampCenter()
     {
-        Vector2 half = _worldSize / 2f;
-        Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
-        float halfView = (viewportSize / Zoom) / 2f;
         // Разрешаем небольшой выход за края карты (океан), но ограничиваем.
         float margin = 200f;
         Center.X = Mathf.Clamp(Center.X, -margin, _worldSize.X + margin);

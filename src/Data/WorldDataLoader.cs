@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Godot;
+using FileAccess = Godot.FileAccess; // implicit System.IO конфликтует с Godot.FileAccess
 
 namespace GrandStrategy.Data;
 
@@ -136,7 +137,7 @@ public static class WorldDataLoader
     public static void SplitPopulation(long total, long[] into)
     {
         // Доли: дети 0-10, подростки 11-17, взрослые 18-59, пожилые 60+.
-        const double childShare = 0.17, teenShare = 0.09, adultShare = 0.56, seniorShare = 0.18;
+        const double childShare = 0.17, teenShare = 0.09, adultShare = 0.56;
         const double femaleShare = 0.505;
 
         long children = (long)(total * childShare);

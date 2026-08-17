@@ -4,6 +4,7 @@ using System.Text.Json;
 using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
+using FileAccess = Godot.FileAccess; // implicit System.IO конфликтует с Godot.FileAccess
 
 namespace GrandStrategy.Systems.Decisions;
 

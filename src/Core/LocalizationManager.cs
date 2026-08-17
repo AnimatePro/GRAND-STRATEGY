@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using GrandStrategy.Utils;
+using FileAccess = Godot.FileAccess; // implicit System.IO конфликтует с Godot.FileAccess
 
 namespace GrandStrategy.Core;
 

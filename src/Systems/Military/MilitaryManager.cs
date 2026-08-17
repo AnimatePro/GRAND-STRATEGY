@@ -113,7 +113,7 @@ public partial class MilitaryManager : Node
             return false;
 
         WorldData world = DataManager.Instance.World;
-        List<int> path = Pathfind(world, army.ProvinceId, targetProvinceId);
+        List<int>? path = Pathfind(world, army.ProvinceId, targetProvinceId);
         if (path == null || path.Count <= 1)
             return false;
 
