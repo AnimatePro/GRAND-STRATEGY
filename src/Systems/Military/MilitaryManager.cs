@@ -157,6 +157,16 @@ public partial class MilitaryManager : Node
             _nextArmyId = Math.Max(_nextArmyId, a.Id + 1);
     }
 
+    /// <summary>Восстановление командиров из сохранения.</summary>
+    public void RestoreCommanders(List<CommanderData> commanders)
+    {
+        Commanders.Clear();
+        Commanders.AddRange(commanders);
+        _nextCommanderId = 1;
+        foreach (CommanderData c in Commanders)
+            _nextCommanderId = Math.Max(_nextCommanderId, c.Id + 1);
+    }
+
     // --- Набор и расформирование ---------------------------------------------
 
     public bool RecruitArmy(int ownerId, int provinceId, Dictionary<int, int> unitCounts)

@@ -14,6 +14,7 @@ public sealed class WorldStateSaveDto
     public List<ArmySaveDto> Armies { get; set; } = new();
     public List<WarSaveDto> Wars { get; set; } = new();
     public List<EconomySaveDto> Economies { get; set; } = new();
+    public List<CommanderSaveDto> Commanders { get; set; } = new();
 }
 
 public sealed class ProvinceSaveDto
@@ -28,6 +29,7 @@ public sealed class ProvinceSaveDto
     public int ReligionId;
     public int CultureId;
     public List<int> BuildingIds = new();
+    public Dictionary<int, int> ResourceAmounts = new(); // goodId -> тонны (реальные рудники)
 }
 
 public sealed class CountrySaveDto
@@ -35,6 +37,8 @@ public sealed class CountrySaveDto
     public int Id;
     public string Code = string.Empty;
     public string NameKey = string.Empty;
+    public string Leader2024 = string.Empty;
+    public string Leader1936 = string.Empty;
     public int GovernmentType;
     public int Ideology;
     public float Stability, Legitimacy, WarExhaustion;
@@ -54,6 +58,22 @@ public sealed class CountrySaveDto
     public string FlagId = string.Empty;
     public int StateReligionId;
     public int PrimaryCultureId;
+    public List<AdvisorSaveDto> Advisors = new();
+}
+
+public sealed class AdvisorSaveDto
+{
+    public int Id, OwnerId;
+    public string Name = string.Empty;
+    public int Domain;
+    public int Skill;
+}
+
+public sealed class CommanderSaveDto
+{
+    public int Id, OwnerId;
+    public string Name = string.Empty;
+    public float Skill;
 }
 
 public sealed class ArmySaveDto
@@ -83,6 +103,8 @@ public sealed class EconomySaveDto
     public double Gdp, GdpPerCapita, AvgWage;
     public double BudgetRevenue, BudgetExpenses, Deficit, TradeBalance;
     public double Inflation, InterestRate, Debt, DebtToGdp, Reserves;
+    public double ExternalDebt, ExchangeRate, CurrentAccount, CapitalAccount, Remittances;
+    public double BaselineGdp, BaselineProductionValue;
     public double[] Supply = System.Array.Empty<double>();
     public double[] Demand = System.Array.Empty<double>();
     public double[] Price = System.Array.Empty<double>();
@@ -100,13 +122,19 @@ public sealed class EconomySaveDto
 public static class WorldSaveCodec
 {
     public static WorldStateSaveDto Encode(WorldData world, WorldEconomy economy,
-        List<ArmyData> armies, List<WarData> wars)
+        List<ArmyData> armies, List<WarData> wars, List<CommanderData> commanders)
     {
         var dto = new WorldStateSaveDto
         {
             ProvinceCount = world.ProvinceCount,
             CountryCount = world.CountryCount,
         };
+
+        foreach (CommanderData cmd in commanders)
+            dto.Commanders.Add(new CommanderSaveDto
+            {
+                Id = cmd.Id, OwnerId = cmd.OwnerId, Name = cmd.Name, Skill = cmd.Skill,
+            });
 
         for (int i = 0; i < world.ProvinceCount; i++)
         {
@@ -125,7 +153,15 @@ public static class WorldSaveCodec
                 FortLevel = p.FortLevel,
                 ReligionId = p.ReligionId, CultureId = p.CultureId,
                 BuildingIds = new List<int>(p.BuildingIds),
+                ResourceAmounts = new Dictionary<int, int>(),
             });
+            // ResourceAmounts: только реальные рудники (goodId -> тонны > 0).
+            if (p.ResourceAmounts != null)
+            {
+                for (int g = 0; g < p.ResourceAmounts.Length; g++)
+                    if (p.ResourceAmounts[g] > 0)
+                        dto.Provinces[dto.Provinces.Count - 1].ResourceAmounts[g] = p.ResourceAmounts[g];
+            }
         }
 
         for (int i = 0; i < world.CountryCount; i++)
@@ -136,6 +172,7 @@ public static class WorldSaveCodec
             dto.Countries.Add(new CountrySaveDto
             {
                 Id = c.Id, Code = c.Code, NameKey = c.NameKey,
+                Leader2024 = c.Leader2024, Leader1936 = c.Leader1936,
                 GovernmentType = (int)c.GovernmentType, Ideology = (int)c.Ideology,
                 Stability = c.Stability, Legitimacy = c.Legitimacy, WarExhaustion = c.WarExhaustion,
                 Treasury = c.Treasury, Debt = c.Debt, Inflation = c.Inflation,
@@ -150,6 +187,12 @@ public static class WorldSaveCodec
                 ColorHex = c.Color.ToHtml(), FlagId = c.FlagId,
                 StateReligionId = c.StateReligionId, PrimaryCultureId = c.PrimaryCultureId,
             });
+            foreach (AdvisorData adv in c.Advisors)
+                dto.Countries[dto.Countries.Count - 1].Advisors.Add(new AdvisorSaveDto
+                {
+                    Id = adv.Id, OwnerId = adv.OwnerId, Name = adv.Name,
+                    Domain = (int)adv.Domain, Skill = adv.Skill,
+                });
         }
 
         foreach (ArmyData a in armies)
@@ -185,6 +228,10 @@ public static class WorldSaveCodec
                 Deficit = eco.Deficit, TradeBalance = eco.TradeBalance,
                 Inflation = eco.Inflation, InterestRate = eco.InterestRate,
                 Debt = eco.Debt, DebtToGdp = eco.DebtToGdp, Reserves = eco.Reserves,
+                ExternalDebt = eco.ExternalDebt, ExchangeRate = eco.ExchangeRate,
+                CurrentAccount = eco.CurrentAccount, CapitalAccount = eco.CapitalAccount,
+                Remittances = eco.Remittances,
+                BaselineGdp = eco.BaselineGdp, BaselineProductionValue = eco.BaselineProductionValue,
                 Supply = (double[])eco.Supply.Clone(),
                 Demand = (double[])eco.Demand.Clone(),
                 Price = (double[])eco.Price.Clone(),
@@ -201,8 +248,15 @@ public static class WorldSaveCodec
     }
 
     public static void Apply(WorldData world, WorldEconomy economy, WorldStateSaveDto dto,
-        List<ArmyData> armiesOut, List<WarData> warsOut)
+        List<ArmyData> armiesOut, List<WarData> warsOut, List<CommanderData> commandersOut)
     {
+        // --- Командиры ---
+        commandersOut.Clear();
+        foreach (CommanderSaveDto c in dto.Commanders)
+            commandersOut.Add(new CommanderData
+            {
+                Id = c.Id, OwnerId = c.OwnerId, Name = c.Name, Skill = c.Skill,
+            });
         // --- Провинции ---
         foreach (ProvinceSaveDto p in dto.Provinces)
         {
@@ -220,6 +274,20 @@ public static class WorldSaveCodec
             cur.FortLevel = p.FortLevel;
             cur.ReligionId = p.ReligionId; cur.CultureId = p.CultureId;
             cur.BuildingIds = p.BuildingIds.ToArray();
+            if (p.ResourceAmounts != null && p.ResourceAmounts.Count > 0)
+            {
+                var amounts = new int[world.GoodCount];
+                for (int g = 0; g < world.GoodCount; g++)
+                    amounts[g] = -1;
+                foreach (KeyValuePair<int, int> kv in p.ResourceAmounts)
+                    if (kv.Key >= 0 && kv.Key < world.GoodCount)
+                        amounts[kv.Key] = kv.Value;
+                cur.ResourceAmounts = amounts;
+            }
+            else
+            {
+                cur.ResourceAmounts = System.Array.Empty<int>();
+            }
             world.Provinces[idx] = cur;
         }
 
@@ -230,6 +298,7 @@ public static class WorldSaveCodec
                 continue;
             CountryData cur = world.Countries[c.Id];
             cur.Code = c.Code; cur.NameKey = c.NameKey;
+            cur.Leader2024 = c.Leader2024; cur.Leader1936 = c.Leader1936;
             cur.GovernmentType = (GovernmentType)c.GovernmentType;
             cur.Ideology = (Ideology)c.Ideology;
             cur.Stability = c.Stability; cur.Legitimacy = c.Legitimacy; cur.WarExhaustion = c.WarExhaustion;
@@ -246,6 +315,13 @@ public static class WorldSaveCodec
             cur.IsPlayer = c.IsPlayer; cur.IsAlive = c.IsAlive;
             cur.FlagId = c.FlagId;
             cur.StateReligionId = c.StateReligionId; cur.PrimaryCultureId = c.PrimaryCultureId;
+            cur.Advisors = new List<AdvisorData>();
+            foreach (AdvisorSaveDto adv in c.Advisors)
+                cur.Advisors.Add(new AdvisorData
+                {
+                    Id = adv.Id, OwnerId = adv.OwnerId, Name = adv.Name,
+                    Domain = (AdvisorDomain)adv.Domain, Skill = adv.Skill,
+                });
             try { cur.Color = new Godot.Color(c.ColorHex); } catch { }
         }
 
@@ -263,6 +339,10 @@ public static class WorldSaveCodec
             eco.Deficit = e.Deficit; eco.TradeBalance = e.TradeBalance;
             eco.Inflation = e.Inflation; eco.InterestRate = e.InterestRate;
             eco.Debt = e.Debt; eco.DebtToGdp = e.DebtToGdp; eco.Reserves = e.Reserves;
+            eco.ExternalDebt = e.ExternalDebt; eco.ExchangeRate = e.ExchangeRate;
+            eco.CurrentAccount = e.CurrentAccount; eco.CapitalAccount = e.CapitalAccount;
+            eco.Remittances = e.Remittances;
+            eco.BaselineGdp = e.BaselineGdp; eco.BaselineProductionValue = e.BaselineProductionValue;
             eco.Supply = e.Supply; eco.Demand = e.Demand; eco.Price = e.Price;
             eco.Production = e.Production; eco.Consumption = e.Consumption;
             eco.Taxes.Income = e.TaxIncome; eco.Taxes.Corporate = e.TaxCorporate;

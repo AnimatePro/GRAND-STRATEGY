@@ -189,7 +189,7 @@ public partial class GameManager : Node
     {
         WorldData world = DataManager.Instance.World;
         WorldStateSaveDto worldState = WorldSaveCodec.Encode(world, EconomyManager.Instance.Economy,
-            MilitaryManager.Instance.Armies, DiplomacyManager.Instance.Wars);
+            MilitaryManager.Instance.Armies, DiplomacyManager.Instance.Wars, MilitaryManager.Instance.Commanders);
 
         return new GameSnapshot
         {
@@ -224,9 +224,11 @@ public partial class GameManager : Node
         {
             var armies = new List<ArmyData>();
             var wars = new List<WarData>();
+            var commanders = new List<CommanderData>();
             WorldSaveCodec.Apply(DataManager.Instance.World, EconomyManager.Instance.Economy,
-                snapshot.WorldState, armies, wars);
+                snapshot.WorldState, armies, wars, commanders);
             MilitaryManager.Instance.RestoreArmies(armies);
+            MilitaryManager.Instance.RestoreCommanders(commanders);
             DiplomacyManager.Instance.RestoreWars(wars);
         }
 
