@@ -1,133 +1,197 @@
-code,leader_1815,leader_1914,leader_1936,leader_2024
-USA,James Madison,Woodrow Wilson,Franklin D. Roosevelt,Joe Biden
-GBR,George III (Regency),George V,Edward VIII,Rishi Sunak
-FRA,Louis XVIII,Raymond Poincaré,Albert Lebrun,Emmanuel Macron
-RUS,Alexander I,Nicholas II,Joseph Stalin,Vladimir Putin
-DEU,,Wilhelm II,Adolf Hitler,Olaf Scholz
-AUT,Francis I,Franz Joseph I,Kurt Schuschnigg,Alexander Van der Bellen
-HUN,Francis I,Franz Joseph I,Miklós Horthy,Tamás Sulyok
-ITA,,Victor Emmanuel III,Benito Mussolini,Sergio Mattarella
-ESP,Ferdinand VII,Alfonso XIII,Manuel Azaña,Felipe VI
-PRT,João VI,Manuel de Arriaga,António Salazar,Marcelo Rebelo de Sousa
-NLD,William I,Wilhelmina,Wilhelmina,Willem-Alexander
-BEL,William I,Albert I,Leopold III,Philippe
-SWE,Charles XIII,Gustaf V,Gustaf V,Carl XVI Gustaf
-NOR,Charles XIII,Haakon VII,Haakon VII,Harald V
-DNK,Frederick VI,Christian X,Christian X,Frederik X
-FIN,,,Pehr Evind Svinhufvud,Alexander Stubb
-ISL,,,Sveinn Björnsson,Halla Tómasdóttir
-POL,Alexander I,,Ignacy Mościcki,Andrzej Duda
-CZE,,,Edvard Beneš,Petr Pavel
-SVK,,,Edvard Beneš,Peter Pellegrini
-CHE,,,Albert Meyer,Viola Amherd
-IRL,,,,Michael D. Higgins
-GRC,,Constantine I,George II,Katerina Sakellaropoulou
-TUR,Mahmud II,Mehmed V,Mustafa Kemal Atatürk,Recep Tayyip Erdoğan
-EGY,Muhammad Ali,Abbas II,Farouk I,Abdel Fattah el-Sisi
-IRN,Fath-Ali Shah,Ahmad Shah,Reza Shah,Ali Khamenei
-IRQ,,,,Abdul Latif Rashid
-SYR,,,,Bashar al-Assad
-SAU,,,,Salman bin Abdulaziz Al Saud
-JOR,,,,Abdullah II
-ISR,,,,Isaac Herzog
-LBN,,,,Joseph Aoun
-CHN,Jiaqing Emperor,Yuan Shikai,Chiang Kai-shek,Xi Jinping
-JPN,Ninkō,Emperor Taishō,Hirohito,Naruhito
-KOR,,,,Yoon Suk Yeol
-PRK,,,,Kim Jong-un
-IND,,,,Narendra Modi
-PAK,,,,Asif Ali Zardari
-BGD,,,,Mohammed Shahabuddin
-LKA,,,,Anura Kumara Dissanayake
-NPL,,,,Ram Chandra Poudel
-AFG,,,,Hibatullah Akhundzada
-MMR,,,,Min Aung Hlaing
-THA,Rama II,Rama VI,Rama VIII,Maha Vajiralongkorn
-VNM,Gia Long,,Bảo Đại,Tô Lâm
-MYS,,,,Anwar Ibrahim
-IDN,,,,Prabowo Subianto
-PHL,,,,Bongbong Marcos
-SGP,,,,Tharman Shanmugaratnam
-MNG,,,,Ukhnaagiin Khürelsükh
-KAZ,,,,Kassym-Jomart Tokayev
-UZB,,,,Shavkat Mirziyoyev
-KGZ,,,,Sadyr Japarov
-TJK,,,,Emomali Rahmon
-TKM,,,,Serdar Berdimuhamedow
-AZE,,,,Ilham Aliyev
-GEO,,,,Salome Zourabichvili
-ARM,,,,Vahagn Khachaturyan
-MDA,,,,Maia Sandu
-UKR,,,,Volodymyr Zelenskyy
-BLR,,,,Alexander Lukashenko
-LTU,,,,Gitanas Nausėda
-LVA,,,,Edgars Rinkēvičs
-EST,,,,Alar Karis
-SRB,,,,Aleksandar Vučić
-HRV,,,,Zoran Milanović
-SVN,,,,Nataša Pirc Musar
-BIH,,,,Denis Bećirović
-MNE,,,,Jakov Milatović
-MKD,,,,Gordana Siljanovska-Davkova
-ALB,,,,Bajram Begaj
-BGR,,,,Rumen Radev
-ROU,,,,Klaus Iohannis
-CAN,,,,Justin Trudeau
-MEX,,,,Claudia Sheinbaum
-GTM,,,,Bernardo Arévalo
-SLV,,,,Nayib Bukele
-HND,,,,Xiomara Castro
-NIC,,,,Daniel Ortega
-CRI,,,,Rodrigo Chaves Robles
-PAN,,,,José Raúl Mulino
-CUB,,,,Miguel Díaz-Canel
-DOM,,,,Luis Abinader
-HTI,,,,Edgard Leblanc Fils
-JAM,,,,Andrew Holness
-BHS,,,,Philip Davis
-TTO,,,,Christine Kangaloo
-COL,,,,Gustavo Petro
-VEN,,,,Nicolás Maduro
-ECU,,,,Daniel Noboa
-PER,,,,Dina Boluarte
-BOL,,,,Luis Arce
-CHL,,,,Gabriel Boric
-ARG,,,,Javier Milei
-PRY,,,,Santiago Peña
-URY,,,,Yamandú Orsi
-BRA,João VI (Reino Unido),Venceslau Brás,Getúlio Vargas,Luiz Inácio Lula da Silva
-ETH,,,,Sahle-Work Zewde
-KEN,,,,William Ruto
-NGA,,,,Bola Tinubu
-GHA,,,,Nana Akufo-Addo
-TZA,,,,Samia Suluhu Hassan
-UGA,,,,Yoweri Museveni
-RWA,,,,Paul Kagame
-ZAF,,,,Cyril Ramaphosa
-DZA,,,,Abdelmadjid Tebboune
-MAR,Moulay Slimane,Yusuf,Mohammed V,Mohammed VI
-TUN,,,,Kais Saied
-LBY,,,,Mohamed al-Menfi
-SDN,,,,Abdel Fattah al-Burhan
-SOM,,,,Hassan Sheikh Mohamud
-COD,,,,Félix Tshisekedi
-AGO,,,,João Lourenço
-MOZ,,,,Filipe Nyusi
-ZWE,,,,Emmerson Mnangagwa
-ZMB,,,,Hakainde Hichilema
-BWA,,,,Duma Boko
-NAM,,,,Nangolo Mbumba
-SEN,,,,Bassirou Diomaye Faye
-CIV,,,,Alassane Ouattara
-CMR,,,,Paul Biya
-MLI,,,,Assimi Goïta
-BFA,,,,Ibrahim Traoré
-NER,,,,Abdourahamane Tchiani
-AUS,,,,Anthony Albanese
-NZL,,,,Christopher Luxon
-PNG,,,,James Marape
-FJI,,,,Wiliame Katonivere
-SLB,,,,David Tiva Kapu
-VUT,,,,Nikenike Vurobaravu
-WSM,,,,Tuimalealiʻifano Vaʻaletoʻa
-TON,,,,Tupou VI
+code,leader_2024,leader_1936
+AFG,Hibatullah Akhundzada,Mohammad Zahir Shah
+AGO,João Lourenço,
+ALB,Bajram Begaj,Zog I
+AND,Xavier Espot Zamora,Boris Skossyreff
+ARE,Mohamed bin Zayed Al Nahyan,
+ARG,Javier Milei,Agustín Pedro Justo
+ARM,Vahagn Khachaturyan,
+ATG,Charles III,
+AUS,Anthony Albanese,Joseph Lyons
+AUT,Alexander Van der Bellen,Kurt Schuschnigg
+AZE,Ilham Aliyev,
+BDI,Évariste Ndayishimiye,
+BEL,Philippe,Leopold III
+BEN,Patrice Talon,
+BFA,Ibrahim Traoré,
+BGD,Mohammed Shahabuddin,
+BGR,Rumen Radev,Boris III
+BHR,Hamad bin Isa Al Khalifa,
+BHS,Philip Davis,
+BIH,Denis Bećirović,
+BLR,Alexander Lukashenko,
+BLZ,Froyla Tzalam,
+BOL,Luis Arce,
+BRA,Luiz Inácio Lula da Silva,Getúlio Vargas
+BRB,Sandra Mason,
+BRN,Hassanal Bolkiah,Ahmad Tajuddin
+BTN,Jigme Khesar Namgyel Wangchuck,Jigme Wangchuck
+BWA,Duma Boko,
+CAF,Faustin-Archange Touadéra,
+CAN,Justin Trudeau,William Lyon Mackenzie King
+CHE,Viola Amherd,Albert Meyer
+CHL,Gabriel Boric,Arturo Alessandri
+CHN,Xi Jinping,Chiang Kai-shek
+CIV,Alassane Ouattara,
+CMR,Paul Biya,
+COD,Félix Tshisekedi,
+COG,Denis Sassou Nguesso,
+COL,Gustavo Petro,Alfonso López Pumarejo
+COM,Azali Assoumani,
+CPV,José Maria Neves,
+CRI,Rodrigo Chaves Robles,
+CUB,Miguel Díaz-Canel,Federico Laredo Brú
+CYP,Nikos Christodoulides,
+CZE,Petr Pavel,Edvard Beneš
+DEU,Olaf Scholz,Adolf Hitler
+DJI,Ismaïl Omar Guelleh,
+DMA,Sylvanie Burton,
+DNK,Frederik X,Christian X
+DOM,Luis Abinader,Rafael Trujillo
+DZA,Abdelmadjid Tebboune,
+ECU,Daniel Noboa,
+EGY,Abdel Fattah el-Sisi,Farouk I
+ERI,Isaias Afwerki,
+ESP,Felipe VI,Manuel Azaña
+EST,Alar Karis,Konstantin Päts
+ETH,Sahle-Work Zewde,Haile Selassie
+FIN,Alexander Stubb,Pehr Evind Svinhufvud
+FJI,Wiliame Katonivere,
+FRA,Emmanuel Macron,Albert Lebrun
+FSM,Wesley Simina,
+GAB,Brice Oligui Nguema,
+GBR,Rishi Sunak,Edward VIII
+GEO,Salome Zourabichvili,
+GHA,Nana Akufo-Addo,
+GIN,Mamady Doumbouya,
+GMB,Adama Barrow,
+GNB,Umaro Sissoco Embaló,
+GNQ,Teodoro Obiang Nguema Mbasogo,
+GRC,Katerina Sakellaropoulou,George II
+GRD,Cécile La Grenade,
+GTM,Bernardo Arévalo,Jorge Ubico
+GUY,Irfaan Ali,
+HND,Xiomara Castro,
+HRV,Zoran Milanović,
+HTI,Edgard Leblanc Fils,Sténio Vincent
+HUN,Tamás Sulyok,Miklós Horthy
+IDN,Prabowo Subianto,
+IND,Narendra Modi,
+IRL,Michael D. Higgins,Éamon de Valera
+IRN,Ali Khamenei,Reza Shah
+IRQ,Abdul Latif Rashid,Ghazi I
+ISL,Halla Tómasdóttir,Sveinn Björnsson
+ISR,Isaac Herzog,
+ITA,Sergio Mattarella,Benito Mussolini
+JAM,Andrew Holness,
+JOR,Abdullah II,Abdullah I
+JPN,Naruhito,Hirohito
+KAZ,Kassym-Jomart Tokayev,
+KEN,William Ruto,
+KGZ,Sadyr Japarov,
+KHM,Hun Manet,Norodom Sihanouk
+KIR,Taneti Maamau,
+KNA,Terrance Drew,
+KOR,Yoon Suk Yeol,
+KWT,Mishal Al-Ahmad Al-Jaber Al-Sabah,Ahmad Al-Jaber Al-Sabah
+LAO,Thongloun Sisoulith,
+LBN,Joseph Aoun,Émile Eddé
+LBR,Joseph Boakai,
+LBY,Mohamed al-Menfi,
+LCA,Philip J. Pierre,
+LIE,Hans-Adam II,Franz I
+LKA,Anura Kumara Dissanayake,
+LSO,Letsie III,
+LTU,Gitanas Nausėda,Antanas Smetona
+LUX,Luc Frieden,Joseph Bech
+LVA,Edgars Rinkēvičs,Kārlis Ulmanis
+MAR,Mohammed VI,Mohammed V
+MCO,Albert II,Louis II
+MDA,Maia Sandu,
+MDG,Andry Rajoelina,
+MDV,Mohamed Muizzu,
+MEX,Claudia Sheinbaum,Lázaro Cárdenas
+MHL,Hilda Heine,
+MKD,Gordana Siljanovska-Davkova,
+MLI,Assimi Goïta,
+MLT,Myriam Spiteri Debono,
+MMR,Min Aung Hlaing,
+MNE,Jakov Milatović,
+MNG,Ukhnaagiin Khürelsükh,
+MOZ,Filipe Nyusi,
+MRT,Mohamed Ould Ghazouani,
+MUS,Prithvirajsing Roopun,
+MWI,Lazarus Chakwera,
+MYS,Anwar Ibrahim,
+NAM,Nangolo Mbumba,
+NER,Abdourahamane Tchiani,
+NGA,Bola Tinubu,
+NIC,Daniel Ortega,Anastasio Somoza García
+NLD,Willem-Alexander,Wilhelmina
+NOR,Harald V,Haakon VII
+NPL,Ram Chandra Poudel,Tribhuvan
+NRU,David Adeang,
+NZL,Christopher Luxon,Michael Joseph Savage
+OMN,Haitham bin Tariq,Said bin Taimur
+PAK,Asif Ali Zardari,
+PAN,José Raúl Mulino,
+PER,Dina Boluarte,
+PHL,Bongbong Marcos,Manuel L. Quezon
+PLW,Surangel Whipps Jr.,
+PNG,James Marape,
+POL,Andrzej Duda,Ignacy Mościcki
+PRK,Kim Jong-un,
+PRT,Marcelo Rebelo de Sousa,António Óscar Carmona
+PRY,Santiago Peña,
+QAT,Tamim bin Hamad Al Thani,
+ROU,Klaus Iohannis,Carol II
+RUS,Vladimir Putin,Joseph Stalin
+RWA,Paul Kagame,
+SAU,Salman bin Abdulaziz Al Saud,Ibn Saud
+SDN,Abdel Fattah al-Burhan,
+SEN,Bassirou Diomaye Faye,
+SGP,Tharman Shanmugaratnam,
+SLB,David Tiva Kapu,
+SLE,Julius Maada Bio,
+SLV,Nayib Bukele,
+SMR,Alessandro Rossi,
+SOM,Hassan Sheikh Mohamud,
+SRB,Aleksandar Vučić,
+SSD,Salva Kiir Mayardit,
+STP,Carlos Vila Nova,
+SUR,Chan Santokhi,
+SVK,Peter Pellegrini,
+SVN,Nataša Pirc Musar,
+SWE,Carl XVI Gustaf,Gustaf V
+SWZ,Mswati III,Sobhuza II
+SYC,Wavel Ramkalawan,
+SYR,Bashar al-Assad,
+TCD,Mahamat Déby,
+TGO,Faure Gnassingbé,
+THA,Maha Vajiralongkorn,Ananda Mahidol
+TJK,Emomali Rahmon,
+TKM,Serdar Berdimuhamedow,
+TLS,José Ramos-Horta,
+TON,Tupou VI,Sālote Tupou III
+TTO,Christine Kangaloo,
+TUN,Kais Saied,
+TUR,Recep Tayyip Erdoğan,Mustafa Kemal Atatürk
+TUV,Feleti Teo,
+TWN,Lai Ching-te,
+TZA,Samia Suluhu Hassan,
+UGA,Yoweri Museveni,
+UKR,Volodymyr Zelenskyy,
+URY,Yamandú Orsi,Gabriel Terra
+USA,Joe Biden,Franklin D. Roosevelt
+UZB,Shavkat Mirziyoyev,
+VAT,Pope Francis,Pope Pius XI
+VCT,Ralph Gonsalves,
+VEN,Nicolás Maduro,Eleazar López Contreras
+VNM,Tô Lâm,Bảo Đại
+VUT,Nikenike Vurobaravu,
+WSM,Tuimalealiʻifano Vaʻaletoʻa,
+XKX,Vjosa Osmani,
+YEM,Rashad al-Alimi,Yahya Muhammad Hamid ed-Din
+ZAF,Cyril Ramaphosa,
+ZMB,Hakainde Hichilema,
+ZWE,Emmerson Mnangagwa,

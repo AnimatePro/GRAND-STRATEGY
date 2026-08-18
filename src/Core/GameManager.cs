@@ -74,6 +74,10 @@ public partial class GameManager : Node
                     DataManager.Instance.World.Countries[i].IsPlayer = (i == options.PlayerCountryId);
         }
 
+        // Историческое население для сценария 1936.
+        if (options.StartYear < 2000 && DataManager.Instance.IsLoaded)
+            ApplyHistoricalPopulation(options.StartYear);
+
         LogService.Instance.Info($"GameManager: new game (seed={options.Seed}, player={options.PlayerCountryId}, difficulty={options.Difficulty})");
         EventBus.Instance.EmitGameStarted();
         EventBus.Instance.EmitTurnStarted(0);
@@ -141,6 +145,43 @@ public partial class GameManager : Node
         EventBus.Instance.EmitGameLoaded();
         EventBus.Instance.EmitTurnStarted(TimeManager.Instance.CurrentTurn);
         return true;
+    }
+
+    /// <summary>Перераспределяет население стран по историческим данным 1936 (по площади).</summary>
+    private void ApplyHistoricalPopulation(int year)
+    {
+        if (year >= 2000)
+            return;
+        WorldData world = DataManager.Instance.World;
+        var pop1936 = WorldDataLoader.LoadPopulation1936();
+        if (pop1936.Count == 0)
+            return;
+
+        foreach (CountryData c in world.Countries)
+        {
+            if (c == null || !pop1936.TryGetValue(c.Code, out long histPop) || c.OwnedProvinceIds.Count == 0)
+                continue;
+
+            // Распределяем историческое население по провинциям пропорционально площади.
+            double totalArea = 0.0;
+            foreach (int pid in c.OwnedProvinceIds)
+                totalArea += world.GetProvince(pid).AreaKm2;
+
+            long assigned = 0;
+            foreach (int pid in c.OwnedProvinceIds)
+            {
+                ProvinceData p = world.GetProvince(pid);
+                long share = totalArea > 0 ? (long)(histPop * p.AreaKm2 / totalArea) : 0;
+                world.SetPopulation(pid, share);
+                assigned += share;
+            }
+            // Остаток — в первую (крупнейшую) провинцию.
+            if (assigned < histPop && c.OwnedProvinceIds.Count > 0)
+                world.AddPopulation(c.OwnedProvinceIds[0], histPop - assigned);
+
+            c.Population = histPop;
+        }
+        LogService.Instance.Info($"Applied historical population for {year} ({pop1936.Count} countries)");
     }
 
     private GameSnapshot BuildSnapshot()

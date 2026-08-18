@@ -47,11 +47,9 @@ public static class WorldDataLoader
         LoadCultures(world);
 
         // --- Страны ---
-        // Лидеры по 4 эпохам (реальные главы государств).
+        // Лидеры по двум сценариям (2024 и 1936, реальные главы государств).
         var leader2024 = new Dictionary<string, string>(StringComparer.Ordinal);
         var leader1936 = new Dictionary<string, string>(StringComparer.Ordinal);
-        var leader1914 = new Dictionary<string, string>(StringComparer.Ordinal);
-        var leader1815 = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/leaders.csv"))
         {
             string code = CsvTableLoader.Str(row, "code");
@@ -59,8 +57,6 @@ public static class WorldDataLoader
                 continue;
             leader2024[code] = CsvTableLoader.Str(row, "leader_2024");
             leader1936[code] = CsvTableLoader.Str(row, "leader_1936");
-            leader1914[code] = CsvTableLoader.Str(row, "leader_1914");
-            leader1815[code] = CsvTableLoader.Str(row, "leader_1815");
         }
 
         world.Countries = new CountryData[dto.Countries.Count];
@@ -86,8 +82,6 @@ public static class WorldDataLoader
                 PrimaryCultureId = cdto.CultureId,
                 Leader2024 = leader2024.TryGetValue(cdto.Code, out string? l24) ? l24 : string.Empty,
                 Leader1936 = leader1936.TryGetValue(cdto.Code, out string? l36) ? l36 : string.Empty,
-                Leader1914 = leader1914.TryGetValue(cdto.Code, out string? l14) ? l14 : string.Empty,
-                Leader1815 = leader1815.TryGetValue(cdto.Code, out string? l15) ? l15 : string.Empty,
             };
             world.Countries[cdto.Id] = country;
             world.CountryCodeToId[cdto.Code] = cdto.Id;
@@ -283,6 +277,20 @@ public static class WorldDataLoader
             list.Add(l);
         }
         world.Laws = list.ToArray();
+    }
+
+    /// <summary>Историческое население 1936 по странам (для сценария 1936).</summary>
+    public static Dictionary<string, long> LoadPopulation1936()
+    {
+        var result = new Dictionary<string, long>(StringComparer.Ordinal);
+        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/population_1936.csv"))
+        {
+            string code = CsvTableLoader.Str(row, "code");
+            long pop = CsvTableLoader.Long(row, "population");
+            if (code.Length > 0 && pop > 0)
+                result[code] = pop;
+        }
+        return result;
     }
 
     private static void LoadReligions(WorldData world)

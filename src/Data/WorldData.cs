@@ -80,6 +80,31 @@ public sealed class WorldData
         return false;
     }
 
+    /// <summary>Задаёт население провинции, разбив на 8 групп по возрастно-половой структуре.</summary>
+    public void SetPopulation(int provinceId, long total)
+    {
+        if (!ProvinceIdToIndex.TryGetValue(provinceId, out int idx))
+            return;
+        ProvinceData p = Provinces[idx];
+        var split = new long[8];
+        WorldDataLoader.SplitPopulation(total, split);
+        p.MaleChildren = (int)split[0]; p.FemaleChildren = (int)split[1];
+        p.MaleTeens = (int)split[2]; p.FemaleTeens = (int)split[3];
+        p.MaleAdults = (int)split[4]; p.FemaleAdults = (int)split[5];
+        p.MaleSeniors = (int)split[6]; p.FemaleSeniors = (int)split[7];
+        Provinces[idx] = p;
+    }
+
+    /// <summary>Прибавляет население провинции (разбивка на 8 групп).</summary>
+    public void AddPopulation(int provinceId, long amount)
+    {
+        if (amount <= 0 || !ProvinceIdToIndex.TryGetValue(provinceId, out int idx))
+            return;
+        ProvinceData p = Provinces[idx];
+        long total = p.TotalPopulation + amount;
+        SetPopulation(provinceId, total);
+    }
+
     public GoodData GetGood(int id) =>
         id >= 0 && id < Goods.Length ? Goods[id] : default;
 

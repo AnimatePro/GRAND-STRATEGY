@@ -1,54 +1,34 @@
 code,era,generals
-USA,1815,Andrew Jackson;Winfield Scott
-USA,1914,John J. Pershing;Peyton March
-USA,1936,Dwight D. Eisenhower;George S. Patton;Douglas MacArthur;George Marshall;Omar Bradley;Chester Nimitz
-USA,2024,Mark Milley;Lloyd Austin;Charles Q. Brown
-GBR,1815,Duke of Wellington;Rowland Hill
-GBR,1914,Douglas Haig;Herbert Kitchener;John Jellicoe
-GBR,1936,Bernard Montgomery;Harold Alexander;Claude Auchinleck;Alan Brooke
-GBR,2024,Tony Radakin;Patrick Sanders
-FRA,1815,Napoleon Bonaparte;Michel Ney;Nicolas Soult
-FRA,1914,Joseph Joffre;Ferdinand Foch;Philippe Pétain
-FRA,1936,Maurice Gamelin;Charles de Gaulle;Maxime Weygand
-FRA,2024,Thierry Burkhard;Pierre Schill
-RUS,1815,Mikhail Kutuzov;Pyotr Bagration;Alexander Suvorov
-RUS,1914,Aleksei Brusilov;Nikolai Ruzsky;Alexander Samsonov
-RUS,1936,Georgy Zhukov;Konstantin Rokossovsky;Ivan Konev;Semyon Timoshenko
-RUS,2024,Valery Gerasimov;Sergei Shoigu
-DEU,1914,Paul von Hindenburg;Erich Ludendorff;Helmuth von Moltke the Younger
-DEU,1936,Erwin Rommel;Heinz Guderian;Erich von Manstein;Gerd von Rundstedt;Wilhelm Keitel
-DEU,2024,Carsten Breuer;Eberhard Zorn
-AUT,1815,Archduke Charles;Karl Philipp zu Schwarzenberg
-AUT,1914,Conrad von Hötzendorf;Franz Rohr
 AUT,1936,Ludwig Beck
-HUN,1936,Viktor Orban (Regent);Henrik Werth
-ITA,1914,Luigi Cadorna;Armando Diaz
-ITA,1936,Rodolfo Graziani;Ugo Cavallero;Giovanni Messe
-ITA,2024,Giuseppe Cavo Dragone
-JPN,1914,Heihachiro Togo;Oku Yasukata
-JPN,1936,Isoroku Yamamoto;Hideki Tojo;Tomoyuki Yamashita
-JPN,2024,Yoshihide Yoshida
-TUR,1815,Mahmud II (general)
-TUR,1914,Enver Pasha;Mustafa Kemal Atatürk
-TUR,1936,Mustafa Kemal Atatürk;Fevzi Çakmak
-TUR,2024,Yaşar Güler
-CHN,1815,Jiaqing (generals)
-CHN,1936,Zhu De;Peng Dehuai;Lin Biao;Bai Chongxi
-CHN,2024,Li Qiaoming;Dong Jun
-KOR,2024,Park An-su
-IND,2024,Manoj Pande;Upendra Dwivedi
-PAK,2024,Asim Munir
-ISR,2024,Herzi Halevi;Yoav Gallant
-UKR,2024,Valerii Zaluzhnyi;Oleksandr Syrskyi
-POL,1914,Józef Piłsudski
-POL,1936,Edward Rydz-Śmigły;Władysław Anders
-POL,2024,Wiesław Kukuła
-SWE,1815,Jean-Baptiste Bernadotte
-SWE,1914,Gustaf V (general)
-GRC,1914,Constantine I
 BRA,1936,Getúlio Vargas;Eurico Gaspar Dutra
 BRA,2024,Tomás Paiva
-ZAF,2024,Rudzani Maphwanya
-NGA,2024,Christopher Musa
+CHN,1936,Zhu De;Peng Dehuai;Lin Biao;Bai Chongxi
+CHN,2024,Li Qiaoming;Dong Jun
+DEU,1936,Erwin Rommel;Heinz Guderian;Erich von Manstein;Gerd von Rundstedt;Wilhelm Keitel
+DEU,2024,Carsten Breuer;Eberhard Zorn
 EGY,2024,Abdel Fattah el-Sisi (military)
+FRA,1936,Maurice Gamelin;Charles de Gaulle;Maxime Weygand
+FRA,2024,Thierry Burkhard;Pierre Schill
+GBR,1936,Bernard Montgomery;Harold Alexander;Claude Auchinleck;Alan Brooke
+GBR,2024,Tony Radakin;Patrick Sanders
+HUN,1936,Viktor Orban (Regent);Henrik Werth
+IND,2024,Manoj Pande;Upendra Dwivedi
+ISR,2024,Herzi Halevi;Yoav Gallant
+ITA,1936,Rodolfo Graziani;Ugo Cavallero;Giovanni Messe
+ITA,2024,Giuseppe Cavo Dragone
+JPN,1936,Isoroku Yamamoto;Hideki Tojo;Tomoyuki Yamashita
+JPN,2024,Yoshihide Yoshida
+KOR,2024,Park An-su
+NGA,2024,Christopher Musa
+PAK,2024,Asim Munir
+POL,1936,Edward Rydz-Śmigły;Władysław Anders
+POL,2024,Wiesław Kukuła
+RUS,1936,Georgy Zhukov;Konstantin Rokossovsky;Ivan Konev;Semyon Timoshenko
+RUS,2024,Valery Gerasimov;Sergei Shoigu
 TUR,1936,Fevzi Çakmak
+TUR,1936,Mustafa Kemal Atatürk;Fevzi Çakmak
+TUR,2024,Yaşar Güler
+UKR,2024,Valerii Zaluzhnyi;Oleksandr Syrskyi
+USA,1936,Dwight D. Eisenhower;George S. Patton;Douglas MacArthur;George Marshall;Omar Bradley;Chester Nimitz
+USA,2024,Mark Milley;Lloyd Austin;Charles Q. Brown
+ZAF,2024,Rudzani Maphwanya

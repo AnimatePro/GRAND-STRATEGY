@@ -80,10 +80,7 @@ public partial class MilitaryManager : Node
     /// <summary>Эпоха для текущего года (ключ, совпадающий с generals.csv).</summary>
     private static string EraForYear(int year)
     {
-        if (year >= 2000) return "2024";
-        if (year >= 1918) return "1936";
-        if (year >= 1900) return "1914";
-        return "1815";
+        return year >= 2000 ? "2024" : "1936";
     }
 
     // Фолбэк-пулы (если для страны нет реального генерала в эпохе).

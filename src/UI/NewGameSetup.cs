@@ -28,14 +28,12 @@ public partial class NewGameSetup : Control
         VBoxContainer col = UiKit.CenterColumn(this, 620f);
         col.AddChild(UiKit.Title(L("NEWGAME_TITLE")));
 
-        // Дата.
+        // Дата (два сценария: 2024 и 1936).
         col.AddChild(UiKit.Label(L("NEWGAME_DATE"), 14));
         _yearDropdown = UiKit.Dropdown(new[]
         {
             new UiKit.DropdownOption("2024", 2024),
             new UiKit.DropdownOption("1936", 1936),
-            new UiKit.DropdownOption("1914", 1914),
-            new UiKit.DropdownOption("1815", 1815),
         }, 0);
         col.AddChild(_yearDropdown);
 
