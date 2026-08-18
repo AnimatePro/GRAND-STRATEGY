@@ -384,6 +384,18 @@ public partial class EconomyManager : Node
 
     private void StepBudget(WorldData world)
     {
+        // Предрасчёт содержания зданий по странам (однократный проход по провинциям).
+        double[] buildingUpkeep = new double[world.CountryCount];
+        for (int i = 0; i < world.ProvinceCount; i++)
+        {
+            ProvinceData p = world.Provinces[i];
+            if (p.OwnerId < 0)
+                continue;
+            foreach (int bid in p.BuildingIds)
+                if (bid >= 0 && bid < world.Buildings.Length)
+                    buildingUpkeep[p.OwnerId] += world.Buildings[bid].Upkeep;
+        }
+
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryEconomy eco = Economy.Countries[c];
@@ -391,18 +403,9 @@ public partial class EconomyManager : Node
             double debtService = eco.Debt * eco.InterestRate;
             double discretionary = Math.Max(revenue - debtService, 0.0);
 
-            // Содержание зданий + законов (реальный расход за ход).
-            double buildingUpkeep = 0.0;
-            foreach (int pid in world.Countries[c].OwnedProvinceIds)
-            {
-                ProvinceData p = world.GetProvince(pid);
-                foreach (int bid in p.BuildingIds)
-                    if (bid >= 0 && bid < world.Buildings.Length)
-                        buildingUpkeep += world.Buildings[bid].Upkeep;
-            }
             double lawUpkeep = world.AggregateLaws(world.Countries[c]).UpkeepPerTurn;
 
-            double expenses = debtService + buildingUpkeep + lawUpkeep;
+            double expenses = debtService + buildingUpkeep[c] + lawUpkeep;
             expenses += discretionary * eco.Spending.Administration;
             expenses += discretionary * eco.Spending.Military;
             expenses += discretionary * eco.Spending.Education;
