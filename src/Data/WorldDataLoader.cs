@@ -115,6 +115,22 @@ public static class WorldDataLoader
                 : ResourceAssigner.Assign(pdto.Id, province.Terrain, province.Climate);
             province.CoreIds = ResolveCoreCodes(pdto.CoreCodes, world);
 
+            // Реальные объёмы добычи рудников (goodId -> тонны).
+            if (pdto.ResourceAmounts != null && pdto.ResourceAmounts.Count > 0)
+            {
+                var amounts = new int[world.GoodCount];
+                for (int g = 0; g < world.GoodCount; g++)
+                    amounts[g] = -1;
+                foreach (KeyValuePair<int, int> kv in pdto.ResourceAmounts)
+                    if (kv.Key >= 0 && kv.Key < world.GoodCount)
+                        amounts[kv.Key] = kv.Value;
+                province.ResourceAmounts = amounts;
+            }
+            else
+            {
+                province.ResourceAmounts = System.Array.Empty<int>();
+            }
+
             SplitPopulation(pdto.TotalPopulation, split);
             province.MaleChildren = (int)split[0];
             province.FemaleChildren = (int)split[1];

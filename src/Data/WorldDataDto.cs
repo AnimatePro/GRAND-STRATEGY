@@ -56,5 +56,6 @@ public sealed class ProvinceDto
     public int CultureId;
     public List<int> NeighborIds = new();
     public List<int> ResourceIds = new();
+    public Dictionary<int, int> ResourceAmounts = new(); // goodId -> тонны (реальные рудники)
     public List<string> CoreCodes = new();
 }

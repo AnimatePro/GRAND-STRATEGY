@@ -111,6 +111,21 @@ public partial class TradeManager : Node
         }
     }
 
+    /// <summary>Есть ли у страны порт (прибрежная провинция с портом или любая прибрежная).</summary>
+    private static bool HasPort(WorldData world, int countryId)
+    {
+        CountryData c = world.GetCountry(countryId);
+        if (c == null)
+            return false;
+        foreach (int pid in c.OwnedProvinceIds)
+        {
+            ProvinceData p = world.GetProvince(pid);
+            if (p.IsCoastal)
+                return true;
+        }
+        return false;
+    }
+
     private static bool CanTrade(WorldData world, int a, int b)
     {
         CountryData ca = world.Countries[a];
@@ -144,6 +159,10 @@ public partial class TradeManager : Node
             Vector2 pb = world.GetProvince(cbPro).Centroid;
             dist = pa.DistanceTo(pb);
         }
+
+        // Морская торговля: если обе страны имеют порт — расстояние дешевле (море).
+        if (HasPort(world, a) && HasPort(world, b))
+            dist *= 0.6;
 
         return SimFormulas.TradeEfficiency(relations, agreement, sanctioned, dist);
     }

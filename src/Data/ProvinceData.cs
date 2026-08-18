@@ -41,6 +41,7 @@ public struct ProvinceData
 
     public int[] CoreIds;      // страны, имеющие ядро на провинцию
     public int[] ResourceIds;  // id ресурсов (см. GoodData)
+    public int[] ResourceAmounts; // тонны добычи (по id ресурса, параллельно ResourceIds); -1 = обычная
     public int[] BuildingIds;  // id построек
     public int[] NeighborIds;  // id соседних провинций (граф смежности)
 
@@ -83,6 +84,7 @@ public struct ProvinceData
             ContinentId = -1,
             CoreIds = System.Array.Empty<int>(),
             ResourceIds = System.Array.Empty<int>(),
+            ResourceAmounts = System.Array.Empty<int>(),
             BuildingIds = System.Array.Empty<int>(),
             NeighborIds = System.Array.Empty<int>(),
         };

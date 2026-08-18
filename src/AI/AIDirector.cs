@@ -201,6 +201,7 @@ public partial class AIDirector : Node
             case AiProfile.Trader:
                 ConsiderImproveRelations(world, countryId, rng);
                 ConsiderBuildTrade(world, countryId, rng);
+                ConsiderTradeAgreements(world, countryId, rng);
                 break;
             case AiProfile.Defensive:
             case AiProfile.Isolationist:
@@ -519,6 +520,36 @@ public partial class AIDirector : Node
             int building = rng.Chance(0.5) ? 1 : 9; // ферма / дорога
             MilitaryManager.Instance.BuildBuilding(countryId, worst, building);
         }
+    }
+
+    /// <summary>ИИ заключает торговые соглашения с крупными соседями при хороших отношениях.</summary>
+    private void ConsiderTradeAgreements(WorldData world, int countryId, Rng rng)
+    {
+        CountryData country = world.Countries[countryId];
+        if (rng.Chance(0.5))
+            return;
+        int best = -1;
+        double bestGdp = 0;
+        foreach (int pid in country.OwnedProvinceIds)
+        {
+            ProvinceData p = world.GetProvince(pid);
+            foreach (int nid in p.NeighborIds)
+            {
+                ProvinceData n = world.GetProvince(nid);
+                if (n.OwnerId < 0 || n.OwnerId == countryId)
+                    continue;
+                if (DiplomacyManager.Instance.AreAtWar(countryId, n.OwnerId))
+                    continue;
+                CountryData other = world.Countries[n.OwnerId];
+                if (other.Gdp > bestGdp && country.RelationWith(n.OwnerId) > 40)
+                {
+                    bestGdp = other.Gdp;
+                    best = n.OwnerId;
+                }
+            }
+        }
+        if (best >= 0 && DiplomacyManager.Instance.GetTradeAgreement(countryId, best) == TradeAgreement.None)
+            DiplomacyManager.Instance.CycleTradeAgreement(countryId, best);
     }
 
     private void ConsiderBuildTrade(WorldData world, int countryId, Rng rng)

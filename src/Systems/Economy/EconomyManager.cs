@@ -174,11 +174,19 @@ public partial class EconomyManager : Node
                 production[foodId] += rural * EconomyConstants.RuralFoodPerWorker * dev * infra
                     * TechManager.Instance.FoodMult(p.OwnerId);
 
-            // Добыча ресурсов.
+            // Добыча ресурсов. Реальные рудники (ResourceAmounts в тоннах) дают больше.
             foreach (int rid in p.ResourceIds)
             {
-                if (rid >= 0 && rid < production.Length)
-                    production[rid] += EconomyConstants.BaseExtraction * dev * infra;
+                if (rid < 0 || rid >= production.Length)
+                    continue;
+                double baseAmount = EconomyConstants.BaseExtraction * dev * infra;
+                if (p.ResourceAmounts.Length > rid && p.ResourceAmounts[rid] > 0)
+                {
+                    // Реальный рудник: объём добычи (тонны) масштабируется.
+                    double real = p.ResourceAmounts[rid] / 100.0; // 100 тонн -> 1 ед.
+                    baseAmount = Math.Max(baseAmount, real);
+                }
+                production[rid] += baseAmount;
             }
         }
 
