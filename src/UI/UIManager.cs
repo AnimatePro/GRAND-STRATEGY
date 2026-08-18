@@ -488,6 +488,27 @@ public partial class UIManager : Node
             RebuildPlayerPanel();
         });
 
+        // Советники.
+        _playerBox.AddChild(new Label { Text = L("PANEL_ADVISORS") });
+        foreach (AdvisorData a in c.Advisors)
+            _playerBox.AddChild(new Label { Text = $"  ◆ {a.Name} ({L("ADV_" + a.Domain.ToString().ToUpperInvariant())}, {a.Skill})" });
+        AddButton(_playerBox, L("ACT_ADVISOR_ECO"), () =>
+        {
+            AdvisorManager.Instance.HireAdvisor(playerId, AdvisorDomain.Economy);
+            RebuildPlayerPanel();
+        });
+        AddButton(_playerBox, L("ACT_ADVISOR_MIL"), () =>
+        {
+            AdvisorManager.Instance.HireAdvisor(playerId, AdvisorDomain.Military);
+            RebuildPlayerPanel();
+        });
+        AddButton(_playerBox, L("ACT_ADVISOR_DIP"), () =>
+        {
+            AdvisorManager.Instance.HireAdvisor(playerId, AdvisorDomain.Diplomacy);
+            RebuildPlayerPanel();
+        });
+        _playerBox.AddChild(new Label { Text = $"{L("PANEL_LEGACY")}: {c.LegacyPoints:0}" });
+
         // Законы: переключение каждого закона.
         _playerBox.AddChild(new Label { Text = L("PANEL_LAWS") });
         foreach (LawData law in world.Laws)
@@ -566,6 +587,18 @@ public partial class UIManager : Node
                 EventBus.Instance.EmitUINotification(L("MSG_COMMANDER_FAIL"));
             RebuildMilitaryPanel();
         });
+
+        // Журнал сражений (тактический экран — кратко).
+        _militaryBox.AddChild(new Label { Text = L("PANEL_BATTLES") });
+        foreach (BattleRecord br in mil.BattleLog)
+        {
+            string prov = DataManager.Instance.World.ProvinceName(br.ProvinceId, LocalizationManager.Instance.Language);
+            string result = br.AttackerWon ? "✓" : "✗";
+            _militaryBox.AddChild(new Label
+            {
+                Text = $"{result} {prov}: {br.AttackerLosses}/{br.DefenderLosses}",
+            });
+        }
 
         // Шаблоны армий (макробилдер рекрутинга).
         _militaryBox.AddChild(new Label { Text = L("PANEL_TEMPLATES") });

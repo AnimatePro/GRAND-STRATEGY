@@ -249,6 +249,10 @@ public partial class DiplomacyManager : Node
         ca.WarExhaustion = 0f;
         cb.WarExhaustion = 0f;
 
+        // Очки наследия победителю за победу/аннексию.
+        double legacy = terms.Annex ? 50.0 : (terms.CedeOccupied || terms.Puppet ? 25.0 : 10.0);
+        AdvisorManager.Instance.AwardLegacy(winner, legacy, "war victory");
+
         LogService.Instance.Info($"Diplomacy: peace between {a} and {b} (winner {winner})");
         EventBus.Instance.EmitPeaceSigned(a, b);
         EventBus.Instance.EmitDiplomacyUpdated();

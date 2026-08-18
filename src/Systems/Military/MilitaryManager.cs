@@ -4,6 +4,7 @@ using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Systems.Diplomacy;
+using GrandStrategy.Systems.Governance;
 using GrandStrategy.Systems.Tech;
 using GrandStrategy.SimCore;
 using GrandStrategy.Utils;
@@ -96,6 +97,10 @@ public partial class MilitaryManager : Node
 
     public List<ArmyData> Armies { get; private set; } = new();
     public List<CommanderData> Commanders { get; private set; } = new();
+
+    /// <summary>Журнал последних сражений (для тактического экрана).</summary>
+    public List<BattleRecord> BattleLog { get; private set; } = new();
+    public const int BattleLogMax = 20;
 
     /// <summary>Выбранная игроком армия для приказа движения (-1 = не выбрана).</summary>
     public int SelectedArmyId = -1;
@@ -594,10 +599,11 @@ public partial class MilitaryManager : Node
         double airFactor = 1.0 - airReduction;
         double reconFactor = 1.0 + Mathf.Min((float)aDroneRecon * 0.02f, 0.3f);
 
+        double aAdvisor = Governance.AdvisorManager.Instance.AdvisorMult(a.OwnerId, AdvisorDomain.Military);
         double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength
             * TechManager.Instance.MilitaryMult(a.OwnerId)
             * DifficultyModifiers.MilitaryMult(a.OwnerId)
-            * aCommander * aLanding * airFactor * reconFactor;
+            * aCommander * aLanding * airFactor * reconFactor * aAdvisor;
         double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef)
             * TechManager.Instance.MilitaryMult(b.OwnerId)
             * DifficultyModifiers.MilitaryMult(b.OwnerId)
@@ -624,6 +630,24 @@ public partial class MilitaryManager : Node
             war.WarScore += (attackerWin - 0.5) * 2.0; // атакующий выигрывает/проигрывает
             war.WarScore = Mathf.Clamp((float)war.WarScore, -100f, 100f);
         }
+
+        // Журнал сражения.
+        int aLosses = (int)(a.TotalUnits * (1.0 - attackerWin) * 0.3);
+        int bLosses = (int)(b.TotalUnits * attackerWin * 0.3);
+        BattleLog.Insert(0, new BattleRecord
+        {
+            Turn = TimeManager.Instance.CurrentTurn,
+            ProvinceId = a.ProvinceId,
+            AttackerId = a.OwnerId,
+            DefenderId = b.OwnerId,
+            AttackerWon = attackerWin >= 0.5,
+            AttackerLosses = aLosses,
+            DefenderLosses = bLosses,
+            AttackerPower = attackP,
+            DefenderPower = defenseP,
+        });
+        if (BattleLog.Count > BattleLogMax)
+            BattleLog.RemoveAt(BattleLog.Count - 1);
     }
 
     /// <summary>Суммарная сила юнитов определённой роли в армии.</summary>

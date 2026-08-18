@@ -289,3 +289,12 @@ UNIT_NAVY,Флот
 TPL_MODERN,Современные общевойсковые
 LEADER,Лидер
 MSG_SCENARIO_FAIL,Не удалось загрузить данные сценария
+PANEL_ADVISORS,Советники
+PANEL_LEGACY,Очки наследия
+PANEL_BATTLES,Журнал сражений
+ACT_ADVISOR_ECO,Нанять экономического советника
+ACT_ADVISOR_MIL,Нанять военного советника
+ACT_ADVISOR_DIP,Нанять дипломатического советника
+ADV_ECONOMY,Экономика
+ADV_MILITARY,Армия
+ADV_DIPLOMACY,Дипломатия

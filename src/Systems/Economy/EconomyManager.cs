@@ -3,6 +3,7 @@ using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.Systems.Population;
+using GrandStrategy.Systems.Governance;
 using GrandStrategy.Systems.Tech;
 using GrandStrategy.Systems.Trade;
 using GrandStrategy.SimCore;
@@ -296,10 +297,11 @@ public partial class EconomyManager : Node
             double vat = consumptionValue * eco.Taxes.Vat;
             double resource = outputValue * eco.Taxes.Resource * 0.3;
 
-            // Технологии + законы.
+            // Технологии + законы + экономический советник.
             double lawTaxMult = world.AggregateLaws(world.Countries[c]).TaxMult;
+            double advisorMult = AdvisorManager.Instance.AdvisorMult(c, AdvisorDomain.Economy);
             eco.BudgetRevenue = (income + corporate + vat + resource)
-                * TechManager.Instance.TaxMult(c) * lawTaxMult;
+                * TechManager.Instance.TaxMult(c) * lawTaxMult * advisorMult;
         }
     }
 

@@ -65,6 +65,7 @@ public partial class GameManager : Node
         AIDirector.Instance.SetSeed(options.Seed);
         AIDirector.Instance.Reset();
         TechManager.Instance.Reset();
+        AdvisorManager.Instance.SetSeed(options.Seed);
 
         // Помечаем игрока.
         if (DataManager.Instance.IsLoaded)

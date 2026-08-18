@@ -97,6 +97,20 @@ public sealed class CommanderData
     public float Skill;                // 1..5
 }
 
+/// <summary>Запись о сражении (для тактического экрана/журнала боёв).</summary>
+public sealed class BattleRecord
+{
+    public int Turn;
+    public int ProvinceId;
+    public int AttackerId;
+    public int DefenderId;
+    public bool AttackerWon;
+    public int AttackerLosses;
+    public int DefenderLosses;
+    public double AttackerPower;
+    public double DefenderPower;
+}
+
 /// <summary>Война между двумя странами.</summary>
 public sealed class WarData
 {
