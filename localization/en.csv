@@ -298,3 +298,10 @@ ACT_ADVISOR_DIP,Hire Diplomatic Advisor
 ADV_ECONOMY,Economy
 ADV_MILITARY,Military
 ADV_DIPLOMACY,Diplomacy
+PANEL_IDEAS,National Ideas
+IDEA_NATIONAL_ARMORY,National Armory
+IDEA_TRADE_EMPIRE,Trade Empire
+IDEA_ENLIGHTENMENT,Enlightenment
+IDEA_SOCIAL_COHESION,Social Cohesion
+IDEA_MILITARY_TRADITION,Military Tradition
+IDEA_ECONOMIC_MIRACLE,Economic Miracle

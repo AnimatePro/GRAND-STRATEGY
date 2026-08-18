@@ -42,6 +42,7 @@ public sealed class CountryData
     public int PrimaryCultureId;  // основная культура (индекс в WorldData.Cultures)
     public double LegacyPoints;   // очки наследия (за войны/аннексии/формирования)
     public List<AdvisorData> Advisors = new(); // советники/министры
+    public List<int> TakenIdeas = new();       // id принятых национальных идей
     public string Leader2024 = string.Empty; // реальный глава государства (сценарий 2024)
     public string Leader1936 = string.Empty; // реальный глава государства (сценарий 1936)
 

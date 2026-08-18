@@ -600,10 +600,11 @@ public partial class MilitaryManager : Node
         double reconFactor = 1.0 + Mathf.Min((float)aDroneRecon * 0.02f, 0.3f);
 
         double aAdvisor = Governance.AdvisorManager.Instance.AdvisorMult(a.OwnerId, AdvisorDomain.Military);
+        double aIdeas = Governance.AdvisorManager.Instance.IdeaMilitaryMult(a.OwnerId);
         double attackP = a.AttackPower(UnitTypes) * a.Morale * a.Strength
             * TechManager.Instance.MilitaryMult(a.OwnerId)
             * DifficultyModifiers.MilitaryMult(a.OwnerId)
-            * aCommander * aLanding * airFactor * reconFactor * aAdvisor;
+            * aCommander * aLanding * airFactor * reconFactor * aAdvisor * aIdeas;
         double defenseP = b.DefensePower(UnitTypes) * b.Morale * b.Strength * (1 + terrainDef + fortDef)
             * TechManager.Instance.MilitaryMult(b.OwnerId)
             * DifficultyModifiers.MilitaryMult(b.OwnerId)

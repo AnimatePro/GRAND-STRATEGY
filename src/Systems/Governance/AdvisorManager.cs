@@ -79,4 +79,47 @@ public partial class AdvisorManager : Node
         c.LegacyPoints += amount;
         LogService.Instance.Info($"Legacy: {c.Code} +{amount:0} ({reason})");
     }
+
+    /// <summary>Принятие национальной идеи за очки наследия.</summary>
+    public bool TakeIdea(int ownerId, int ideaId)
+    {
+        CountryData c = DataManager.Instance.World.GetCountry(ownerId);
+        if (c == null || ideaId < 0 || ideaId >= DataManager.Instance.World.Ideas.Length)
+            return false;
+        IdeaData idea = DataManager.Instance.World.Ideas[ideaId];
+        if (c.TakenIdeas.Contains(ideaId))
+            return false;
+        if (c.LegacyPoints < idea.Cost)
+            return false;
+        c.LegacyPoints -= idea.Cost;
+        c.TakenIdeas.Add(ideaId);
+        LogService.Instance.Info($"Idea: {c.Code} adopted '{idea.NameKey}'");
+        return true;
+    }
+
+    /// <summary>Суммарный множитель налогов от идей страны.</summary>
+    public double IdeaTaxMult(int ownerId)
+    {
+        CountryData c = DataManager.Instance.World.GetCountry(ownerId);
+        if (c == null)
+            return 1.0;
+        double m = 1.0;
+        foreach (int id in c.TakenIdeas)
+            if (id >= 0 && id < DataManager.Instance.World.Ideas.Length)
+                m *= DataManager.Instance.World.Ideas[id].TaxMult;
+        return m;
+    }
+
+    /// <summary>Суммарный военный множитель от идей страны.</summary>
+    public double IdeaMilitaryMult(int ownerId)
+    {
+        CountryData c = DataManager.Instance.World.GetCountry(ownerId);
+        if (c == null)
+            return 1.0;
+        double m = 1.0;
+        foreach (int id in c.TakenIdeas)
+            if (id >= 0 && id < DataManager.Instance.World.Ideas.Length)
+                m *= DataManager.Instance.World.Ideas[id].MilitaryMult;
+        return m;
+    }
 }

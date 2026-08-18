@@ -509,6 +509,22 @@ public partial class UIManager : Node
         });
         _playerBox.AddChild(new Label { Text = $"{L("PANEL_LEGACY")}: {c.LegacyPoints:0}" });
 
+        // Национальные идеи (трата очков наследия).
+        if (world.Ideas.Length > 0)
+        {
+            _playerBox.AddChild(new Label { Text = L("PANEL_IDEAS") });
+            foreach (IdeaData idea in world.Ideas)
+            {
+                bool taken = c.TakenIdeas.Contains(idea.Id);
+                string marker = taken ? "[x]" : $"[{idea.Cost:0}]";
+                AddButton(_playerBox, $"{marker} {LocalizationManager.Instance.Get(idea.NameKey)}", () =>
+                {
+                    if (AdvisorManager.Instance.TakeIdea(playerId, idea.Id))
+                        RebuildPlayerPanel();
+                });
+            }
+        }
+
         // Законы: переключение каждого закона.
         _playerBox.AddChild(new Label { Text = L("PANEL_LAWS") });
         foreach (LawData law in world.Laws)

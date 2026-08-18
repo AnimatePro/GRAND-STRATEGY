@@ -19,6 +19,7 @@ public sealed class WorldData
     public LawData[] Laws = System.Array.Empty<LawData>();
     public ReligionData[] Religions = System.Array.Empty<ReligionData>();
     public CultureData[] Cultures = System.Array.Empty<CultureData>();
+    public IdeaData[] Ideas = System.Array.Empty<IdeaData>();
 
     /// <summary>Названия провинций (индекс = id провинции), EN и RU.</summary>
     public string[] ProvinceNamesEn = System.Array.Empty<string>();

@@ -300,8 +300,9 @@ public partial class EconomyManager : Node
             // Технологии + законы + экономический советник.
             double lawTaxMult = world.AggregateLaws(world.Countries[c]).TaxMult;
             double advisorMult = AdvisorManager.Instance.AdvisorMult(c, AdvisorDomain.Economy);
+            double ideaMult = AdvisorManager.Instance.IdeaTaxMult(c);
             eco.BudgetRevenue = (income + corporate + vat + resource)
-                * TechManager.Instance.TaxMult(c) * lawTaxMult * advisorMult;
+                * TechManager.Instance.TaxMult(c) * lawTaxMult * advisorMult * ideaMult;
         }
     }
 
