@@ -13,6 +13,7 @@ public struct GoodData
     public int Id;
     public string NameKey = string.Empty;
     public GoodCategory Category;
+    public string IconPath = string.Empty;  // спрайт ресурса (res://assets/goods/*.png)
     public double BasePrice;       // базовая цена в условных единицах
     public double Price;           // текущая рыночная цена
     public double Supply;

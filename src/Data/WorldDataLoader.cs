@@ -213,6 +213,10 @@ public static class WorldDataLoader
             good.ElasticityDemand = CsvTableLoader.Double(row, "elast_demand", 1.0);
             good.ElasticitySupply = CsvTableLoader.Double(row, "elast_supply", 1.0);
             good.Price = good.BasePrice;
+            // Спрайт ресурса.
+            string icon = CsvTableLoader.Str(row, "icon");
+            if (!string.IsNullOrWhiteSpace(icon))
+                good.IconPath = $"res://assets/goods/{icon}.png";
             // Производственный рецепт: "inputId:amount;inputId:amount".
             string recipe = CsvTableLoader.Str(row, "inputs");
             if (!string.IsNullOrWhiteSpace(recipe))
