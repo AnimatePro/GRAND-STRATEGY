@@ -349,6 +349,33 @@ public partial class UIManager : Node
         };
         _provinceBox.AddChild(info);
 
+        // Ресурсы провинции (со спрайтами).
+        if (p.ResourceIds.Length > 0)
+        {
+            _provinceBox.AddChild(new Label { Text = L("PANEL_RESOURCES") });
+            foreach (int rid in p.ResourceIds)
+            {
+                if (rid < 0 || rid >= world.GoodCount)
+                    continue;
+                GoodData good = world.Goods[rid];
+                var row = new HBoxContainer();
+                row.AddThemeConstantOverride("separation", 6);
+                if (!string.IsNullOrEmpty(good.IconPath) && ResourceLoader.Exists(good.IconPath))
+                {
+                    var icon = new TextureRect
+                    {
+                        Texture = GD.Load<Texture2D>(good.IconPath),
+                        CustomMinimumSize = new Vector2(18, 18),
+                        StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                        SizeFlagsVertical = Control.SizeFlags.ShrinkCenter,
+                    };
+                    row.AddChild(icon);
+                }
+                row.AddChild(new Label { Text = LocalizationManager.Instance.Get(good.NameKey) });
+                _provinceBox.AddChild(row);
+            }
+        }
+
         if (p.OwnerId == playerId)
         {
             AddButton(_provinceBox, L("ACT_BUILD_INFRA"), () =>
