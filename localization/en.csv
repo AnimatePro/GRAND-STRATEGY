@@ -288,3 +288,4 @@ UNIT_AIR_FORCE,Air Force
 UNIT_NAVY,Navy
 TPL_MODERN,Modern Combined Arms
 LEADER,Leader
+MSG_SCENARIO_FAIL,Failed to load scenario data

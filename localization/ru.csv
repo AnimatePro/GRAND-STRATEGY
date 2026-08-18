@@ -288,3 +288,4 @@ UNIT_AIR_FORCE,Авиация
 UNIT_NAVY,Флот
 TPL_MODERN,Современные общевойсковые
 LEADER,Лидер
+MSG_SCENARIO_FAIL,Не удалось загрузить данные сценария

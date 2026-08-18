@@ -119,13 +119,28 @@ public partial class NewGameSetup : Control
 
     private void StartGame()
     {
+        int year = (int)_yearDropdown.GetItemId(_yearDropdown.Selected);
         int countryId = _countryDropdown.ItemCount > 0
             ? (int)_countryDropdown.GetItemId(_countryDropdown.Selected)
             : 0;
 
+        // Загрузка данных под выбранный сценарий (2024 или 1936).
+        if (DataManager.Instance.ScenarioYear != year)
+        {
+            if (!DataManager.Instance.LoadScenario(year))
+            {
+                EventBus.Instance.EmitUINotification(L("MSG_SCENARIO_FAIL"));
+                return;
+            }
+            _countries = CollectCountries();
+            RebuildCountryList("");
+            countryId = _countryDropdown.ItemCount > 0
+                ? (int)_countryDropdown.GetItemId(_countryDropdown.Selected) : 0;
+        }
+
         var options = new NewGameOptions
         {
-            StartYear = (int)_yearDropdown.GetItemId(_yearDropdown.Selected),
+            StartYear = year,
             PlayerCountryId = countryId,
             Seed = ParseSeed(_seedInput.Text),
             Difficulty = _difficultyDropdown.GetItemId(_difficultyDropdown.Selected).ToString(),

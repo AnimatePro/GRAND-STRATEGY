@@ -17,11 +17,36 @@ public partial class DataManager : Node
     public WorldData World { get; private set; } = null!;
     public bool IsLoaded { get; private set; }
 
+    /// <summary>Текущие пути к текстурам карты (зависят от сценария).</summary>
+    public string IdMapPath = "res://data/cache/id_map.png";
+    public string BorderMaskPath = "res://data/cache/border_mask.png";
+
+    /// <summary>Текущий год сценария (2024 или 1936).</summary>
+    public int ScenarioYear = 2024;
+
     public override void _Ready()
     {
         Instance = this;
         IsLoaded = false;
         World = new WorldData();
+    }
+
+    /// <summary>Загрузка мировых данных под конкретный сценарий (год).</summary>
+    public bool LoadScenario(int year)
+    {
+        ScenarioYear = year;
+        if (year >= 2000)
+        {
+            IdMapPath = "res://data/cache/id_map.png";
+            BorderMaskPath = "res://data/cache/border_mask.png";
+            return LoadWorldData(WorldDataLoader.WorldCachePath);
+        }
+        else
+        {
+            IdMapPath = "res://data/cache/id_map_1938.png";
+            BorderMaskPath = "res://data/cache/border_mask_1938.png";
+            return LoadWorldData("res://data/cache/world_1938.json");
+        }
     }
 
     /// <summary>Загрузка мировых данных из кэша + CSV-баланса.</summary>

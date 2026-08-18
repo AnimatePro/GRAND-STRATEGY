@@ -45,15 +45,15 @@ public partial class MapRenderer : TextureRect
     {
         _world = world;
 
-        // ID-карта (сырая загрузка).
-        _idImage = Image.LoadFromFile(ProjectSettings.GlobalizePath(IdMapPath));
+        // ID-карта (сырая загрузка) — пути зависят от сценария (DataManager).
+        _idImage = Image.LoadFromFile(ProjectSettings.GlobalizePath(GrandStrategy.Core.DataManager.Instance.IdMapPath));
         _idTexture = ImageTexture.CreateFromImage(_idImage);
         Texture = _idTexture;
         TextureFilter = TextureFilterEnum.Nearest;
         StretchMode = TextureRect.StretchModeEnum.Scale;
         ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 
-        Image borderImg = Image.LoadFromFile(ProjectSettings.GlobalizePath(BorderMaskPath));
+        Image borderImg = Image.LoadFromFile(ProjectSettings.GlobalizePath(GrandStrategy.Core.DataManager.Instance.BorderMaskPath));
         _borderTexture = ImageTexture.CreateFromImage(borderImg);
 
         // LUT: 1 пиксель на провинцию.
