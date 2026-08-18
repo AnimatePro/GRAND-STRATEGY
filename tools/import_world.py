@@ -146,10 +146,13 @@ def main():
         name_ru = p.get("NAME_RU") or p.get("NAME") or name
         pop = to_int(p.get("POP_EST"), 0)
 
+        # GDP_MD / GDP_MD_EST в Natural Earth — МИЛЛИОНЫ долларов; переводим в доллары.
         gdp = to_float(p.get("GDP_MD_EST"), -1)
         if gdp < 0:
             gdp = to_float(p.get("GDP_MD"), -1)
-        if gdp < 0:
+        if gdp >= 0:
+            gdp *= 1_000_000.0
+        else:
             gdp = pop * INCOME_PC.get(p.get("INCOME_GRP"), 5000)
 
         continent = CONTINENT_MAP.get(p.get("CONTINENT"), 0)
