@@ -597,6 +597,22 @@ public partial class UIManager : Node
             RebuildMilitaryPanel();
         });
 
+        // Назначение командира выбранной армии.
+        if (mil.SelectedArmyId >= 0)
+        {
+            _militaryBox.AddChild(new Label { Text = L("PANEL_ASSIGN_COMMANDER") });
+            foreach (CommanderData cmd in mil.Commanders)
+            {
+                if (cmd.OwnerId != playerId)
+                    continue;
+                AddButton(_militaryBox, $"{cmd.Name} ({cmd.Skill})", () =>
+                {
+                    mil.AssignCommander(mil.SelectedArmyId, cmd.Id);
+                    RebuildMilitaryPanel();
+                });
+            }
+        }
+
         // Журнал сражений (тактический экран — кратко).
         _militaryBox.AddChild(new Label { Text = L("PANEL_BATTLES") });
         foreach (BattleRecord br in mil.BattleLog)

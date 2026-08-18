@@ -310,3 +310,4 @@ MSG_LOAN_OK,Кредит получен
 MSG_LOAN_FAIL,В кредите отказано
 PANEL_ECONOMY,Экономика
 PANEL_POLITICS,Политика
+PANEL_ASSIGN_COMMANDER,Назначить командира

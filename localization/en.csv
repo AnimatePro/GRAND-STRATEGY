@@ -310,3 +310,4 @@ MSG_LOAN_OK,Loan received
 MSG_LOAN_FAIL,Loan declined
 PANEL_ECONOMY,Economy
 PANEL_POLITICS,Politics
+PANEL_ASSIGN_COMMANDER,Assign Commander
