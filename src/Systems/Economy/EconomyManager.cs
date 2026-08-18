@@ -212,7 +212,9 @@ public partial class EconomyManager : Node
     /// <summary>Реальная добыча страны (production.csv) добавляется поверх провинциальной.</summary>
     private void ApplyNationalProduction(WorldData world)
     {
-        // id товаров: 3=iron, 4=coal, 5=oil, 6=gas.
+        // Индексы товаров (0-based, порядок data/goods.csv).
+        const int IronId = 3, CoalId = 4, OilId = 5, GasId = 6;
+
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryData country = world.Countries[c];
@@ -224,13 +226,13 @@ public partial class EconomyManager : Node
 
             // Нефть (тыс. барр/день -> годовой масштаб), газ (млрд м3), уголь/железо (млн т).
             if (prod.OilKbd > 0)
-                eco.Production[5] += prod.OilKbd * 0.4 * dev;   // 5=oil
+                eco.Production[OilId] += prod.OilKbd * 0.4 * dev;
             if (prod.GasBcm > 0)
-                eco.Production[6] += prod.GasBcm * 0.6 * dev;   // 6=gas
+                eco.Production[GasId] += prod.GasBcm * 0.6 * dev;
             if (prod.CoalMt > 0)
-                eco.Production[4] += prod.CoalMt * 0.8 * dev;   // 4=coal
+                eco.Production[CoalId] += prod.CoalMt * 0.8 * dev;
             if (prod.IronMt > 0)
-                eco.Production[3] += prod.IronMt * 0.9 * dev;   // 3=iron
+                eco.Production[IronId] += prod.IronMt * 0.9 * dev;
         }
     }
 
