@@ -32,7 +32,7 @@ public partial class TooltipLayer : Control
     {
         if (_panel == null || provinceId < 0 || provinceId >= world.ProvinceCount)
         {
-            Hide();
+            HideTooltip();
             return;
         }
 
@@ -55,7 +55,7 @@ public partial class TooltipLayer : Control
         _panel.Visible = true;
     }
 
-    public void Hide()
+    public void HideTooltip()
     {
         if (_panel != null)
             _panel.Visible = false;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Godot;
+using GrandStrategy.Core;
 using FileAccess = Godot.FileAccess; // implicit System.IO конфликтует с Godot.FileAccess
 
 namespace GrandStrategy.Data;

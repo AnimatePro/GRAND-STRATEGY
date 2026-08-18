@@ -196,7 +196,7 @@ public partial class GameRoot : Node
             if (hover >= 0)
                 _tooltip.ShowProvince(DataManager.Instance.World, hover, mouse);
             else
-                _tooltip.Hide();
+                _tooltip.HideTooltip();
         }
 
         // Метки, миникарта и маркеры армий.
@@ -238,7 +238,7 @@ public partial class GameRoot : Node
         {
             if (index >= 0)
             {
-                var template = MilitaryManager.Instance.Templates[MilitaryManager.Instance.MacroRecruitTemplate];
+                var template = MilitaryManager.Templates[MilitaryManager.Instance.MacroRecruitTemplate];
                 if (MilitaryManager.Instance.RecruitArmy(PlayerCountryId(), index, template))
                     EventBus.Instance.EmitUINotification("Army recruited");
                 else
