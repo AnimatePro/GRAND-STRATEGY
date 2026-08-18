@@ -182,14 +182,22 @@ def main():
             np_["CoreCodes"] = []
         provinces_out.append(np_)
 
-    # Столицы.
+    # Столицы: провинция с максимальным населением; fallback — любая провинция страны.
     best_cap = defaultdict(lambda: (None, 0))
+    any_prov = {}
     for p in provinces_out:
         code = p["OwnerCode"]
-        if code and p["TotalPopulation"] > best_cap[code][1]:
+        if not code:
+            continue
+        if code not in any_prov:
+            any_prov[code] = p["Id"]
+        if p["TotalPopulation"] > best_cap[code][1]:
             best_cap[code] = (p["Id"], p["TotalPopulation"])
     for c in countries:
-        c["CapitalProvinceId"] = best_cap.get(c["Code"], (0, 0))[0]
+        pid = best_cap.get(c["Code"], (None, 0))[0]
+        if pid is None:
+            pid = any_prov.get(c["Code"], 0)
+        c["CapitalProvinceId"] = pid
 
     world = {"Version": 2, "MapWidthPx": w["MapWidthPx"], "MapHeightPx": w["MapHeightPx"],
              "Countries": countries, "Provinces": provinces_out}
