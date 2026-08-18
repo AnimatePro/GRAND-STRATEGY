@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
@@ -24,6 +25,37 @@ public partial class ArmyLayer : Control
     {
         _world = world;
         _camera = camera;
+    }
+
+    /// <summary>Спрайт доминирующего рода войск армии (кэш по iconPath).</summary>
+    private static readonly Dictionary<string, Texture2D> _iconCache = new();
+
+    private static Texture2D? DominantUnitIcon(ArmyData army)
+    {
+        // Доминирующий тип — с наибольшим числом юнитов.
+        int bestType = -1;
+        int bestCount = 0;
+        foreach (KeyValuePair<int, int> kv in army.UnitCounts)
+        {
+            if (kv.Value > bestCount)
+            {
+                bestCount = kv.Value;
+                bestType = kv.Key;
+            }
+        }
+        if (bestType < 0 || bestType >= MilitaryManager.UnitTypes.Length)
+            return null;
+
+        string path = MilitaryManager.UnitTypes[bestType].IconPath;
+        if (string.IsNullOrEmpty(path))
+            return null;
+        if (_iconCache.TryGetValue(path, out Texture2D? cached))
+            return cached;
+        if (!ResourceLoader.Exists(path))
+            return null;
+        var tex = GD.Load<Texture2D>(path);
+        _iconCache[path] = tex;
+        return tex;
     }
 
     public override void _Draw()
@@ -73,11 +105,25 @@ public partial class ArmyLayer : Control
                 ? _world.Countries[army.OwnerId].Color
                 : Colors.White;
 
-            DrawCircle(screen, 7f, color);
-            DrawCircle(screen, 7f, new Color(0, 0, 0, 0.6f), false, 1.5f);
+            // Спрайт доминирующего рода войск армии (вместо кружка).
+            Texture2D? icon = DominantUnitIcon(army);
+            if (icon != null)
+            {
+                var rect = new Rect2(screen - new Vector2(10, 10), new Vector2(20, 20));
+                DrawTextureRect(icon, rect, false);
+            }
+            else
+            {
+                DrawCircle(screen, 7f, color);
+                DrawCircle(screen, 7f, new Color(0, 0, 0, 0.6f), false, 1.5f);
+            }
+
+            // Цветовая окантовка страны (рамка вокруг спрайта).
+            DrawRect(new Rect2(screen - new Vector2(11, 11), new Vector2(22, 22)), new Color(color.R, color.G, color.B, 0.7f), false, 1.5f);
+
             string text = army.TotalUnits.ToString();
             Vector2 ts = font.GetStringSize(text, HorizontalAlignment.Left, -1, 12);
-            DrawString(font, screen - new Vector2(ts.X / 2f, -14f), text,
+            DrawString(font, screen - new Vector2(ts.X / 2f, -16f), text,
                 HorizontalAlignment.Left, -1, 12, Colors.White);
 
             // Полоса здоровья (сила).

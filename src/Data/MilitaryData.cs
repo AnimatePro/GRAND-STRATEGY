@@ -22,6 +22,7 @@ public struct UnitTypeData
     public int Id;
     public string NameKey;
     public UnitRole Role;
+    public string IconPath;     // путь к спрайту (res://assets/units/*.png)
     public float Attack;
     public float Defense;
     public float Mobility;
