@@ -95,8 +95,11 @@ public partial class TradeManager : Node
                 economy.Countries[b].TradeBalance -= value;                       // импорт
                 economy.Countries[b].Consumption[goodId] += flow;
 
-                // Тарифный доход импортёра и экспортный налог экспортёра.
+                // Тариф импортёра зависит от категории товара: стратегические/энергия дороже.
                 double tariff = economy.Countries[b].Taxes.ImportTariff;
+                GoodCategory cat = world.Goods[goodId].Category;
+                if (cat is GoodCategory.Strategic or GoodCategory.Energy)
+                    tariff *= 1.5; // повышенные пошлины на стратегические товары
                 double exportTax = economy.Countries[a].Taxes.ExportTariff;
                 economy.Countries[b].BudgetRevenue += value * tariff;
                 economy.Countries[a].BudgetRevenue += value * exportTax;

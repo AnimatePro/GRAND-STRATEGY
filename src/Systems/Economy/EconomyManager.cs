@@ -491,6 +491,20 @@ public partial class EconomyManager : Node
             targetRate = Math.Clamp(targetRate, 0.2, 5.0);
             eco.ExchangeRate += (targetRate - eco.ExchangeRate) * 0.1; // плавная подстройка
 
+            // Обслуживание внешнего долга: процент со списанием из резервов/казны.
+            double extDebtService = eco.ExternalDebt * eco.InterestRate;
+            if (extDebtService > 0)
+            {
+                double pay = Math.Min(eco.Reserves, extDebtService);
+                eco.Reserves -= pay;
+                double remaining = extDebtService - pay;
+                if (remaining > 0)
+                {
+                    // Не хватает резервов — списываем с казны и добавляем в расходы.
+                    country.Treasury = Math.Max(country.Treasury - remaining, 0.0);
+                }
+            }
+
             // Резервы не могут быть отрицательными.
             eco.Reserves = Math.Max(eco.Reserves, 0.0);
 

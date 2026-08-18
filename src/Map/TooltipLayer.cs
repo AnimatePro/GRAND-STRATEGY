@@ -47,7 +47,9 @@ public partial class TooltipLayer : Control
             $"{owner}\n" +
             $"Pop: {p.TotalPopulation:N0}\n" +
             $"Dev: {p.Development:P0}  Infra: {p.Infrastructure:P0}\n" +
-            $"{p.Terrain}";
+            $"Terrain: {p.Terrain}  Climate: {p.Climate}\n" +
+            $"{LocalizationManager.Instance.Get("PANEL_RELIGION")}: {world.ReligionName(p.ReligionId, lang)}\n" +
+            $"{LocalizationManager.Instance.Get("PANEL_CULTURE")}: {world.CultureName(p.CultureId, lang)}";
 
         _panel.Position = ClampToViewport(screenPos + new Vector2(16, 16), _panel.Size);
         _panel.Visible = true;
