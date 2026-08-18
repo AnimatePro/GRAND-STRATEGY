@@ -118,6 +118,12 @@ public partial class DiplomacyManager : Node
         if (attackerId == defenderId || AreAtWar(attackerId, defenderId))
             return false;
 
+        WorldData world = DataManager.Instance.World;
+        CountryData attacker = world.GetCountry(attackerId);
+        CountryData defender = world.GetCountry(defenderId);
+        if (attacker == null || defender == null || !attacker.IsAlive || !defender.IsAlive)
+            return false; // нельзя воевать с мёртвой страной
+
         var war = new WarData
         {
             Id = _nextWarId++,
@@ -129,7 +135,6 @@ public partial class DiplomacyManager : Node
         Wars.Add(war);
         SetStatus(attackerId, defenderId, DiplomacyStatus.War);
 
-        WorldData world = DataManager.Instance.World;
         ChangeRelation(attackerId, defenderId, -100f, "REL_WAR");
         ChangeRelation(defenderId, attackerId, -100f, "REL_WAR");
 
@@ -304,7 +309,11 @@ public partial class DiplomacyManager : Node
 
     public bool FormAlliance(int a, int b)
     {
-        if (AreAtWar(a, b) || GetStatus(a, b) == DiplomacyStatus.Alliance)
+        if (a == b || AreAtWar(a, b) || GetStatus(a, b) == DiplomacyStatus.Alliance)
+            return false;
+        WorldData world = DataManager.Instance.World;
+        if (world.GetCountry(a) == null || world.GetCountry(b) == null ||
+            !world.GetCountry(a).IsAlive || !world.GetCountry(b).IsAlive)
             return false;
         SetStatus(a, b, DiplomacyStatus.Alliance);
         ImproveRelations(a, b, 25f, "REL_ALLIANCE");
