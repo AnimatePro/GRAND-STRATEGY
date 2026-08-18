@@ -51,6 +51,9 @@ public partial class EconomyManager : Node
             eco.InterestRate = world.Countries[c].BaseInterestRate;
             eco.Inflation = world.Countries[c].Inflation;
             eco.Reserves = world.Countries[c].Treasury;
+            eco.BaselineGdp = world.Countries[c].Gdp; // реальный стартовый ВВП
+            eco.Gdp = world.Countries[c].Gdp;
+            eco.GdpPerCapita = world.Countries[c].Gdp / Math.Max(world.Countries[c].Population, 1L);
         }
         _lastDemographyYear = -1;
         _lastMigrationMonth = -1;
@@ -473,11 +476,22 @@ public partial class EconomyManager : Node
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryEconomy eco = Economy.Countries[c];
-            double gdp = 0.0;
+            double productionValue = 0.0;
             for (int g = 0; g < world.GoodCount; g++)
-                gdp += eco.Production[g] * eco.Price[g];
+                productionValue += eco.Production[g] * eco.Price[g];
 
-            eco.Gdp = Math.Max(gdp, 1.0);
+            // ВВП = производственный расчёт, но не падает ниже разумной доли реального
+            // стартового ВВП (экономика не должна «схлопываться» из-за масштаба).
+            double baseline = eco.BaselineGdp > 0 ? eco.BaselineGdp : 1.0;
+            double simulated = Math.Max(productionValue, baseline * 0.1);
+
+            // Плавная эволюция: ВВП сходится к производственному уровню, но
+            // стартует с реального значения (нет резкого обнуления).
+            if (eco.Gdp <= 0)
+                eco.Gdp = baseline;
+            eco.Gdp = eco.Gdp * 0.9 + simulated * 0.1;
+
+            eco.Gdp = Math.Max(eco.Gdp, 1.0);
             eco.GdpPerCapita = eco.Gdp / Math.Max(world.Countries[c].Population, 1L);
             world.Countries[c].Gdp = eco.Gdp;
             world.Countries[c].Treasury = Math.Max(world.Countries[c].Treasury - eco.Deficit, 0.0);

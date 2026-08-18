@@ -53,6 +53,7 @@ public sealed class CountryEconomy
     public double Gdp;              // номинальный ВВП
     public double GdpPerCapita;
     public double AvgWage;
+    public double BaselineGdp;      // реальный стартовый ВВП (якорь из данных)
 
     public double BudgetRevenue;
     public double BudgetExpenses;
