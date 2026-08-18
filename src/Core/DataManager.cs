@@ -43,9 +43,10 @@ public partial class DataManager : Node
         }
         else
         {
-            IdMapPath = "res://data/cache/id_map_1938.png";
-            BorderMaskPath = "res://data/cache/border_mask_1938.png";
-            return LoadWorldData("res://data/cache/world_1938.json");
+            // 1936: та же детальная сетка провинций, но историческое владение.
+            IdMapPath = "res://data/cache/id_map.png";
+            BorderMaskPath = "res://data/cache/border_mask.png";
+            return LoadWorldData("res://data/cache/world_1936.json");
         }
     }
 
