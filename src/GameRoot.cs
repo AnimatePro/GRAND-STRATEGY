@@ -30,10 +30,11 @@ public partial class GameRoot : Node
 
     public override void _Ready()
     {
-        // 1. Данные (уже загружены на boot; перезагружаем только если их нет).
+        // 1. Данные: загружаем под выбранный сценарий (NewGameSetup уже вызвал LoadScenario),
+        //    поэтому здесь не перезагружаем — используем текущий ScenarioYear.
         if (!DataManager.Instance.IsLoaded)
         {
-            if (!DataManager.Instance.LoadWorldData())
+            if (!DataManager.Instance.LoadScenario(DataManager.Instance.ScenarioYear))
             {
                 ShowFatal("World data not found.\nRun MapImporterTool to generate data/cache/world.json");
                 return;

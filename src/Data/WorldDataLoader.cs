@@ -333,7 +333,12 @@ public static class WorldDataLoader
 
     private static void LoadProduction(WorldData world)
     {
-        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/production.csv"))
+        // Выбираем CSV по году сценария (2024 — современные объёмы, 1936 — исторические).
+        string path = DataManager.Instance.ScenarioYear >= 2000
+            ? "res://data/production.csv"
+            : "res://data/production_1936.csv";
+
+        foreach (Dictionary<string, string> row in CsvTableLoader.Load(path))
         {
             string code = CsvTableLoader.Str(row, "code");
             if (code.Length == 0)
