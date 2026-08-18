@@ -190,7 +190,42 @@ public partial class EconomyManager : Node
             }
         }
 
-        // Промышленное производство: товары производятся из сырья (производственные цепочки).
+        // Реальная добыча по странам (production.csv): нефть/газ/уголь/железо масштабируются
+        // по фактическим объёмам производства, распределяясь по ресурсным провинциям.
+        ApplyNationalProduction(world);
+
+        // Промышленность (цепочки сырьё -> товары).
+        StepIndustry(world);
+    }
+
+    /// <summary>Реальная добыча страны (production.csv) добавляется поверх провинциальной.</summary>
+    private void ApplyNationalProduction(WorldData world)
+    {
+        // id товаров: 3=iron, 4=coal, 5=oil, 6=gas.
+        for (int c = 0; c < world.CountryCount; c++)
+        {
+            CountryData country = world.Countries[c];
+            if (country == null || !world.ProductionByCode.TryGetValue(country.Code, out ProductionData prod))
+                continue;
+
+            CountryEconomy eco = Economy.Countries[c];
+            double dev = 0.5 + 0.5 * Math.Clamp(country.Urbanization, 0.0, 1.0);
+
+            // Нефть (тыс. барр/день -> годовой масштаб), газ (млрд м3), уголь/железо (млн т).
+            if (prod.OilKbd > 0)
+                eco.Production[5] += prod.OilKbd * 0.4 * dev;   // 5=oil
+            if (prod.GasBcm > 0)
+                eco.Production[6] += prod.GasBcm * 0.6 * dev;   // 6=gas
+            if (prod.CoalMt > 0)
+                eco.Production[4] += prod.CoalMt * 0.8 * dev;   // 4=coal
+            if (prod.IronMt > 0)
+                eco.Production[3] += prod.IronMt * 0.9 * dev;   // 3=iron
+        }
+    }
+
+    // Промышленное производство: товары производятся из сырья (производственные цепочки).
+    private void StepIndustry(WorldData world)
+    {
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryEconomy eco = Economy.Countries[c];

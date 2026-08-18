@@ -45,6 +45,7 @@ public static class WorldDataLoader
         LoadLaws(world);
         LoadReligions(world);
         LoadCultures(world);
+        LoadProduction(world);
 
         // --- Страны ---
         // Лидеры по двум сценариям (2024 и 1936, реальные главы государств).
@@ -328,6 +329,23 @@ public static class WorldDataLoader
                 result[code] = pop;
         }
         return result;
+    }
+
+    private static void LoadProduction(WorldData world)
+    {
+        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/production.csv"))
+        {
+            string code = CsvTableLoader.Str(row, "code");
+            if (code.Length == 0)
+                continue;
+            world.ProductionByCode[code] = new ProductionData
+            {
+                OilKbd = CsvTableLoader.Double(row, "oil_kbd"),
+                GasBcm = CsvTableLoader.Double(row, "gas_bcm"),
+                CoalMt = CsvTableLoader.Double(row, "coal_mt"),
+                IronMt = CsvTableLoader.Double(row, "iron_mt"),
+            };
+        }
     }
 
     private static void LoadReligions(WorldData world)

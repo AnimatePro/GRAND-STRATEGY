@@ -20,6 +20,9 @@ public sealed class WorldData
     public ReligionData[] Religions = System.Array.Empty<ReligionData>();
     public CultureData[] Cultures = System.Array.Empty<CultureData>();
 
+    /// <summary>Реальная добыча по странам (oil_kbd, gas_bcm, coal_mt, iron_mt).</summary>
+    public Dictionary<string, ProductionData> ProductionByCode = new();
+
     /// <summary>Названия провинций (индекс = id провинции), EN и RU.</summary>
     public string[] ProvinceNamesEn = System.Array.Empty<string>();
     public string[] ProvinceNamesRu = System.Array.Empty<string>();
