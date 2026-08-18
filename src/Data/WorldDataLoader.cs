@@ -45,7 +45,6 @@ public static class WorldDataLoader
         LoadLaws(world);
         LoadReligions(world);
         LoadCultures(world);
-        var resourceByCountry = LoadCountryResources();
 
         // --- Страны ---
         // Лидеры по двум сценариям (2024 и 1936, реальные главы государств).
@@ -109,24 +108,11 @@ public static class WorldDataLoader
             province.CultureId = pdto.CultureId;
             province.Centroid = new Vector2(pdto.CentroidX, pdto.CentroidY);
             province.NeighborIds = pdto.NeighborIds.ToArray();
-            // Ресурсы: реальные по стране (resources.csv) — распределяются по ~30% провинций
-            // детерминированно (не каждая провинция нефтяная); иначе fallback по ландшафту.
-            if (resourceByCountry.TryGetValue(pdto.OwnerCode, out int[]? realRes) && realRes.Length > 0)
-            {
-                var res = new List<int>();
-                foreach (int rid in realRes)
-                {
-                    // Детерминированно: ~30% провинций страны получают данный ресурс.
-                    int hash = (pdto.Id * 2654435761) ^ (rid * 40503);
-                    if ((hash & 3) == 0) // примерно 25% (2 бита)
-                        res.Add(rid);
-                }
-                province.ResourceIds = res.ToArray();
-            }
-            else
-            {
-                province.ResourceIds = ResourceAssigner.Assign(pdto.Id, province.Terrain, province.Climate);
-            }
+            // Ресурсы: полный список из json (реальные рудники + ресурсы страны),
+            // иначе детерминированный fallback по ландшафту.
+            province.ResourceIds = pdto.ResourceIds.Count > 0
+                ? pdto.ResourceIds.ToArray()
+                : ResourceAssigner.Assign(pdto.Id, province.Terrain, province.Climate);
             province.CoreIds = ResolveCoreCodes(pdto.CoreCodes, world);
 
             SplitPopulation(pdto.TotalPopulation, split);
@@ -312,28 +298,6 @@ public static class WorldDataLoader
             list.Add(l);
         }
         world.Laws = list.ToArray();
-    }
-
-    /// <summary>Реальные ресурсы по странам (data/resources.csv) -> id товаров.</summary>
-    private static Dictionary<string, int[]> LoadCountryResources()
-    {
-        // id товаров: 2=timber, 3=iron, 4=coal, 5=oil, 6=gas, 13=rare_metals, 12=gold
-        var result = new Dictionary<string, int[]>(StringComparer.Ordinal);
-        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/resources.csv"))
-        {
-            string code = CsvTableLoader.Str(row, "code");
-            if (code.Length == 0)
-                continue;
-            var list = new List<int>();
-            if (CsvTableLoader.Bool(row, "oil")) list.Add(5);
-            if (CsvTableLoader.Bool(row, "gas")) list.Add(6);
-            if (CsvTableLoader.Bool(row, "coal")) list.Add(4);
-            if (CsvTableLoader.Bool(row, "iron")) list.Add(3);
-            if (CsvTableLoader.Bool(row, "rare_metals")) list.Add(13);
-            if (CsvTableLoader.Bool(row, "gold")) list.Add(12);
-            result[code] = list.ToArray();
-        }
-        return result;
     }
 
     /// <summary>Историческое население 1936 по странам (для сценария 1936).</summary>
