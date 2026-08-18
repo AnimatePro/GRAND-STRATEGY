@@ -338,11 +338,10 @@ public partial class EconomyManager : Node
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryEconomy eco = Economy.Countries[c];
-            double totalOutputValue = 0.0;
-            for (int g = 0; g < world.GoodCount; g++)
-                totalOutputValue += eco.Production[g] * eco.Price[g];
 
-            double wageBill = totalOutputValue * EconomyConstants.WageShare;
+            // Средняя зарплата ≈ доля труда в ВВП на занятого (реалистичный масштаб).
+            double gdp = eco.Gdp > 0 ? eco.Gdp : eco.BaselineGdp;
+            double wageBill = gdp * EconomyConstants.WageShare;
             eco.AvgWage = wageBill / Math.Max(eco.Employment, 1.0);
         }
     }
@@ -354,28 +353,21 @@ public partial class EconomyManager : Node
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryEconomy eco = Economy.Countries[c];
-            double outputValue = 0.0;
-            for (int g = 0; g < world.GoodCount; g++)
-                outputValue += eco.Production[g] * eco.Price[g];
 
-            double wageBill = outputValue * EconomyConstants.WageShare;
-            double profit = outputValue - wageBill;
+            // Налоговые поступления ≈ доля ВВП (реалистично 15-40% в зависимости от ставок).
+            // Это привязывает бюджет к реальному масштабу ВВП, а не к игровым единицам.
+            double gdp = eco.Gdp > 0 ? eco.Gdp : eco.BaselineGdp;
+            double effectiveRate =
+                eco.Taxes.Income * 0.45 +      // подоходный
+                eco.Taxes.Corporate * 0.15 +   // на прибыль
+                eco.Taxes.Vat * 0.35 +         // НДС
+                eco.Taxes.Resource * 0.05;     // ресурсный
+            effectiveRate = Math.Clamp(effectiveRate, 0.02, 0.60);
 
-            // База НДС — фактическое потребление = min(доступное предложение, спрос).
-            // (Supply уже включает импорт после торговли; Demand — полный спрос.)
-            double consumptionValue = 0.0;
-            for (int g = 0; g < world.GoodCount; g++)
-                consumptionValue += Math.Min(eco.Supply[g], eco.Demand[g]) * eco.Price[g];
-
-            double income = wageBill * eco.Taxes.Income;
-            double corporate = profit * eco.Taxes.Corporate;
-            double vat = consumptionValue * eco.Taxes.Vat;
-            double resource = outputValue * eco.Taxes.Resource * 0.3;
-
-            // Технологии + законы + экономический советник.
             double lawTaxMult = world.AggregateLaws(world.Countries[c]).TaxMult;
             double advisorMult = AdvisorManager.Instance.AdvisorMult(c, AdvisorDomain.Economy);
-            eco.BudgetRevenue = (income + corporate + vat + resource)
+
+            eco.BudgetRevenue = gdp * effectiveRate
                 * TechManager.Instance.TaxMult(c) * lawTaxMult * advisorMult;
         }
     }
@@ -480,16 +472,21 @@ public partial class EconomyManager : Node
             for (int g = 0; g < world.GoodCount; g++)
                 productionValue += eco.Production[g] * eco.Price[g];
 
-            // ВВП = производственный расчёт, но не падает ниже разумной доли реального
-            // стартового ВВП (экономика не должна «схлопываться» из-за масштаба).
-            double baseline = eco.BaselineGdp > 0 ? eco.BaselineGdp : 1.0;
-            double simulated = Math.Max(productionValue, baseline * 0.1);
+            // Инициализируем базовое производство на первом тике.
+            if (eco.BaselineProductionValue <= 0)
+                eco.BaselineProductionValue = Math.Max(productionValue, 1.0);
 
-            // Плавная эволюция: ВВП сходится к производственному уровню, но
-            // стартует с реального значения (нет резкого обнуления).
+            // ВВП = реальный базовый ВВП × индекс экономической активности
+            // (текущее производство относительно стартового). Так ВВП остаётся
+            // реалистичным по масштабу и реагирует на войну/кризис/рост.
+            double baseline = eco.BaselineGdp > 0 ? eco.BaselineGdp : 1.0;
+            double activity = productionValue / Math.Max(eco.BaselineProductionValue, 1.0);
+            activity = Math.Clamp(activity, 0.2, 5.0); // не падает ниже 20%, не растёт выше 5x
+
+            double targetGdp = baseline * activity;
             if (eco.Gdp <= 0)
-                eco.Gdp = baseline;
-            eco.Gdp = eco.Gdp * 0.9 + simulated * 0.1;
+                eco.Gdp = targetGdp;
+            eco.Gdp += (targetGdp - eco.Gdp) * 0.2; // плавная подстройка
 
             eco.Gdp = Math.Max(eco.Gdp, 1.0);
             eco.GdpPerCapita = eco.Gdp / Math.Max(world.Countries[c].Population, 1L);
