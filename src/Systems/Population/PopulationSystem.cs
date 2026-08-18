@@ -1,4 +1,5 @@
 using System;
+using GrandStrategy.Core;
 using GrandStrategy.Data;
 using GrandStrategy.SimCore;
 
@@ -24,6 +25,7 @@ public static class PopulationSystem
                 ref p.MaleSeniors, ref p.FemaleSeniors);
             world.Provinces[i] = p;
         }
+        Core.EventBus.Instance.EmitPopulationUpdated();
     }
 
     /// <summary>
