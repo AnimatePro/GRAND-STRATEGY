@@ -22,6 +22,11 @@ public partial class NewGameSetup : Control
 
     public override void _Ready()
     {
+        // Всегда начинаем с 2024: синхронизируем данные и dropdown, чтобы не было
+        // рассинхрона, если прошлый сеанс закончился на 1936.
+        if (DataManager.Instance.ScenarioYear != 2024)
+            DataManager.Instance.LoadScenario(2024);
+
         _countries = CollectCountries();
 
         AddChild(UiKit.Background());
