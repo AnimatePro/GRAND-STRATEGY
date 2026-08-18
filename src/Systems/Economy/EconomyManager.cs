@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 using GrandStrategy.Core;
 using GrandStrategy.Data;
@@ -90,6 +91,7 @@ public partial class EconomyManager : Node
         StepInflation(world);
         StepDebt(world);
         StepGdp(world);
+        StepForeignEconomy(world);
 
         EventBus.Instance.EmitEconomyUpdated();
     }
@@ -180,33 +182,60 @@ public partial class EconomyManager : Node
             }
         }
 
-        // Промышленное производство (индустриальные работники распределяются по товарам).
+        // Промышленное производство: товары производятся из сырья (производственные цепочки).
         for (int c = 0; c < world.CountryCount; c++)
         {
             CountryEconomy eco = Economy.Countries[c];
             double industrial = eco.Employment * world.Countries[c].Urbanization;
-            double output = industrial * EconomyConstants.IndustryProductivity
-                * TechManager.Instance.ProductionMult(c);
+            double capacity = industrial * EconomyConstants.IndustryProductivity
+                * TechManager.Instance.ProductionMult(c)
+                * DifficultyModifiers.EconomyMult(c);
 
-            int manuCount = 0;
+            // Распределяем промышленный потенциал по производящимся товарам,
+            // ограничивая каждое производство доступным сырьём (рецепт).
+            double totalDesired = 0.0;
             for (int g = 0; g < world.GoodCount; g++)
-                if (world.Goods[g].Category is GoodCategory.Manufactured or GoodCategory.Strategic)
-                    manuCount++;
+                if (world.Goods[g].Inputs.Length > 0)
+                    totalDesired += 1.0; // каждое производство претендует на равную долю
 
-            if (manuCount > 0)
+            if (totalDesired > 0)
             {
-                double perGood = output / manuCount;
-                for (int g = 0; g < world.GoodCount; g++)
-                    if (world.Goods[g].Category is GoodCategory.Manufactured or GoodCategory.Strategic)
-                        eco.Production[g] += perGood;
-            }
+                foreach (int g in ProducingGoods(world))
+                {
+                    GoodData good = world.Goods[g];
+                    double share = capacity / totalDesired;
 
-            // Модификатор сложности (промышленные товары).
-            double diffMult = DifficultyModifiers.EconomyMult(c);
-            for (int g = 0; g < world.GoodCount; g++)
-                if (world.Goods[g].Category != GoodCategory.Food)
-                    eco.Production[g] *= diffMult;
+                    // Лимит по сырью: максимум продукции = min(доступное_сырьё / расход).
+                    double inputLimit = double.MaxValue;
+                    for (int i = 0; i < good.Inputs.Length; i++)
+                    {
+                        int inId = good.Inputs[i];
+                        double avail = eco.Production[inId]; // добытое сырьё этого хода
+                        double need = good.InputAmounts[i];
+                        if (need > 0)
+                            inputLimit = Math.Min(inputLimit, avail / need);
+                    }
+
+                    double produced = Math.Min(share, inputLimit);
+                    if (produced <= 0)
+                        continue;
+
+                    // Расход сырья (потребление в производстве).
+                    for (int i = 0; i < good.Inputs.Length; i++)
+                        eco.Production[good.Inputs[i]] -= produced * good.InputAmounts[i];
+
+                    eco.Production[g] += produced;
+                }
+            }
         }
+    }
+
+    /// <summary>Товары с производственным рецептом (входное сырьё).</summary>
+    private static IEnumerable<int> ProducingGoods(WorldData world)
+    {
+        for (int g = 0; g < world.GoodCount; g++)
+            if (world.Goods[g].Inputs.Length > 0)
+                yield return g;
     }
 
     // --- 4. Спрос/предложение ------------------------------------------------
@@ -300,9 +329,8 @@ public partial class EconomyManager : Node
             // Технологии + законы + экономический советник.
             double lawTaxMult = world.AggregateLaws(world.Countries[c]).TaxMult;
             double advisorMult = AdvisorManager.Instance.AdvisorMult(c, AdvisorDomain.Economy);
-            double ideaMult = AdvisorManager.Instance.IdeaTaxMult(c);
             eco.BudgetRevenue = (income + corporate + vat + resource)
-                * TechManager.Instance.TaxMult(c) * lawTaxMult * advisorMult * ideaMult;
+                * TechManager.Instance.TaxMult(c) * lawTaxMult * advisorMult;
         }
     }
 
@@ -411,6 +439,80 @@ public partial class EconomyManager : Node
             world.Countries[c].Gdp = eco.Gdp;
             world.Countries[c].Treasury = Math.Max(world.Countries[c].Treasury - eco.Deficit, 0.0);
         }
+    }
+
+    // --- 14. Внешняя экономика (платёжный баланс, резервы, курс) --------------
+
+    private void StepForeignEconomy(WorldData world)
+    {
+        for (int c = 0; c < world.CountryCount; c++)
+        {
+            CountryEconomy eco = Economy.Countries[c];
+            CountryData country = world.Countries[c];
+            if (eco == null || country == null)
+                continue;
+
+            // Счёт текущих операций = торговый баланс + услуги (2% ВВП) + переводы.
+            double services = eco.Gdp * 0.02;
+            eco.CurrentAccount = eco.TradeBalance + services + eco.Remittances;
+
+            // Счёт капитала: приток инвестиций пропорционален разнице ставок,
+            // отток — при нестабильности/высокой инфляции.
+            double interestDifferential = (EconomyAverageInterest() - eco.InterestRate) * 0.05;
+            double stabilityFactor = (country.Stability - 50.0) / 1000.0;
+            eco.CapitalAccount = eco.Gdp * (interestDifferential + stabilityFactor);
+
+            // Дефицит текущего счёта покрывается резервами; профицит пополняет их.
+            double netFlow = eco.CurrentAccount + eco.CapitalAccount;
+            if (netFlow < 0)
+            {
+                // Покрываем из резервов; если их не хватает — берём внешний долг.
+                double need = -netFlow;
+                double fromReserves = Math.Min(eco.Reserves, need);
+                eco.Reserves -= fromReserves;
+                need -= fromReserves;
+                if (need > 0)
+                    eco.ExternalDebt += need;
+            }
+            else
+            {
+                // Профицит гасит внешний долг, остаток — в резервы.
+                double surplus = netFlow;
+                double payDebt = Math.Min(eco.ExternalDebt, surplus);
+                eco.ExternalDebt -= payDebt;
+                eco.Reserves += (surplus - payDebt);
+            }
+
+            // Обменный курс (плавающий): зависит от торгового баланса,
+            // дифференциала инфляции и процентных ставок.
+            double inflationDiff = eco.Inflation - EconomyAverageInflation();
+            double tradePressure = eco.TradeBalance / Math.Max(eco.Gdp, 1.0);
+            double targetRate = 1.0 + tradePressure * 2.0 + inflationDiff * 0.5 - interestDifferential;
+            targetRate = Math.Clamp(targetRate, 0.2, 5.0);
+            eco.ExchangeRate += (targetRate - eco.ExchangeRate) * 0.1; // плавная подстройка
+
+            // Резервы не могут быть отрицательными.
+            eco.Reserves = Math.Max(eco.Reserves, 0.0);
+
+            // Синхронизация с CountryData.
+            country.BaseInterestRate = eco.InterestRate;
+        }
+    }
+
+    private double EconomyAverageInterest()
+    {
+        double sum = 0.0;
+        for (int c = 0; c < Economy.Countries.Length; c++)
+            sum += Economy.Countries[c].InterestRate;
+        return Economy.Countries.Length > 0 ? sum / Economy.Countries.Length : 0.04;
+    }
+
+    private double EconomyAverageInflation()
+    {
+        double sum = 0.0;
+        for (int c = 0; c < Economy.Countries.Length; c++)
+            sum += Economy.Countries[c].Inflation;
+        return Economy.Countries.Length > 0 ? sum / Economy.Countries.Length : 0.02;
     }
 
     // --- helpers -------------------------------------------------------------

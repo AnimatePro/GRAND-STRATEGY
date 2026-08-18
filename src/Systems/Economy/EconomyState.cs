@@ -65,6 +65,13 @@ public sealed class CountryEconomy
     public double DebtToGdp;
     public double Reserves;
 
+    // --- Внешняя экономика (платёжный баланс, обменный курс) ---
+    public double ExchangeRate = 1.0;   // за 1 единицу базовой валюты (условно USD)
+    public double CurrentAccount;       // счёт текущих операций (торговля + услуги + трансферты)
+    public double CapitalAccount;       // счёт капитала (инвестиции + займы)
+    public double ExternalDebt;         // внешний долг (займы у других стран)
+    public double Remittances;          // денежные переводы (диаспора)
+
     public TaxRates Taxes = new();
     public SpendingPlan Spending = new();
 

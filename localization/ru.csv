@@ -298,10 +298,13 @@ ACT_ADVISOR_DIP,Нанять дипломатического советника
 ADV_ECONOMY,Экономика
 ADV_MILITARY,Армия
 ADV_DIPLOMACY,Дипломатия
-PANEL_IDEAS,Национальные идеи
-IDEA_NATIONAL_ARMORY,Национальный арсенал
-IDEA_TRADE_EMPIRE,Торговая империя
-IDEA_ENLIGHTENMENT,Просвещение
-IDEA_SOCIAL_COHESION,Социальное единство
-IDEA_MILITARY_TRADITION,Военные традиции
-IDEA_ECONOMIC_MIRACLE,Экономическое чудо
+REL_SANCTION,введены санкции
+REL_LOAN,кредитное соглашение
+ACT_SANCTIONS,Переключить санкции
+ACT_LOAN,Запросить кредит
+PANEL_RESERVES,Резервы
+PANEL_EXT_DEBT,Внешний долг
+PANEL_EXCHANGE,Курс валюты
+PANEL_TRADE_BAL,Торговый баланс
+MSG_LOAN_OK,Кредит получен
+MSG_LOAN_FAIL,В кредите отказано

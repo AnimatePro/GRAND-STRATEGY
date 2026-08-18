@@ -45,7 +45,6 @@ public static class WorldDataLoader
         LoadLaws(world);
         LoadReligions(world);
         LoadCultures(world);
-        LoadIdeas(world);
 
         // --- Страны ---
         // Лидеры по двум сценариям (2024 и 1936, реальные главы государств).
@@ -196,6 +195,26 @@ public static class WorldDataLoader
             good.ElasticityDemand = CsvTableLoader.Double(row, "elast_demand", 1.0);
             good.ElasticitySupply = CsvTableLoader.Double(row, "elast_supply", 1.0);
             good.Price = good.BasePrice;
+            // Производственный рецепт: "inputId:amount;inputId:amount".
+            string recipe = CsvTableLoader.Str(row, "inputs");
+            if (!string.IsNullOrWhiteSpace(recipe))
+            {
+                var inIds = new List<int>();
+                var inAmts = new List<double>();
+                foreach (string part in recipe.Split(';'))
+                {
+                    string[] kv = part.Split(':');
+                    if (kv.Length == 2 && int.TryParse(kv[0], out int gid) &&
+                        double.TryParse(kv[1], System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out double amt))
+                    {
+                        inIds.Add(gid);
+                        inAmts.Add(amt);
+                    }
+                }
+                good.Inputs = inIds.ToArray();
+                good.InputAmounts = inAmts.ToArray();
+            }
             list.Add(good);
         }
         world.Goods = list.ToArray();
@@ -322,25 +341,6 @@ public static class WorldDataLoader
             });
         }
         world.Cultures = list.ToArray();
-    }
-
-    private static void LoadIdeas(WorldData world)
-    {
-        var list = new List<IdeaData>();
-        foreach (Dictionary<string, string> row in CsvTableLoader.Load("res://data/ideas.csv"))
-        {
-            list.Add(new IdeaData
-            {
-                Id = list.Count,
-                NameKey = CsvTableLoader.Str(row, "name_key"),
-                Cost = CsvTableLoader.Double(row, "cost", 20),
-                TaxMult = CsvTableLoader.Double(row, "tax_mult", 1.0),
-                MilitaryMult = CsvTableLoader.Double(row, "military_mult", 1.0),
-                StabilityBonus = CsvTableLoader.Double(row, "stability_bonus"),
-                ResearchMult = CsvTableLoader.Double(row, "research_mult", 1.0),
-            });
-        }
-        world.Ideas = list.ToArray();
     }
 
     private static string ReadText(string resPath)

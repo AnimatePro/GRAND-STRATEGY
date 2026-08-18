@@ -298,10 +298,13 @@ ACT_ADVISOR_DIP,Hire Diplomatic Advisor
 ADV_ECONOMY,Economy
 ADV_MILITARY,Military
 ADV_DIPLOMACY,Diplomacy
-PANEL_IDEAS,National Ideas
-IDEA_NATIONAL_ARMORY,National Armory
-IDEA_TRADE_EMPIRE,Trade Empire
-IDEA_ENLIGHTENMENT,Enlightenment
-IDEA_SOCIAL_COHESION,Social Cohesion
-IDEA_MILITARY_TRADITION,Military Tradition
-IDEA_ECONOMIC_MIRACLE,Economic Miracle
+REL_SANCTION,sanctions imposed
+REL_LOAN,loan agreement
+ACT_SANCTIONS,Toggle Sanctions
+ACT_LOAN,Request Loan
+PANEL_RESERVES,Reserves
+PANEL_EXT_DEBT,External Debt
+PANEL_EXCHANGE,Exchange Rate
+PANEL_TRADE_BAL,Trade Balance
+MSG_LOAN_OK,Loan received
+MSG_LOAN_FAIL,Loan declined

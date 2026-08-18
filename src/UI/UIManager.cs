@@ -462,6 +462,8 @@ public partial class UIManager : Node
                 $"{L("PANEL_CULTURE")}: {world.CultureName(c.PrimaryCultureId, LocalizationManager.Instance.Language)}\n" +
                 $"GDP: {c.Gdp:N0}  Pop: {c.Population:N0}\n" +
                 $"Debt: {c.Debt:N0}  Inflation: {eco.Inflation * 100:0.0}%\n" +
+                $"{L("PANEL_RESERVES")}: {eco.Reserves:N0}  {L("PANEL_EXT_DEBT")}: {eco.ExternalDebt:N0}\n" +
+                $"{L("PANEL_EXCHANGE")}: {eco.ExchangeRate:0.00}  {L("PANEL_TRADE_BAL")}: {eco.TradeBalance:N0}\n" +
                 $"Stability: {c.Stability:0}  Legitimacy: {c.Legitimacy:0}  WarExh: {c.WarExhaustion:0}\n" +
                 $"Income tax: {eco.Taxes.Income:P0}",
         };
@@ -507,24 +509,6 @@ public partial class UIManager : Node
             AdvisorManager.Instance.HireAdvisor(playerId, AdvisorDomain.Diplomacy);
             RebuildPlayerPanel();
         });
-        _playerBox.AddChild(new Label { Text = $"{L("PANEL_LEGACY")}: {c.LegacyPoints:0}" });
-
-        // Национальные идеи (трата очков наследия).
-        if (world.Ideas.Length > 0)
-        {
-            _playerBox.AddChild(new Label { Text = L("PANEL_IDEAS") });
-            foreach (IdeaData idea in world.Ideas)
-            {
-                bool taken = c.TakenIdeas.Contains(idea.Id);
-                string marker = taken ? "[x]" : $"[{idea.Cost:0}]";
-                AddButton(_playerBox, $"{marker} {LocalizationManager.Instance.Get(idea.NameKey)}", () =>
-                {
-                    if (AdvisorManager.Instance.TakeIdea(playerId, idea.Id))
-                        RebuildPlayerPanel();
-                });
-            }
-        }
-
         // Законы: переключение каждого закона.
         _playerBox.AddChild(new Label { Text = L("PANEL_LAWS") });
         foreach (LawData law in world.Laws)
@@ -769,9 +753,23 @@ public partial class UIManager : Node
             DiplomacyManager.Instance.ToggleEmbargo(playerId, _targetCountry);
             RebuildTargetPanel();
         });
+        AddButton(_targetBox, L("ACT_SANCTIONS"), () =>
+        {
+            DiplomacyManager.Instance.ToggleSanctions(playerId, _targetCountry);
+            RebuildTargetPanel();
+        });
         AddButton(_targetBox, L("ACT_TRADE_AGREEMENT"), () =>
         {
             DiplomacyManager.Instance.CycleTradeAgreement(playerId, _targetCountry);
+            RebuildTargetPanel();
+        });
+        AddButton(_targetBox, L("ACT_LOAN"), () =>
+        {
+            double amount = DataManager.Instance.World.GetCountry(playerId).Gdp * 0.05;
+            if (DiplomacyManager.Instance.TakeLoan(playerId, _targetCountry, amount))
+                EventBus.Instance.EmitUINotification(L("MSG_LOAN_OK"));
+            else
+                EventBus.Instance.EmitUINotification(L("MSG_LOAN_FAIL"));
             RebuildTargetPanel();
         });
     }

@@ -249,10 +249,6 @@ public partial class DiplomacyManager : Node
         ca.WarExhaustion = 0f;
         cb.WarExhaustion = 0f;
 
-        // Очки наследия победителю за победу/аннексию.
-        double legacy = terms.Annex ? 50.0 : (terms.CedeOccupied || terms.Puppet ? 25.0 : 10.0);
-        AdvisorManager.Instance.AwardLegacy(winner, legacy, "war victory");
-
         LogService.Instance.Info($"Diplomacy: peace between {a} and {b} (winner {winner})");
         EventBus.Instance.EmitPeaceSigned(a, b);
         EventBus.Instance.EmitDiplomacyUpdated();
@@ -353,6 +349,42 @@ public partial class DiplomacyManager : Node
         WorldData world = DataManager.Instance.World;
         return world.Countries[a].TradePolicy.Agreements.TryGetValue(b, out TradeAgreement v)
             ? v : TradeAgreement.None;
+    }
+
+    /// <summary>Санкции (a вводит/снимает против b) — влияют на торговлю и отношения.</summary>
+    public void ToggleSanctions(int a, int b)
+    {
+        WorldData world = DataManager.Instance.World;
+        var set = world.Countries[a].TradePolicy.Sanctioned;
+        if (!set.Remove(b))
+        {
+            set.Add(b);
+            ChangeRelation(a, b, -15f, "REL_SANCTION");
+        }
+        EventBus.Instance.EmitTradeUpdated();
+    }
+
+    /// <summary>Внешний заём: страна a берёт в долг у b (реальные деньги + процент).</summary>
+    public bool TakeLoan(int borrowerId, int lenderId, double amount)
+    {
+        WorldData world = DataManager.Instance.World;
+        CountryData borrower = world.Countries[borrowerId];
+        CountryData lender = world.Countries[lenderId];
+        if (borrower == null || lender == null || amount <= 0)
+            return false;
+        if (lender.Treasury < amount)
+            return false;
+        if (borrower.RelationWith(lenderId) < -20f)
+            return false; // плохие отношения — кредит не дадут
+
+        lender.Treasury -= amount;
+        borrower.Treasury += amount;
+        // Внешний долг растёт у заёмщика, у кредитора — внешний актив.
+        Economy.EconomyManager.Instance.Economy.Countries[borrowerId].ExternalDebt += amount;
+        ChangeRelation(borrowerId, lenderId, 5f, "REL_LOAN");
+        ChangeRelation(lenderId, borrowerId, 5f, "REL_LOAN");
+        LogService.Instance.Info($"Loan: {borrower.Code} borrowed {amount:N0} from {lender.Code}");
+        return true;
     }
 
     // --- Тик -------------------------------------------------------------
