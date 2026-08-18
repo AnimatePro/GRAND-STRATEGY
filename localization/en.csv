@@ -308,3 +308,5 @@ PANEL_EXCHANGE,Exchange Rate
 PANEL_TRADE_BAL,Trade Balance
 MSG_LOAN_OK,Loan received
 MSG_LOAN_FAIL,Loan declined
+PANEL_ECONOMY,Economy
+PANEL_POLITICS,Politics

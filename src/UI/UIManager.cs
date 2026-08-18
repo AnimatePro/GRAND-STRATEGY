@@ -469,6 +469,10 @@ public partial class UIManager : Node
         };
         _playerBox.AddChild(info);
 
+        // --- Экономика ---
+        var econHeader = new Label { Text = L("PANEL_ECONOMY") };
+        econHeader.AddThemeFontSizeOverride("font_size", 15);
+        _playerBox.AddChild(econHeader);
         AddButton(_playerBox, L("ACT_TAX_PLUS"), () =>
         {
             eco.Taxes.Income = Math.Min(eco.Taxes.Income + 0.05, 0.5);
@@ -479,6 +483,11 @@ public partial class UIManager : Node
             eco.Taxes.Income = Math.Max(eco.Taxes.Income - 0.05, 0.0);
             UpdateTopBar(); RebuildPlayerPanel();
         });
+
+        // --- Политика ---
+        var polHeader = new Label { Text = L("PANEL_POLITICS") };
+        polHeader.AddThemeFontSizeOverride("font_size", 15);
+        _playerBox.AddChild(polHeader);
         AddButton(_playerBox, L("ACT_CHANGE_GOV"), () =>
         {
             GovernanceSystem.ChangeGovernment(world, playerId);

@@ -308,3 +308,5 @@ PANEL_EXCHANGE,Курс валюты
 PANEL_TRADE_BAL,Торговый баланс
 MSG_LOAN_OK,Кредит получен
 MSG_LOAN_FAIL,В кредите отказано
+PANEL_ECONOMY,Экономика
+PANEL_POLITICS,Политика
