@@ -310,7 +310,7 @@ public partial class AIDirector : Node
                 int other = side > 0 ? war.DefenderId : war.AttackerId;
                 DiplomacyManager.Instance.MakePeace(countryId, other, new PeaceTerms());
                 _lastPeaceTurn[countryId] = TimeManager.Instance.CurrentTurn;
-                LogService.Instance.Info($"AI: {countryId} sued for peace ({hopeless ? "hopeless" : "stalemate"})");
+                LogService.Instance.Info($"AI: {countryId} sued for peace ({(hopeless ? "hopeless" : "stalemate")})");
                 return true;
             }
         }
