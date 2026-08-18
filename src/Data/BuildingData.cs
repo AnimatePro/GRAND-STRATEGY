@@ -11,6 +11,7 @@ public struct BuildingData
     public int Id;
     public string NameKey = string.Empty;
     public BuildingCategory Category;
+    public string IconPath = string.Empty;  // спрайт здания (res://assets/buildings/*.png)
     public double BuildCost;      // стоимость строительства
     public double Upkeep;         // содержание за ход
     public int BuildTurns;        // время постройки (в ходах)

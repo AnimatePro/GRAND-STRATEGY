@@ -275,6 +275,9 @@ public static class WorldDataLoader
             b.RequiresCoast = CsvTableLoader.Bool(row, "requires_coast");
             b.DevelopmentBonus = CsvTableLoader.Double(row, "dev_bonus");
             b.InfrastructureBonus = CsvTableLoader.Double(row, "infra_bonus");
+            string icon = CsvTableLoader.Str(row, "icon");
+            if (!string.IsNullOrWhiteSpace(icon))
+                b.IconPath = $"res://assets/buildings/{icon}.png";
             list.Add(b);
         }
         world.Buildings = list.ToArray();

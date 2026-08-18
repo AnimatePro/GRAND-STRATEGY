@@ -204,6 +204,23 @@ public partial class UIManager : Node
         parent.AddChild(btn);
     }
 
+    /// <summary>Кнопка с иконкой слева (для зданий).</summary>
+    private static void AddIconButton(Container parent, string iconPath, string text, Action onPressed)
+    {
+        var btn = new Button { Text = text };
+        if (!string.IsNullOrEmpty(iconPath) && ResourceLoader.Exists(iconPath))
+        {
+            btn.Icon = GD.Load<Texture2D>(iconPath);
+            btn.ExpandIcon = true;
+        }
+        btn.Pressed += () =>
+        {
+            AudioManager.Instance.PlayClick();
+            onPressed();
+        };
+        parent.AddChild(btn);
+    }
+
     private VBoxContainer MakePanel(Control.LayoutPreset preset, Vector2 offsetMin, Vector2 offsetMax, string title)
     {
         var panel = new PanelContainer();
@@ -407,11 +424,11 @@ public partial class UIManager : Node
                     EventBus.Instance.EmitUINotification(L("MSG_FORT_FAIL"));
             });
 
-            // Сетка зданий: кнопка постройки на каждый тип.
+            // Сетка зданий: кнопка постройки на каждый тип (с иконкой).
             _provinceBox.AddChild(new Label { Text = L("PANEL_BUILDINGS") });
             foreach (BuildingData b in world.Buildings)
             {
-                AddButton(_provinceBox, $"{LocalizationManager.Instance.Get(b.NameKey)} ({b.BuildCost:N0})", () =>
+                AddIconButton(_provinceBox, b.IconPath, $"{LocalizationManager.Instance.Get(b.NameKey)} ({b.BuildCost:N0})", () =>
                 {
                     if (MilitaryManager.Instance.BuildBuilding(playerId, _selectedProvince, b.Id))
                         RebuildProvincePanel();
