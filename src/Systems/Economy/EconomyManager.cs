@@ -132,6 +132,14 @@ public partial class EconomyManager : Node
             eco.LaborForce = Math.Max(laborByCountry[c], 1.0);
             world.Countries[c].Population = popByCountry[c];
 
+            // Мёртвые (аннексированные) страны: экономика замораживается.
+            if (!world.Countries[c].IsAlive)
+            {
+                eco.Employment = 0;
+                eco.UnemploymentRate = 0;
+                continue;
+            }
+
             // Стабильность с бонусом от законов.
             double stability = world.Countries[c].Stability + world.AggregateLaws(world.Countries[c]).StabilityBonus;
             stability = Math.Clamp(stability, 0.0, 100.0);

@@ -48,6 +48,9 @@ public partial class TradeManager : Node
 
         for (int c = 0; c < n; c++)
         {
+            // Мёртвые (аннексированные) страны не торгуют.
+            if (world.Countries[c] == null || !world.Countries[c].IsAlive)
+                continue;
             CountryEconomy eco = economy.Countries[c];
             surplus[c] = Math.Max(eco.Supply[goodId] - eco.Demand[goodId], 0.0);
             deficit[c] = Math.Max(eco.Demand[goodId] - eco.Supply[goodId], 0.0);
