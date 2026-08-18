@@ -91,6 +91,13 @@ public partial class TradeManager : Node
                 deficit[b] -= flow;
 
                 double value = flow * price;
+                // Масштабируем торговую стоимость к ВВП: реальный экспорт/импорт —
+                // заметная доля экономики (игровые единицы несопоставимы с $трлн ВВП).
+                double scale = economy.Countries[a].BaselineGdp > 0
+                    ? economy.Countries[a].BaselineGdp / 1_000_000.0 // ~0.1% ВВП на единицу
+                    : 1.0;
+                value *= Math.Max(scale, 1.0);
+
                 economy.Countries[a].TradeBalance += value;                       // экспорт
                 economy.Countries[b].TradeBalance -= value;                       // импорт
                 economy.Countries[b].Consumption[goodId] += flow;
