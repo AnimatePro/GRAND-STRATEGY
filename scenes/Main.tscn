@@ -25,7 +25,7 @@ grow_vertical = 2
 theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="CanvasLayer/BootUI/Center/VBox"]
-text = "GRAND STRATEGY"
+text = "WORLD DIPLOMACY"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 48
 

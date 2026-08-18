@@ -1,17 +1,17 @@
 ; Engine configuration file.
-; Godot 4.7.1 (C# / .NET 8) — GRAND STRATEGY
+; Godot 4.7.1 (C# / .NET 8) — World Diplomacy
 ; M1: core autoload singletons + boot scene.
 
 config_version=5
 
 [application]
 
-config/name="GRAND-STRATEGY"
+config/name="World Diplomacy"
 config/description="2D grand strategy in the spirit of Age of History 3"
 config/version="0.1.0"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://assets/icon.png"
 
 [autoload]
 
