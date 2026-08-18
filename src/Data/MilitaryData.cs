@@ -110,6 +110,11 @@ public sealed class BattleRecord
     public int DefenderLosses;
     public double AttackerPower;
     public double DefenderPower;
+    public Terrain Terrain;       // террейн провинции (фактор обороны)
+    public float AttackerMorale;  // мораль после боя
+    public float DefenderMorale;
+    public bool NavalLanding;     // был штраф десанта
+    public bool AirDefenseActive; // работало ПВО
 }
 
 /// <summary>Война между двумя странами.</summary>

@@ -657,15 +657,19 @@ public partial class UIManager : Node
             }
         }
 
-        // Журнал сражений (тактический экран — кратко).
+        // Журнал сражений (тактический экран: исход, потери, факторы).
         _militaryBox.AddChild(new Label { Text = L("PANEL_BATTLES") });
         foreach (BattleRecord br in mil.BattleLog)
         {
             string prov = DataManager.Instance.World.ProvinceName(br.ProvinceId, LocalizationManager.Instance.Language);
             string result = br.AttackerWon ? "✓" : "✗";
+            var factors = new System.Text.StringBuilder();
+            if (br.NavalLanding) factors.Append("⚓desant ");
+            if (br.AirDefenseActive) factors.Append("🛡PVO ");
+            factors.Append(br.Terrain.ToString());
             _militaryBox.AddChild(new Label
             {
-                Text = $"{result} {prov}: {br.AttackerLosses}/{br.DefenderLosses}",
+                Text = $"{result} {prov}: {br.AttackerLosses}/{br.DefenderLosses} ({factors})",
             });
         }
 

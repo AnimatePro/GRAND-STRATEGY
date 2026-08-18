@@ -645,6 +645,11 @@ public partial class MilitaryManager : Node
             DefenderLosses = bLosses,
             AttackerPower = attackP,
             DefenderPower = defenseP,
+            Terrain = province.Terrain,
+            AttackerMorale = a.Morale,
+            DefenderMorale = b.Morale,
+            NavalLanding = a.NavalLandingTurns > 0,
+            AirDefenseActive = bAirDefense > 0,
         });
         if (BattleLog.Count > BattleLogMax)
             BattleLog.RemoveAt(BattleLog.Count - 1);
